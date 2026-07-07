@@ -5,9 +5,10 @@ type Props = {
   wordmark?: string;
   ctaLabel: string;
   onCtaClick?: () => void;
+  ctaHref?: string;
 };
 
-export function Nav({ wordmark = "홈쇼퍼", ctaLabel, onCtaClick }: Props) {
+export function Nav({ wordmark = "홈쇼퍼", ctaLabel, onCtaClick, ctaHref }: Props) {
   return (
     <header
       className="bg-glass sticky inset-x-0 top-0 z-30"
@@ -20,9 +21,15 @@ export function Nav({ wordmark = "홈쇼퍼", ctaLabel, onCtaClick }: Props) {
         <span className="text-[17px] font-bold tracking-[-0.3px] text-[var(--color-ink)]">
           {wordmark}
         </span>
-        <Button variant="primary" size="md" onClick={onCtaClick}>
-          {ctaLabel}
-        </Button>
+        {ctaHref ? (
+          <Button variant="primary" size="md" href={ctaHref}>
+            {ctaLabel}
+          </Button>
+        ) : (
+          <Button variant="primary" size="md" onClick={onCtaClick}>
+            {ctaLabel}
+          </Button>
+        )}
       </div>
     </header>
   );
