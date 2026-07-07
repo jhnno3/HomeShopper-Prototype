@@ -8,9 +8,20 @@
 
 **Tech Stack:** Next.js 14 (App Router), TypeScript, Tailwind CSS, lucide-react, `motion` (animation), Vitest + React Testing Library (component tests), npm.
 
+## Design Addendum (2026-07-08 — overrides task details below where they conflict)
+
+The visual foundation is the **landing-kit** at `docs/superpowers/specs/landing-kit/` (theme.css + 7 components). Rules:
+
+1. **Scaffold with `create-next-app@latest` (Next 15 + Tailwind v4)**, not `@14` — the kit's `theme.css` uses Tailwind v4 syntax (`@utility`, `@theme inline`). Also `npm install clsx tailwind-merge` (kit deps). Task 1 Step 1's command changes accordingly; everything else in Task 1 stands.
+2. **Copy the kit into the project**: `lib/cn.ts` from kit's `lib/`, kit components into `components/kit/`, and `theme.css` imported from `app/globals.css` (replacing the default Tailwind import per the kit README). Fix the components' `../lib/cn` imports to `@/lib/cn`.
+3. **Theme tokens are the kit's**: Pretendard font, `--color-blue #0083ff` → `--color-purple #4c2ce2` gradient, `--color-bg #f4f6fb`, ink/slate text colors, `bg-glass`/`border-glass`/`shadow-glass`/`glass-edge`/`text-grad`/`bg-grad` utilities. Do NOT introduce other color palettes; the plan's `bg-blue-600`, `bg-gray-900` etc. in task code blocks should be replaced with kit tokens/utilities (`bg-grad` primary buttons, `GlassCard` surfaces, `text-[var(--color-slate)]` secondary text).
+4. **Reuse kit components where they fit**: `Button`, `GlassCard`, `Nav`, `Hero` (adapt copy via props), `FeatureGrid` (How-it-works), `Footer`. Page-specific components (report tables, forms, progress animation) are new but must be styled with the same glass/token vocabulary.
+5. **Design stance — minimal, calm, not overwhelming** (fake-door test): single-column layouts, one primary CTA per screen (secondary actions visually subordinate), max ~3 items per section, generous whitespace. Smooth transitions with `motion`: 150–300ms micro-interactions, ease-out entrances, subtle stagger (30–50ms) on lists, respect `prefers-reduced-motion`. No decorative animation beyond this.
+6. Landing page (Task 3) uses kit `Nav` + `Hero` + `FeatureGrid` + `Footer` structure with the spec's HomeShopper copy; the plan's hand-rolled Hero/HowItWorks code blocks serve as content reference, not markup to copy verbatim. Test assertions on copy/hrefs still apply.
+
 ## Global Constraints
 
-- Stack is exactly: Next.js 14 App Router · TypeScript · Tailwind CSS · lucide-react · `motion`. No Supabase, no OAuth libraries, no HTTP client libraries — this phase is frontend-only.
+- Stack is exactly: Next.js (latest, App Router) · TypeScript · Tailwind CSS v4 · lucide-react · `motion` · clsx + tailwind-merge. No Supabase, no OAuth libraries, no HTTP client libraries — this phase is frontend-only.
 - Never render a score, grade, or traffic-light indicator anywhere in report UI (spec §3.3.3 / §4.3: "판정·점수·등급·신호등 표시 금지"). Concerns are always presented as fact → reason → how-to-check, never a verdict.
 - Legal disclaimer copy in the basic report (spec §3.3.6) must appear verbatim.
 - Analytics event names must exactly match the taxonomy in spec §5: `analyze_start`, `analyze_complete`, `report_view`, `premium_cta_click`, `login_complete`, `premium_sent`, `premium_view`, `visit_cta_click`, `reserve_phone_complete`.
