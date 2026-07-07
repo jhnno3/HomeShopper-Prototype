@@ -27,7 +27,8 @@ Supabase, Kakao/Naver OAuth, GA4)는 다른 팀원이 이후에 별도로 개발
 
 ## 기술 스택
 
-Next.js 14 (App Router) · TypeScript · Tailwind CSS · lucide-react. 인증/DB 라이브러리는 설치하지 않음.
+Next.js 14 (App Router) · TypeScript · Tailwind CSS · lucide-react · `motion`(Framer Motion 후속,
+`/analyze` 진행 애니메이션·페이지 전환 등에 사용). 인증/DB 라이브러리는 설치하지 않음.
 
 ## 페이지 구성
 
