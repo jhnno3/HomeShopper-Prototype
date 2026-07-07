@@ -25,12 +25,16 @@ export function TrustSection() {
           <GlassCard key={faq.q} className="p-0">
             <button
               onClick={() => setOpenIndex(openIndex === index ? null : index)}
+              aria-expanded={openIndex === index}
+              aria-controls={`faq-answer-${index}`}
               className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-medium text-[var(--color-ink)]"
             >
               {faq.q}
             </button>
             {openIndex === index && (
-              <p className="px-4 pb-3 text-sm text-[var(--color-slate)]">{faq.a}</p>
+              <p id={`faq-answer-${index}`} className="px-4 pb-3 text-sm text-[var(--color-slate)]">
+                {faq.a}
+              </p>
             )}
           </GlassCard>
         ))}

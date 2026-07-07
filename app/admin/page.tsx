@@ -4,6 +4,7 @@ import { mockPremiumRequests } from '@/lib/mock-data';
 import type { PremiumRequest } from '@/lib/types';
 import { GlassCard } from '@/components/kit/GlassCard';
 import { Button } from '@/components/kit/Button';
+import { trackEvent } from '@/lib/analytics';
 
 export default function AdminPage() {
   const [requests, setRequests] = useState<PremiumRequest[]>(mockPremiumRequests);
@@ -26,6 +27,7 @@ export default function AdminPage() {
         req.id === selectedId ? { ...req, status: 'sent', sentAt: new Date().toISOString() } : req
       )
     );
+    trackEvent('premium_sent', { requestId: selectedId });
     setJsonInput('');
     setSelectedId(null);
   }
@@ -37,7 +39,7 @@ export default function AdminPage() {
       <GlassCard className="overflow-x-auto p-0">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-white/30 text-[var(--color-slate)]">
+            <tr className="border-b border-[var(--glass-border)] text-[var(--color-slate)]">
               <th className="px-5 py-3 font-medium">리포트 ID</th>
               <th className="px-5 py-3 font-medium">제공자</th>
               <th className="px-5 py-3 font-medium">상태</th>
@@ -46,7 +48,7 @@ export default function AdminPage() {
           </thead>
           <tbody>
             {requests.map((req) => (
-              <tr key={req.id} className="border-b border-white/20 last:border-0">
+              <tr key={req.id} className="border-b border-[var(--glass-border)] last:border-0">
                 <td className="px-5 py-3 text-[var(--color-ink)]">{req.reportId}</td>
                 <td className="px-5 py-3 text-[var(--color-ink)]">{req.provider}</td>
                 <td className="px-5 py-3 text-[var(--color-ink)]">{req.status}</td>

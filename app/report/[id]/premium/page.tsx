@@ -1,5 +1,5 @@
 'use client';
-import { useEffect } from 'react';
+import { use, useEffect } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { getReportById, mockReports } from '@/lib/mock-data';
 import { FactsTable } from '@/components/report/FactsTable';
@@ -9,9 +9,10 @@ import { VisitCta } from '@/components/report/VisitCta';
 import { Disclaimer } from '@/components/report/Disclaimer';
 import { trackEvent } from '@/lib/analytics';
 
-export default function PremiumReportPage({ params }: { params: { id: string } }) {
+export default function PremiumReportPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const report =
-    getReportById(params.id) ?? mockReports.find((r) => r.tier === 'premium') ?? mockReports[0];
+    getReportById(id) ?? mockReports.find((r) => r.tier === 'premium') ?? mockReports[0];
   const reduceMotion = useReducedMotion();
 
   useEffect(() => {
