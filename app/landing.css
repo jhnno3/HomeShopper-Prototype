@@ -1,6 +1,5 @@
-@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
-
-/* Landing C — "clear sky glass" theme. All rules scoped under .v3 */
+/* Landing surface styling. Scoped under .v3. The ambient background lives
+   globally in theme.css (<InkBackground />), so .v3 stays transparent. */
 .v3 {
   --royal: #0a5cff;
   --royal-deep: #0b3ba7;
@@ -14,18 +13,7 @@
   --ok: #0f9d58;
   --warn: #e8a13a;
 
-  /* ink-splatter palette — interpolated along linear-gradient(135deg, #0083FF, #4C2CE2) */
-  --ink-blue: #0083ff;
-  --ink-blue-soft: #73bbff;
-  --ink-mid: #2658f0;
-  --ink-violet: #4c2ce2;
-  --ink-violet-soft: #8b76ec;
-
-  font-family:
-    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
-    system-ui, sans-serif;
   color: var(--ink);
-  background: linear-gradient(180deg, #f9fafe 0%, #f2f4fb 100%);
   letter-spacing: -0.01em;
   overflow-x: clip;
   position: relative;
@@ -59,51 +47,6 @@
   -webkit-backdrop-filter: blur(18px) saturate(160%);
   backdrop-filter: blur(18px) saturate(160%);
   border-bottom: 1px solid var(--glass-edge);
-}
-
-/* ---------- edge-blended color field (scrolls with the page, not pinned) ---------- */
-.v3-ink {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.ink-bloom {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(50px);
-  mix-blend-mode: multiply;
-  pointer-events: none;
-  transform: rotate(var(--rot, 0deg));
-}
-
-@keyframes ink-drift-a {
-  0%,
-  100% {
-    transform: rotate(var(--rot, 0deg)) translate(0, 0);
-  }
-  50% {
-    transform: rotate(var(--rot, 0deg)) translate(2vmax, -1.5vmax);
-  }
-}
-
-@keyframes ink-drift-b {
-  0%,
-  100% {
-    transform: rotate(var(--rot, 0deg)) translate(0, 0);
-  }
-  50% {
-    transform: rotate(var(--rot, 0deg)) translate(-1.5vmax, 2vmax);
-  }
-}
-
-.ink-drift-a {
-  animation: ink-drift-a 24s ease-in-out infinite;
-}
-.ink-drift-b {
-  animation: ink-drift-b 28s ease-in-out infinite;
 }
 
 /* ---------- signature: glass skyline ---------- */
@@ -328,11 +271,4 @@
 
 .g-banner-cta:active {
   transform: scale(0.97);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .ink-drift-a,
-  .ink-drift-b {
-    animation: none;
-  }
 }

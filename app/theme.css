@@ -11,6 +11,14 @@
   --color-caution: #e8a13a;
   --color-danger: #e5484d;
 
+  /* ambient ink-bloom palette — interpolated along the brand gradient
+     linear-gradient(135deg, #0083FF, #4C2CE2). Used by <InkBackground />. */
+  --ink-blue: #0083ff;
+  --ink-blue-soft: #73bbff;
+  --ink-mid: #2658f0;
+  --ink-violet: #4c2ce2;
+  --ink-violet-soft: #8b76ec;
+
   --grad-primary: linear-gradient(135deg, #0083ff, #4c2ce2);
   --glass-fill: rgba(255, 255, 255, 0.25);
   --glass-fill-dark: rgba(20, 22, 40, 0.35);
@@ -39,8 +47,65 @@
 
 html,
 body {
-  background: var(--color-bg);
+  background: linear-gradient(180deg, #f9fafe 0%, #f2f4fb 100%);
   color: var(--color-ink);
+}
+
+body {
+  position: relative;
+  overflow-x: clip;
+}
+
+/* ---------- ambient ink background (page-wide, scrolls with content) ---------- */
+.ink-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ink-bloom {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(50px);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  transform: rotate(var(--rot, 0deg));
+}
+
+@keyframes ink-drift-a {
+  0%,
+  100% {
+    transform: rotate(var(--rot, 0deg)) translate(0, 0);
+  }
+  50% {
+    transform: rotate(var(--rot, 0deg)) translate(2vmax, -1.5vmax);
+  }
+}
+
+@keyframes ink-drift-b {
+  0%,
+  100% {
+    transform: rotate(var(--rot, 0deg)) translate(0, 0);
+  }
+  50% {
+    transform: rotate(var(--rot, 0deg)) translate(-1.5vmax, 2vmax);
+  }
+}
+
+.ink-drift-a {
+  animation: ink-drift-a 24s ease-in-out infinite;
+}
+.ink-drift-b {
+  animation: ink-drift-b 28s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ink-drift-a,
+  .ink-drift-b {
+    animation: none;
+  }
 }
 
 body {
