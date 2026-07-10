@@ -112,7 +112,7 @@ function FaqRow({
 }
 
 export function FaqAccordion() {
-  const [openId, setOpenId] = React.useState<string | null>(ITEMS[0]?.id ?? null);
+  const [openId, setOpenId] = React.useState<string | null>(null);
 
   return (
     <div className="mx-auto mt-8 max-w-2xl overflow-hidden rounded-[20px] g-panel">

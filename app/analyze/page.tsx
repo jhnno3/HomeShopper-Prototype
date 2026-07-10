@@ -1,6 +1,6 @@
 'use client';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ProgressAnimation } from '@/components/analyze/ProgressAnimation';
 import { Button } from '@/components/kit/Button';
 import { GlassCard } from '@/components/kit/GlassCard';
@@ -9,6 +9,10 @@ import { demoReportId } from '@/lib/mock-data';
 import type { DealType } from '@/lib/types';
 
 type Step = 'input' | 'details' | 'progress';
+
+function looksLikeUrl(value: string) {
+  return /^https?:\/\//i.test(value.trim());
+}
 
 function SegmentedButton({
   active,
@@ -34,11 +38,16 @@ function SegmentedButton({
   );
 }
 
-export default function AnalyzePage() {
+function AnalyzeFlow() {
   const router = useRouter();
-  const [step, setStep] = useState<Step>('input');
-  const [inputMode, setInputMode] = useState<'link' | 'address'>('link');
-  const [sourceValue, setSourceValue] = useState('');
+  const searchParams = useSearchParams();
+  // A source passed from the landing search box skips the 매물 정보 step.
+  const initialSource = (searchParams.get('source') ?? '').trim();
+  const [step, setStep] = useState<Step>(initialSource ? 'details' : 'input');
+  const [inputMode, setInputMode] = useState<'link' | 'address'>(
+    initialSource && !looksLikeUrl(initialSource) ? 'address' : 'link'
+  );
+  const [sourceValue, setSourceValue] = useState(initialSource);
   const [dealType, setDealType] = useState<DealType>('전세');
   const [deposit, setDeposit] = useState('');
 
@@ -124,5 +133,14 @@ export default function AnalyzePage() {
         </GlassCard>
       )}
     </main>
+  );
+}
+
+export default function AnalyzePage() {
+  // useSearchParams requires a Suspense boundary for prerendering (Next docs).
+  return (
+    <Suspense fallback={null}>
+      <AnalyzeFlow />
+    </Suspense>
   );
 }

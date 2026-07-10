@@ -14,6 +14,14 @@
   --warn: #e8a13a;
   --nav-h: 61px;
 
+  /* brand gradient: blue -> indigo -> cyan, used for both text and fills */
+  --brand-1: #2563eb;
+  --brand-2: #4f46e5;
+  --brand-3: #06b6d4;
+  --brand-grad: linear-gradient(90deg, var(--brand-1) 0%, var(--brand-2) 50%, var(--brand-3) 100%);
+  --brand-grad-v: linear-gradient(180deg, var(--brand-1) 0%, var(--brand-2) 55%, var(--brand-3) 100%);
+  --brand-grad-diag: linear-gradient(135deg, var(--brand-1) 0%, var(--brand-2) 50%, var(--brand-3) 100%);
+
   color: var(--ink);
   letter-spacing: -0.01em;
   overflow-x: clip;
@@ -40,13 +48,35 @@
 
 /* ---------- glass primitives ---------- */
 .g-panel {
+  position: relative;
+  overflow: hidden;
   background: var(--glass);
-  -webkit-backdrop-filter: blur(18px) saturate(160%);
-  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid var(--glass-edge);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.9) inset,
-    0 12px 40px -12px rgba(11, 59, 167, 0.18);
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 12px 40px -12px rgba(11, 59, 167, 0.2);
+}
+
+/* glossy sheen: a soft diagonal highlight across the top of every card,
+   kept behind real content via a negative z-index. */
+.g-panel::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: -30%;
+  left: -20%;
+  right: -20%;
+  height: 70%;
+  background: linear-gradient(
+    115deg,
+    rgba(255, 255, 255, 0.65) 0%,
+    rgba(255, 255, 255, 0.22) 40%,
+    rgba(255, 255, 255, 0) 65%
+  );
+  transform: rotate(-4deg);
+  pointer-events: none;
 }
 
 .g-chip {
@@ -66,10 +96,17 @@
 
 /* ---------- command bar ---------- */
 .g-bar {
+  /* the search pill keeps its outer focus glow instead of the card sheen,
+     which needs overflow:hidden and would clip that glow. */
+  overflow: visible;
   border-radius: 999px;
   transition:
     box-shadow 0.25s ease,
     transform 0.25s ease;
+}
+
+.g-bar::before {
+  content: none;
 }
 
 .g-bar:focus-within {
@@ -100,13 +137,13 @@
 }
 
 .g-cta {
-  background: linear-gradient(180deg, #2f79ff, var(--royal) 60%);
+  background: var(--brand-grad);
   color: #fff;
   font-weight: 700;
   border-radius: 999px;
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.35) inset,
-    0 8px 20px -6px rgba(10, 92, 255, 0.55);
+    0 8px 20px -6px rgba(37, 99, 235, 0.55);
   cursor: pointer;
   transition:
     transform 0.18s ease,
@@ -118,7 +155,7 @@
   filter: brightness(1.06);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.35) inset,
-    0 10px 26px -6px rgba(10, 92, 255, 0.6);
+    0 10px 26px -6px rgba(37, 99, 235, 0.6);
 }
 
 .g-cta:active {
@@ -163,7 +200,7 @@
       rgba(125, 180, 255, 0.55),
       transparent 55%
     ),
-    linear-gradient(135deg, #0b3ba7 0%, #0a5cff 100%);
+    var(--brand-grad-diag);
   color: #fff;
   overflow: hidden;
   position: relative;

@@ -101,13 +101,20 @@ function Logo() {
       <rect x="15.1" y="21" width="1.8" height="3.6" rx="0.5" fill="#F5F8FF" />
       <defs>
         <linearGradient id="logo-grad" x1="3" y1="1" x2="29" y2="31" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#2F8CFF" />
-          <stop offset="0.55" stopColor="#2F6FED" />
-          <stop offset="1" stopColor="#4536D6" />
+          <stop stopColor="#2563eb" />
+          <stop offset="0.55" stopColor="#4f46e5" />
+          <stop offset="1" stopColor="#06b6d4" />
         </linearGradient>
       </defs>
     </svg>
   );
+}
+
+function focusHeroSearch() {
+  const el = document.getElementById("hero-search") as HTMLInputElement | null;
+  if (!el) return;
+  el.scrollIntoView({ behavior: "smooth", block: "center" });
+  el.focus({ preventScroll: true });
 }
 
 function CommandBar() {
@@ -121,7 +128,9 @@ function CommandBar() {
       className="g-panel g-bar flex w-full items-center gap-2.5 py-1.5 pl-4 pr-2"
       onSubmit={(e) => {
         e.preventDefault();
-        router.push("/analyze");
+        const source = value.trim();
+        if (!source) return;
+        router.push(`/analyze?source=${encodeURIComponent(source)}`);
       }}
     >
       <svg
@@ -138,6 +147,7 @@ function CommandBar() {
         <path d="m21 21-4.3-4.3" />
       </svg>
       <input
+        id="hero-search"
         type="text"
         inputMode="text"
         aria-label="매물 링크 또는 주소"
@@ -312,9 +322,9 @@ export default function LandingPage() {
             <a href="#faq" className="g-ghost hidden px-3 py-2 text-sm sm:block">
               자주 묻는 질문
             </a>
-            <Link href="/analyze" className="g-cta px-4 py-2 text-sm">
+            <button type="button" onClick={focusHeroSearch} className="g-cta px-4 py-2 text-sm">
               무료 분석
-            </Link>
+            </button>
           </nav>
         </div>
       </header>
@@ -322,9 +332,17 @@ export default function LandingPage() {
       {/* hero */}
       <section className="relative px-4 pt-12 pb-16 sm:pt-16 sm:pb-20">
         <div className="relative z-10 mx-auto w-full max-w-5xl">
-          <div className="flex flex-col items-center gap-8 lg:flex-row-reverse lg:items-center lg:justify-between lg:gap-14">
+          {/*
+            Grid areas keep the DOM order (heading, image, search) identical
+            for mobile stacking, while desktop remaps the same three areas
+            into a 2-column layout: heading+search on the left, image on the
+            right spanning both rows.
+          */}
+          <div
+            className="grid gap-y-9 [grid-template-areas:'heading'_'image'_'search'] sm:gap-y-10 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-x-16 lg:gap-y-9 lg:[grid-template-areas:'heading_image'_'search_image']"
+          >
             <motion.div
-              className="flex w-full max-w-xl flex-col items-center gap-6 text-center lg:items-start lg:text-left"
+              className="flex w-full max-w-xl flex-col items-center gap-6 text-center [grid-area:heading] lg:items-start lg:text-left"
               initial={reduce ? false : "hide"}
               animate="show"
               variants={{ show: { transition: { staggerChildren: 0.09 } } }}
@@ -339,6 +357,16 @@ export default function LandingPage() {
                   링크 하나만 붙여넣으면 등기부등본부터 실거래가까지, 계약 전에 꼭
                   봐야 할 서류를 대신 읽어드립니다.
                 </p>,
+                <ul key="docs" className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[13.5px] font-medium text-(--muted) lg:justify-start">
+                  {DOCS.map((d) => (
+                    <li key={d} className="flex items-center gap-1.5">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--royal)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                      {d} 자동 확인
+                    </li>
+                  ))}
+                </ul>,
               ].map((node, i) => (
                 <motion.div
                   key={i}
@@ -353,63 +381,45 @@ export default function LandingPage() {
             </motion.div>
 
             <motion.div
-              className="shrink-0"
-              initial={reduce ? false : { opacity: 0, x: -24 }}
+              className="shrink-0 justify-self-center [grid-area:image] lg:justify-self-end lg:self-center"
+              initial={reduce ? false : { opacity: 0, x: 24 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.65, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
             >
               <Image
-                src="/hero-illustration.png"
-                alt="돋보기로 부동산 서류와 도면을 검토하는 일러스트"
-                width={1055}
-                height={1491}
+                src="/hero-docs-v2.png"
+                alt="돋보기로 부동산 서류와 평면도를 살펴보는 일러스트"
+                width={1792}
+                height={2400}
                 priority
-                className="h-auto w-[210px] sm:w-[260px] lg:w-[330px] [filter:drop-shadow(0_24px_44px_rgba(11,59,167,0.2))]"
+                className="h-auto w-[230px] sm:w-[290px] lg:w-[360px] [filter:drop-shadow(0_20px_38px_rgba(37,99,235,0.22))]"
               />
+            </motion.div>
+
+            <motion.div
+              className="mx-auto w-full max-w-xl [grid-area:search] lg:mx-0 lg:max-w-none"
+              initial={reduce ? false : { opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.55, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <CommandBar />
             </motion.div>
           </div>
 
+          {/* sample report preview */}
           <motion.div
-            className="mx-auto mt-10 flex w-full max-w-xl flex-col items-center gap-6 text-center lg:mt-12"
-            initial={reduce ? false : "hide"}
-            animate="show"
-            variants={{ show: { transition: { staggerChildren: 0.09, delayChildren: 0.3 } } }}
+            className="mx-auto mt-12 w-full max-w-2xl sm:mt-14"
+            initial={reduce ? false : { opacity: 0, y: 28 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           >
-            {[
-              <div key="bar" className="w-full max-w-xl">
-                <CommandBar />
-              </div>,
-              <ul key="docs" className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[13px] font-medium text-(--faint)">
-                {DOCS.map((d) => (
-                  <li key={d} className="flex items-center gap-1.5">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--royal)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                      <path d="M20 6L9 17l-5-5" />
-                    </svg>
-                    {d} 자동 확인
-                  </li>
-                ))}
-              </ul>,
-            ].map((node, i) => (
-              <motion.div
-                key={i}
-                className={i === 0 ? "w-full max-w-xl" : undefined}
-                variants={{
-                  hide: { opacity: 0, y: 18 },
-                  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] } },
-                }}
-              >
-                {node}
-              </motion.div>
-            ))}
-          </motion.div>
-
-          {/* sample report, straddling the fold */}
-          <motion.div
-            className="mt-14 sm:mt-16"
-            initial={reduce ? false : { opacity: 0, y: 32 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.65, delay: 0.55, ease: [0.22, 1, 0.36, 1] }}
-          >
+            <div className="mb-5 text-center">
+              <p className="text-[13px] font-bold tracking-[0.12em] text-(--royal)">SAMPLE REPORT</p>
+              <h2 className="mt-1.5 break-keep text-[20px] font-extrabold tracking-[-0.02em] sm:text-[24px]">
+                분석이 끝나면 이런 리포트를 받아요
+              </h2>
+            </div>
             <SampleReport />
           </motion.div>
         </div>
@@ -449,7 +459,7 @@ export default function LandingPage() {
                     {/* vertical (mobile) */}
                     <motion.span
                       className="absolute left-[27px] top-[64px] bottom-2 w-[2.5px] origin-top rounded-full sm:hidden"
-                      style={{ background: "linear-gradient(180deg, var(--royal), rgba(10,92,255,0.25))" }}
+                      style={{ background: "linear-gradient(180deg, #2563eb, rgba(6,182,212,0.25))" }}
                       aria-hidden
                       variants={{
                         hide: { scaleY: 0 },
@@ -462,7 +472,7 @@ export default function LandingPage() {
                     {/* horizontal (desktop) */}
                     <motion.span
                       className="absolute top-[27px] left-[calc(50%+40px)] hidden h-[2.5px] w-[calc(100%-64px)] origin-left rounded-full sm:block"
-                      style={{ background: "linear-gradient(90deg, var(--royal), rgba(10,92,255,0.25))" }}
+                      style={{ background: "linear-gradient(90deg, #2563eb, rgba(6,182,212,0.25))" }}
                       aria-hidden
                       variants={{
                         hide: { scaleX: 0 },
@@ -477,7 +487,7 @@ export default function LandingPage() {
 
                 <span
                   className="relative z-10 flex h-[56px] w-[56px] shrink-0 items-center justify-center rounded-full text-white shadow-[0_8px_20px_-6px_rgba(10,92,255,0.55)]"
-                  style={{ background: "linear-gradient(180deg,#2f79ff,var(--royal))" }}
+                  style={{ background: "var(--brand-grad-v)" }}
                   aria-hidden
                 >
                   {s.icon}
@@ -515,7 +525,7 @@ export default function LandingPage() {
                 <article className="g-panel h-full rounded-3xl p-6">
                   <span
                     className="flex h-10 w-10 items-center justify-center rounded-xl text-white"
-                    style={{ background: "linear-gradient(180deg,#2f79ff,var(--royal))" }}
+                    style={{ background: "var(--brand-grad-v)" }}
                     aria-hidden
                   >
                     {c.icon}
@@ -544,13 +554,13 @@ export default function LandingPage() {
                 붙여넣으면 위 항목 전부를 실제 서류 기준으로 검증한 상세
                 리포트를 30초 안에 보여드립니다.
               </p>
-              <Link href="/analyze" className="g-cta inline-flex items-center gap-2 px-7 py-3.5 text-[15px]">
+              <button type="button" onClick={focusHeroSearch} className="g-cta inline-flex items-center gap-2 px-7 py-3.5 text-[15px]">
                 무료로 상세 분석 받기
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                   <path d="M5 12h14" />
                   <path d="m13 6 6 6-6 6" />
                 </svg>
-              </Link>
+              </button>
             </div>
           </Reveal>
         </div>
