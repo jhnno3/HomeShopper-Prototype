@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "motion/react";
 import { demoReportId } from "@/lib/mock-data";
+import { FaqAccordion } from "@/components/landing/FaqAccordion";
 import "./landing.css";
 
 const DOCS = ["등기부등본", "건축물대장", "실거래가"];
@@ -24,21 +25,6 @@ const STEPS = [
     n: "3",
     title: "리포트 확인",
     body: "근저당·가압류 같은 항목을 신호등 색으로 정리한 리포트를 바로 받습니다.",
-  },
-];
-
-const FAQS = [
-  {
-    q: "정말 무료인가요?",
-    a: "네. 링크 분석과 기본 리포트는 가입 없이 무료로 제공됩니다. 등기부 원문 첨부 등 심화 리포트만 유료로 준비하고 있습니다.",
-  },
-  {
-    q: "어떤 서류를 확인해 주나요?",
-    a: "등기부등본의 근저당·가압류·소유자 정보, 건축물대장의 위반건축물 여부, 국토부 실거래가를 함께 대조해 정리합니다.",
-  },
-  {
-    q: "입력한 링크나 주소는 저장되나요?",
-    a: "분석 목적 외에는 사용하지 않으며, 개인 식별 정보와 연결하지 않습니다. 분석이 끝나면 리포트 열람용으로만 보관됩니다.",
   },
 ];
 
@@ -330,19 +316,7 @@ export default function LandingPage() {
             <h2 className="break-keep mt-14 text-center text-[24px] font-extrabold tracking-[-0.02em] sm:text-[30px]">
               자주 묻는 질문
             </h2>
-            <div className="mt-8 space-y-3">
-              {FAQS.map((f) => (
-                <details key={f.q} className="g-panel g-faq">
-                  <summary>
-                    {f.q}
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden>
-                      <path d="M12 5v14M5 12h14" />
-                    </svg>
-                  </summary>
-                  <p className="g-faq-body">{f.a}</p>
-                </details>
-              ))}
-            </div>
+            <FaqAccordion />
           </Reveal>
         </div>
       </section>
