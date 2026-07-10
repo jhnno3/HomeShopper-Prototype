@@ -78,6 +78,48 @@ function CommandBar() {
   );
 }
 
+function HeroReportSnippet() {
+  const reduce = useReducedMotion();
+  const rows: [string, string, string][] = [
+    ["근저당권", "#0f9d58", "안전"],
+    ["위반건축물", "#0f9d58", "안전"],
+    ["실거래가 대비 보증금", "#e8a13a", "주의"],
+  ];
+
+  return (
+    <motion.div
+      className="g-panel w-full max-w-xs shrink-0 overflow-hidden rounded-2xl text-left lg:w-[272px]"
+      animate={reduce ? undefined : { y: [0, -7, 0] }}
+      transition={reduce ? undefined : { duration: 6, repeat: Infinity, ease: "easeInOut" }}
+    >
+      <div className="flex items-center gap-1.5 border-b border-white/70 px-4 py-2.5">
+        <span className="h-2 w-2 rounded-full bg-[#f26d63]" aria-hidden />
+        <span className="h-2 w-2 rounded-full bg-[#f5be4f]" aria-hidden />
+        <span className="h-2 w-2 rounded-full bg-[#58c26a]" aria-hidden />
+        <span className="ml-2 truncate text-[11px] font-semibold text-(--faint)">
+          매탄동 ○○아파트
+        </span>
+      </div>
+      <div className="space-y-2 p-3.5">
+        {rows.map(([label, color, tag]) => (
+          <div
+            key={label}
+            className="flex items-center justify-between gap-3 rounded-lg bg-white/70 px-3 py-2"
+          >
+            <span className="text-[12.5px] font-semibold text-(--ink)">{label}</span>
+            <span
+              className="shrink-0 rounded-full px-2 py-0.5 text-[10.5px] font-bold text-white"
+              style={{ background: color }}
+            >
+              {tag}
+            </span>
+          </div>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
 function Reveal({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   const reduce = useReducedMotion();
   return (
@@ -121,7 +163,7 @@ export default function LandingPage() {
       {/* hero */}
       <section className="relative px-4 pt-16 pb-36 sm:pt-24 sm:pb-48">
         <motion.div
-          className="relative z-10 mx-auto flex max-w-3xl flex-col items-center gap-6 text-center"
+          className="relative z-10 mx-auto flex max-w-4xl flex-col items-center gap-6 text-center"
           initial={reduce ? false : "hide"}
           animate="show"
           variants={{ show: { transition: { staggerChildren: 0.09 } } }}
@@ -136,8 +178,13 @@ export default function LandingPage() {
               링크 하나만 붙여넣으면 등기부등본부터 실거래가까지, 계약 전에 꼭
               봐야 할 서류를 대신 읽어드립니다.
             </p>,
-            <div key="bar" className="w-full max-w-xl">
-              <CommandBar />
+            <div key="bar" className="w-full">
+              <div className="flex flex-col items-center gap-5 lg:flex-row lg:items-stretch lg:justify-center">
+                <div className="w-full max-w-xl">
+                  <CommandBar />
+                </div>
+                <HeroReportSnippet />
+              </div>
             </div>,
             <ul key="docs" className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[13px] font-medium text-(--faint)">
               {DOCS.map((d) => (
@@ -152,7 +199,7 @@ export default function LandingPage() {
           ].map((node, i) => (
             <motion.div
               key={i}
-              className={i === 2 ? "w-full max-w-xl" : undefined}
+              className={i === 2 ? "w-full" : undefined}
               variants={{
                 hide: { opacity: 0, y: 18 },
                 show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] } },
