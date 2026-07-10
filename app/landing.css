@@ -12,6 +12,7 @@
   --blue-edge: rgba(10, 92, 255, 0.14);
   --ok: #0f9d58;
   --warn: #e8a13a;
+  --nav-h: 61px;
 
   color: var(--ink);
   letter-spacing: -0.01em;
@@ -21,6 +22,26 @@
 
 .v3 ::selection {
   background: rgba(10, 92, 255, 0.18);
+}
+
+/* Hero fills exactly one screen (viewport minus the sticky navbar) so the
+   next section stays below the fold on load. */
+.v3-hero {
+  min-height: calc(100dvh - var(--nav-h));
+}
+
+/* Mobile: snap each full-bleed section to the top when scrolling, instead
+   of free scrolling. Scoped to landing via :has() so other routes are
+   unaffected. */
+@media (max-width: 767px) {
+  html:has(.v3) {
+    scroll-snap-type: y mandatory;
+    scroll-padding-top: 61px;
+  }
+
+  .v3 > section {
+    scroll-snap-align: start;
+  }
 }
 
 /* ---------- glass primitives ---------- */
@@ -72,6 +93,12 @@
   width: 100%;
   font-size: 15px;
   color: var(--ink);
+}
+
+/* The pill's :focus-within ring is the focus indicator; suppress the
+   input's own outline so no blue rectangle shows on click/focus. */
+.g-bar input:focus-visible {
+  outline: none;
 }
 
 .g-bar input::placeholder {

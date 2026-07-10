@@ -1,8 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { demoReportId } from "@/lib/mock-data";
 import { FaqAccordion } from "@/components/landing/FaqAccordion";
 import "./landing.css";
@@ -55,25 +56,67 @@ function Logo() {
 
 function CommandBar() {
   const router = useRouter();
+  const reduce = useReducedMotion();
+  const [value, setValue] = useState("");
+  const hasText = value.trim().length > 0;
 
   return (
     <form
-      className="g-panel g-bar flex w-full items-center gap-2 p-1.5 sm:gap-3"
+      className="g-panel g-bar flex w-full items-center gap-2.5 py-1.5 pl-4 pr-2"
       onSubmit={(e) => {
         e.preventDefault();
         router.push("/analyze");
       }}
     >
+      <svg
+        className="size-[18px] shrink-0 text-(--faint)"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden
+      >
+        <circle cx="11" cy="11" r="7" />
+        <path d="m21 21-4.3-4.3" />
+      </svg>
       <input
         type="text"
         inputMode="text"
         aria-label="매물 링크 또는 주소"
         placeholder="매물 링크나 주소를 붙여넣으세요"
-        className="min-h-10 flex-1 px-3"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        className="min-h-10 flex-1 px-0"
       />
-      <button type="submit" className="g-cta min-h-10 shrink-0 px-5 text-[14px]">
-        무료로 확인하기
-      </button>
+      <AnimatePresence>
+        {hasText && (
+          <motion.button
+            type="submit"
+            aria-label="분석하기"
+            className="g-cta grid size-10 shrink-0 place-items-center"
+            initial={reduce ? false : { opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.5 }}
+            transition={reduce ? { duration: 0.12 } : { type: "spring", stiffness: 520, damping: 26 }}
+          >
+            <svg
+              className="size-[18px]"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden
+            >
+              <path d="M5 12h14" />
+              <path d="m13 6 6 6-6 6" />
+            </svg>
+          </motion.button>
+        )}
+      </AnimatePresence>
     </form>
   );
 }
@@ -161,54 +204,82 @@ export default function LandingPage() {
       </header>
 
       {/* hero */}
-      <section className="relative px-4 pt-16 pb-36 sm:pt-24 sm:pb-48">
-        <motion.div
-          className="relative z-10 mx-auto flex max-w-4xl flex-col items-center gap-6 text-center"
-          initial={reduce ? false : "hide"}
-          animate="show"
-          variants={{ show: { transition: { staggerChildren: 0.09 } } }}
-        >
-          {[
-            <h1 key="h1" className="text-[30px] leading-[1.22] font-extrabold tracking-[-0.03em] text-balance break-keep sm:text-[46px]">
-              그 매물, 임장 가기 전에
-              <br />
-              <span className="text-(--royal)">30초 만에 서류부터</span> 확인하세요
-            </h1>,
-            <p key="sub" className="max-w-md break-keep text-[15.5px] leading-relaxed text-(--muted) sm:text-[17px]">
-              링크 하나만 붙여넣으면 등기부등본부터 실거래가까지, 계약 전에 꼭
-              봐야 할 서류를 대신 읽어드립니다.
-            </p>,
-            <div key="bar" className="w-full">
-              <div className="flex flex-col items-center gap-5 lg:flex-row lg:items-stretch lg:justify-center">
-                <div className="w-full max-w-xl">
-                  <CommandBar />
-                </div>
-                <HeroReportSnippet />
-              </div>
-            </div>,
-            <ul key="docs" className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[13px] font-medium text-(--faint)">
-              {DOCS.map((d) => (
-                <li key={d} className="flex items-center gap-1.5">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--royal)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <path d="M20 6L9 17l-5-5" />
-                  </svg>
-                  {d} 자동 확인
-                </li>
-              ))}
-            </ul>,
-          ].map((node, i) => (
+      <section className="v3-hero relative flex flex-col justify-center px-4 py-10 sm:py-12">
+        <div className="relative z-10 mx-auto w-full max-w-5xl">
+          <div className="flex flex-col items-center gap-10 lg:flex-row lg:items-start lg:justify-between lg:gap-12">
             <motion.div
-              key={i}
-              className={i === 2 ? "w-full" : undefined}
-              variants={{
-                hide: { opacity: 0, y: 18 },
-                show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] } },
-              }}
+              className="flex w-full max-w-xl flex-col items-center gap-6 text-center lg:items-start lg:text-left"
+              initial={reduce ? false : "hide"}
+              animate="show"
+              variants={{ show: { transition: { staggerChildren: 0.09 } } }}
             >
-              {node}
+              {[
+                <h1 key="h1" className="text-[30px] leading-[1.22] font-extrabold tracking-[-0.03em] text-balance break-keep sm:text-[46px]">
+                  그 매물, 임장 가기 전에
+                  <br />
+                  <span className="text-(--royal)">30초 만에 서류부터</span> 확인하세요
+                </h1>,
+                <p key="sub" className="max-w-md break-keep text-[15.5px] leading-relaxed text-(--muted) sm:text-[17px]">
+                  링크 하나만 붙여넣으면 등기부등본부터 실거래가까지, 계약 전에 꼭
+                  봐야 할 서류를 대신 읽어드립니다.
+                </p>,
+              ].map((node, i) => (
+                <motion.div
+                  key={i}
+                  variants={{
+                    hide: { opacity: 0, y: 18 },
+                    show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] } },
+                  }}
+                >
+                  {node}
+                </motion.div>
+              ))}
             </motion.div>
-          ))}
-        </motion.div>
+
+            <motion.div
+              className="w-full max-w-xs lg:mt-3 lg:w-[272px] lg:max-w-none lg:shrink-0"
+              initial={reduce ? false : { opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.55, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <HeroReportSnippet />
+            </motion.div>
+          </div>
+
+          <motion.div
+            className="mx-auto mt-10 flex w-full max-w-xl flex-col items-center gap-6 text-center lg:mt-16"
+            initial={reduce ? false : "hide"}
+            animate="show"
+            variants={{ show: { transition: { staggerChildren: 0.09, delayChildren: 0.3 } } }}
+          >
+            {[
+              <div key="bar" className="w-full max-w-xl">
+                <CommandBar />
+              </div>,
+              <ul key="docs" className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[13px] font-medium text-(--faint)">
+                {DOCS.map((d) => (
+                  <li key={d} className="flex items-center gap-1.5">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--royal)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                      <path d="M20 6L9 17l-5-5" />
+                    </svg>
+                    {d} 자동 확인
+                  </li>
+                ))}
+              </ul>,
+            ].map((node, i) => (
+              <motion.div
+                key={i}
+                className={i === 0 ? "w-full max-w-xl" : undefined}
+                variants={{
+                  hide: { opacity: 0, y: 18 },
+                  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] } },
+                }}
+              >
+                {node}
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
       </section>
 
       {/* how it works */}
