@@ -24,18 +24,12 @@
   background: rgba(10, 92, 255, 0.18);
 }
 
-/* Hero fills exactly one screen (viewport minus the sticky navbar) so the
-   next section stays below the fold on load. */
-.v3-hero {
-  min-height: calc(100dvh - var(--nav-h));
-}
-
 /* Mobile: snap each full-bleed section to the top when scrolling, instead
    of free scrolling. Scoped to landing via :has() so other routes are
-   unaffected. */
+   unaffected. Sections taller than the viewport still scroll freely inside. */
 @media (max-width: 767px) {
   html:has(.v3) {
-    scroll-snap-type: y mandatory;
+    scroll-snap-type: y proximity;
     scroll-padding-top: 61px;
   }
 
@@ -158,17 +152,6 @@
 .g-window {
   border-radius: 20px;
   overflow: hidden;
-}
-
-.g-blurred {
-  filter: blur(7px);
-  user-select: none;
-  pointer-events: none;
-}
-
-.g-skel {
-  background: rgba(13, 42, 92, 0.1);
-  border-radius: 6px;
 }
 
 /* ---------- banner ---------- */

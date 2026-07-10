@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { demoReportId } from "@/lib/mock-data";
 import { FaqAccordion } from "@/components/landing/FaqAccordion";
 import "./landing.css";
 
@@ -15,16 +15,72 @@ const STEPS = [
     n: "1",
     title: "링크 붙여넣기",
     body: "보고 있는 매물 링크나 주소를 그대로 붙여넣으세요. 가입도, 앱 설치도 없습니다.",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+      </svg>
+    ),
   },
   {
     n: "2",
     title: "30초 자동 분석",
     body: "등기부등본·건축물대장·실거래가를 자동으로 대조해 위험 신호를 찾습니다.",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <circle cx="11" cy="11" r="7" />
+        <path d="m21 21-4.3-4.3" />
+      </svg>
+    ),
   },
   {
     n: "3",
     title: "리포트 확인",
     body: "근저당·가압류 같은 항목을 신호등 색으로 정리한 리포트를 바로 받습니다.",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <path d="M14 2v6h6" />
+        <path d="m9 15 2 2 4-4" />
+      </svg>
+    ),
+  },
+];
+
+const CHECKS = [
+  {
+    doc: "등기부등본",
+    desc: "권리관계의 위험 신호를 찾습니다",
+    items: ["근저당권 · 채권최고액 규모", "가압류 · 가처분 · 경매개시 여부", "등기상 소유자와 임대인 일치"],
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <path d="M14 2v6h6" />
+        <path d="M8 13h8M8 17h5" />
+      </svg>
+    ),
+  },
+  {
+    doc: "건축물대장",
+    desc: "건물 자체의 하자를 확인합니다",
+    items: ["위반건축물 등재 여부", "주용도 · 전용면적 대조", "사용승인 연도"],
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <rect x="4" y="3" width="16" height="18" rx="2" />
+        <path d="M9 8h1M14 8h1M9 12h1M14 12h1M9 16h6" />
+      </svg>
+    ),
+  },
+  {
+    doc: "실거래가",
+    desc: "가격의 적정성을 검증합니다",
+    items: ["최근 국토부 실거래 이력", "시세 대비 보증금 비율", "역전세 · 깡통전세 위험 신호"],
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M3 3v18h18" />
+        <path d="m7 14 4-4 3 3 5-6" />
+      </svg>
+    ),
   },
 ];
 
@@ -121,45 +177,105 @@ function CommandBar() {
   );
 }
 
-function HeroReportSnippet() {
-  const reduce = useReducedMotion();
-  const rows: [string, string, string][] = [
-    ["근저당권", "#0f9d58", "안전"],
-    ["위반건축물", "#0f9d58", "안전"],
-    ["실거래가 대비 보증금", "#e8a13a", "주의"],
-  ];
-
+function StatusTag({ level }: { level: "safe" | "caution" }) {
+  const safe = level === "safe";
   return (
-    <motion.div
-      className="g-panel w-full max-w-xs shrink-0 overflow-hidden rounded-2xl text-left lg:w-[272px]"
-      animate={reduce ? undefined : { y: [0, -7, 0] }}
-      transition={reduce ? undefined : { duration: 6, repeat: Infinity, ease: "easeInOut" }}
+    <span
+      className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold text-white"
+      style={{ background: safe ? "var(--ok)" : "var(--warn)" }}
     >
-      <div className="flex items-center gap-1.5 border-b border-white/70 px-4 py-2.5">
-        <span className="h-2 w-2 rounded-full bg-[#f26d63]" aria-hidden />
-        <span className="h-2 w-2 rounded-full bg-[#f5be4f]" aria-hidden />
-        <span className="h-2 w-2 rounded-full bg-[#58c26a]" aria-hidden />
-        <span className="ml-2 truncate text-[11px] font-semibold text-(--faint)">
-          매탄동 ○○아파트
+      {safe ? "안전" : "주의"}
+    </span>
+  );
+}
+
+const REPORT_SECTIONS: {
+  doc: string;
+  rows: { item: string; value: string; level: "safe" | "caution" }[];
+}[] = [
+  {
+    doc: "등기부등본",
+    rows: [
+      { item: "근저당권", value: "채권최고액 3억 6,000만 원 · 시세 대비 42%", level: "safe" },
+      { item: "가압류 · 가처분", value: "해당 없음", level: "safe" },
+      { item: "소유자 확인", value: "등기상 소유자 1인 · 임대인과 일치", level: "safe" },
+    ],
+  },
+  {
+    doc: "건축물대장",
+    rows: [
+      { item: "위반건축물", value: "등재 이력 없음", level: "safe" },
+      { item: "주용도 · 면적", value: "공동주택(아파트) · 전용 84.9㎡", level: "safe" },
+    ],
+  },
+  {
+    doc: "실거래가",
+    rows: [
+      { item: "시세 대비 보증금", value: "보증금 5.4억 / 최근 실거래 6.2억 · 87%", level: "caution" },
+    ],
+  },
+];
+
+function SampleReport() {
+  return (
+    <div className="g-panel g-window mx-auto w-full max-w-2xl text-left">
+      {/* window chrome */}
+      <div className="flex items-center gap-1.5 border-b border-white/70 px-4 py-3">
+        <span className="h-2.5 w-2.5 rounded-full bg-[#f26d63]" aria-hidden />
+        <span className="h-2.5 w-2.5 rounded-full bg-[#f5be4f]" aria-hidden />
+        <span className="h-2.5 w-2.5 rounded-full bg-[#58c26a]" aria-hidden />
+        <span className="ml-3 truncate text-[12px] font-semibold text-(--faint)">
+          homeshopper.report
         </span>
       </div>
-      <div className="space-y-2 p-3.5">
-        {rows.map(([label, color, tag]) => (
-          <div
-            key={label}
-            className="flex items-center justify-between gap-3 rounded-lg bg-white/70 px-3 py-2"
-          >
-            <span className="text-[12.5px] font-semibold text-(--ink)">{label}</span>
-            <span
-              className="shrink-0 rounded-full px-2 py-0.5 text-[10.5px] font-bold text-white"
-              style={{ background: color }}
-            >
-              {tag}
-            </span>
+
+      {/* report head */}
+      <div className="border-b border-(--blue-edge) px-5 py-4 sm:px-7 sm:py-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Logo />
+            <div>
+              <p className="text-[15px] font-extrabold tracking-tight">홈쇼퍼 안심 리포트</p>
+              <p className="text-[11.5px] font-medium text-(--faint)">발급일 2026.07.11 · 등기사항전부증명서 기준</p>
+            </div>
+          </div>
+          <span className="rounded-full border border-(--warn) px-3 py-1 text-[12px] font-bold" style={{ color: "var(--warn)" }}>
+            종합 판정 · 주의 1건
+          </span>
+        </div>
+        <p className="mt-3 text-[14px] font-bold sm:text-[15px]">
+          경기 수원시 영통구 매탄동 ○○아파트 101동 1203호
+        </p>
+        <div className="mt-2 flex items-center gap-4 text-[12px] font-semibold">
+          <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full" style={{ background: "var(--ok)" }} aria-hidden />안전 5</span>
+          <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full" style={{ background: "var(--warn)" }} aria-hidden />주의 1</span>
+          <span className="flex items-center gap-1.5 text-(--faint)"><span className="h-2 w-2 rounded-full bg-[#e5484d]" aria-hidden />위험 0</span>
+        </div>
+      </div>
+
+      {/* report body */}
+      <div className="space-y-5 px-5 py-5 sm:px-7 sm:py-6">
+        {REPORT_SECTIONS.map((sec) => (
+          <div key={sec.doc}>
+            <p className="text-[11.5px] font-bold tracking-[0.08em] text-(--royal)">{sec.doc}</p>
+            <div className="mt-2 space-y-1.5">
+              {sec.rows.map((row) => (
+                <div key={row.item} className="flex items-center justify-between gap-3 rounded-xl bg-white/70 px-4 py-2.5">
+                  <div className="min-w-0">
+                    <p className="text-[13px] font-bold">{row.item}</p>
+                    <p className="truncate text-[12px] text-(--muted)">{row.value}</p>
+                  </div>
+                  <StatusTag level={row.level} />
+                </div>
+              ))}
+            </div>
           </div>
         ))}
+        <p className="text-[11px] leading-relaxed text-(--faint)">
+          자동 분석 결과는 공부상 기재 사항 기준이며, 계약 판단의 참고 자료로만 사용하세요.
+        </p>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -204,9 +320,9 @@ export default function LandingPage() {
       </header>
 
       {/* hero */}
-      <section className="v3-hero relative flex flex-col justify-center px-4 py-10 sm:py-12">
+      <section className="relative px-4 pt-12 pb-16 sm:pt-16 sm:pb-20">
         <div className="relative z-10 mx-auto w-full max-w-5xl">
-          <div className="flex flex-col items-center gap-10 lg:flex-row lg:items-start lg:justify-between lg:gap-12">
+          <div className="flex flex-col items-center gap-8 lg:flex-row-reverse lg:items-center lg:justify-between lg:gap-14">
             <motion.div
               className="flex w-full max-w-xl flex-col items-center gap-6 text-center lg:items-start lg:text-left"
               initial={reduce ? false : "hide"}
@@ -237,17 +353,24 @@ export default function LandingPage() {
             </motion.div>
 
             <motion.div
-              className="w-full max-w-xs lg:mt-3 lg:w-[272px] lg:max-w-none lg:shrink-0"
-              initial={reduce ? false : { opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.55, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              className="shrink-0"
+              initial={reduce ? false : { opacity: 0, x: -24 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.65, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
             >
-              <HeroReportSnippet />
+              <Image
+                src="/hero-illustration.png"
+                alt="돋보기로 부동산 서류와 도면을 검토하는 일러스트"
+                width={1055}
+                height={1491}
+                priority
+                className="h-auto w-[210px] sm:w-[260px] lg:w-[330px] [filter:drop-shadow(0_24px_44px_rgba(11,59,167,0.2))]"
+              />
             </motion.div>
           </div>
 
           <motion.div
-            className="mx-auto mt-10 flex w-full max-w-xl flex-col items-center gap-6 text-center lg:mt-16"
+            className="mx-auto mt-10 flex w-full max-w-xl flex-col items-center gap-6 text-center lg:mt-12"
             initial={reduce ? false : "hide"}
             animate="show"
             variants={{ show: { transition: { staggerChildren: 0.09, delayChildren: 0.3 } } }}
@@ -279,10 +402,20 @@ export default function LandingPage() {
               </motion.div>
             ))}
           </motion.div>
+
+          {/* sample report, straddling the fold */}
+          <motion.div
+            className="mt-14 sm:mt-16"
+            initial={reduce ? false : { opacity: 0, y: 32 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.65, delay: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <SampleReport />
+          </motion.div>
         </div>
       </section>
 
-      {/* how it works */}
+      {/* how it works — connected process flow */}
       <section id="how" className="scroll-mt-24 px-4 py-16 sm:py-24">
         <div className="mx-auto max-w-5xl">
           <Reveal>
@@ -293,86 +426,131 @@ export default function LandingPage() {
               세 걸음이면 끝납니다
             </h2>
           </Reveal>
-          <div className="mt-10 grid gap-4 sm:grid-cols-3 sm:gap-5">
+          <ol className="mx-auto mt-12 flex max-w-4xl flex-col sm:flex-row sm:gap-4">
             {STEPS.map((s, i) => (
-              <Reveal key={s.n} delay={i * 0.1}>
+              <motion.li
+                key={s.n}
+                className="relative flex gap-5 pb-10 last:pb-0 sm:flex-1 sm:flex-col sm:items-center sm:gap-0 sm:pb-0 sm:text-center"
+                initial={reduce ? false : "hide"}
+                whileInView="show"
+                viewport={{ once: true, margin: "-60px" }}
+                variants={{
+                  hide: { opacity: 0, y: 24 },
+                  show: {
+                    opacity: 1,
+                    y: 0,
+                    transition: { duration: 0.5, delay: i * 0.15, ease: [0.22, 1, 0.36, 1] },
+                  },
+                }}
+              >
+                {/* connector to next step */}
+                {i < STEPS.length - 1 && (
+                  <>
+                    {/* vertical (mobile) */}
+                    <motion.span
+                      className="absolute left-[27px] top-[64px] bottom-2 w-[2.5px] origin-top rounded-full sm:hidden"
+                      style={{ background: "linear-gradient(180deg, var(--royal), rgba(10,92,255,0.25))" }}
+                      aria-hidden
+                      variants={{
+                        hide: { scaleY: 0 },
+                        show: {
+                          scaleY: 1,
+                          transition: { duration: 0.5, delay: i * 0.15 + 0.25, ease: [0.22, 1, 0.36, 1] },
+                        },
+                      }}
+                    />
+                    {/* horizontal (desktop) */}
+                    <motion.span
+                      className="absolute top-[27px] left-[calc(50%+40px)] hidden h-[2.5px] w-[calc(100%-64px)] origin-left rounded-full sm:block"
+                      style={{ background: "linear-gradient(90deg, var(--royal), rgba(10,92,255,0.25))" }}
+                      aria-hidden
+                      variants={{
+                        hide: { scaleX: 0 },
+                        show: {
+                          scaleX: 1,
+                          transition: { duration: 0.5, delay: i * 0.15 + 0.25, ease: [0.22, 1, 0.36, 1] },
+                        },
+                      }}
+                    />
+                  </>
+                )}
+
+                <span
+                  className="relative z-10 flex h-[56px] w-[56px] shrink-0 items-center justify-center rounded-full text-white shadow-[0_8px_20px_-6px_rgba(10,92,255,0.55)]"
+                  style={{ background: "linear-gradient(180deg,#2f79ff,var(--royal))" }}
+                  aria-hidden
+                >
+                  {s.icon}
+                </span>
+                <div className="pt-1 sm:pt-5">
+                  <p className="text-[12px] font-bold tracking-[0.1em] text-(--faint)">STEP {s.n}</p>
+                  <h3 className="mt-1 text-[17px] font-bold">{s.title}</h3>
+                  <p className="mt-1.5 max-w-[260px] break-keep text-[14px] leading-relaxed text-(--muted)">
+                    {s.body}
+                  </p>
+                </div>
+              </motion.li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* what the analyzer checks */}
+      <section className="px-4 py-16 sm:py-24">
+        <div className="mx-auto max-w-5xl">
+          <Reveal>
+            <p className="text-center text-[13px] font-bold tracking-[0.12em] text-(--royal)">WHAT WE CHECK</p>
+            <h2 className="break-keep mt-2 text-center text-[24px] font-extrabold tracking-[-0.02em] sm:text-[32px]">
+              분석기가 확인하고 검증하는 것들
+            </h2>
+            <p className="mx-auto mt-4 max-w-lg break-keep text-center text-[15px] leading-relaxed text-(--muted)">
+              공공 데이터에 등록된 서류 세 가지를 항목별로 대조해, 계약 전에
+              놓치기 쉬운 위험 신호를 찾아냅니다.
+            </p>
+          </Reveal>
+
+          <div className="mt-10 grid gap-4 sm:grid-cols-3 sm:gap-5">
+            {CHECKS.map((c, i) => (
+              <Reveal key={c.doc} delay={i * 0.1}>
                 <article className="g-panel h-full rounded-3xl p-6">
                   <span
-                    className="flex h-10 w-10 items-center justify-center rounded-xl text-[15px] font-extrabold text-white"
+                    className="flex h-10 w-10 items-center justify-center rounded-xl text-white"
                     style={{ background: "linear-gradient(180deg,#2f79ff,var(--royal))" }}
                     aria-hidden
                   >
-                    {s.n}
+                    {c.icon}
                   </span>
-                  <h3 className="mt-4 text-[17px] font-bold">{s.title}</h3>
-                  <p className="mt-2 text-[14.5px] leading-relaxed text-(--muted)">{s.body}</p>
+                  <h3 className="mt-4 text-[17px] font-bold">{c.doc}</h3>
+                  <p className="mt-1 text-[13px] font-semibold text-(--royal-deep)">{c.desc}</p>
+                  <ul className="mt-4 space-y-2.5">
+                    {c.items.map((item) => (
+                      <li key={item} className="flex items-start gap-2 text-[14px] leading-snug text-(--muted)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="mt-0.5 shrink-0">
+                          <path d="M20 6L9 17l-5-5" />
+                        </svg>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
                 </article>
               </Reveal>
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* report preview */}
-      <section className="px-4 py-16 sm:py-24">
-        <div className="mx-auto grid max-w-5xl items-center gap-10 lg:grid-cols-[1fr_1.1fr]">
-          <Reveal>
-            <p className="text-[13px] font-bold tracking-[0.12em] text-(--royal)">SAMPLE REPORT</p>
-            <h2 className="break-keep mt-2 text-[24px] font-extrabold tracking-[-0.02em] sm:text-[32px]">
-              서류 용어를 몰라도
-              <br />
-              신호등만 보면 됩니다
-            </h2>
-            <p className="mt-4 max-w-md text-[15px] leading-relaxed text-(--muted)">
-              근저당권, 가압류, 위반건축물 — 어려운 항목마다 안전·주의·위험
-              신호를 붙여 한 장으로 정리합니다. 링크를 붙여넣으면 이 리포트가
-              실제 매물 기준으로 열립니다.
-            </p>
-          </Reveal>
-
-          <Reveal delay={0.1}>
-            <div className="g-panel g-window relative">
-              <div className="flex items-center gap-1.5 border-b border-white/70 px-4 py-3">
-                <span className="h-2.5 w-2.5 rounded-full bg-[#f26d63]" aria-hidden />
-                <span className="h-2.5 w-2.5 rounded-full bg-[#f5be4f]" aria-hidden />
-                <span className="h-2.5 w-2.5 rounded-full bg-[#58c26a]" aria-hidden />
-                <span className="ml-3 text-[12px] font-semibold text-(--faint)">
-                  homeshopper.report — 매탄동 ○○아파트
-                </span>
-              </div>
-              <div className="g-blurred space-y-3 p-5" aria-hidden>
-                {[
-                  ["등기부등본 · 근저당권", "#0f9d58", "안전"],
-                  ["등기부등본 · 가압류", "#e8a13a", "주의"],
-                  ["건축물대장 · 위반건축물", "#0f9d58", "안전"],
-                  ["실거래가 대비 보증금", "#e8a13a", "주의"],
-                ].map(([label, color, tag]) => (
-                  <div key={label as string} className="flex items-center justify-between rounded-xl bg-white/70 px-4 py-3">
-                    <div className="space-y-1.5">
-                      <p className="text-[13px] font-bold">{label}</p>
-                      <div className="g-skel h-2 w-40" />
-                    </div>
-                    <span
-                      className="rounded-full px-2.5 py-1 text-[11px] font-bold text-white"
-                      style={{ background: color as string }}
-                    >
-                      {tag}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <div className="absolute inset-x-0 bottom-0 top-11 flex items-center justify-center">
-                <Link
-                  href={`/report/${demoReportId}`}
-                  className="g-chip flex items-center gap-2 rounded-full px-5 py-2.5 text-[14px] font-bold text-(--royal-deep)"
-                >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <rect x="3" y="11" width="18" height="11" rx="2" />
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                  </svg>
-                  샘플 리포트 열어보기
-                </Link>
-              </div>
+          <Reveal delay={0.15}>
+            <div className="mx-auto mt-12 flex max-w-lg flex-col items-center gap-5 text-center">
+              <p className="break-keep text-[15px] leading-relaxed text-(--muted)">
+                보고 있는 매물도 같은 기준으로 확인할 수 있어요. 링크를
+                붙여넣으면 위 항목 전부를 실제 서류 기준으로 검증한 상세
+                리포트를 30초 안에 보여드립니다.
+              </p>
+              <Link href="/analyze" className="g-cta inline-flex items-center gap-2 px-7 py-3.5 text-[15px]">
+                무료로 상세 분석 받기
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M5 12h14" />
+                  <path d="m13 6 6 6-6 6" />
+                </svg>
+              </Link>
             </div>
           </Reveal>
         </div>
