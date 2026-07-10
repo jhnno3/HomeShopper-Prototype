@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "motion/react";
@@ -28,78 +27,51 @@ const STEPS = [
   },
 ];
 
-function GlassSkyline() {
+function Logo() {
   return (
-    <svg
-      className="g-skyline h-28 w-full sm:h-36"
-      viewBox="0 0 1200 150"
-      preserveAspectRatio="xMidYMax slice"
-      aria-hidden
-    >
-      {/* far row */}
-      <rect className="g-tower-far" x="40" y="70" width="70" height="80" rx="6" />
-      <rect className="g-tower-far" x="240" y="55" width="56" height="95" rx="6" />
-      <rect className="g-tower-far" x="500" y="78" width="80" height="72" rx="6" />
-      <rect className="g-tower-far" x="760" y="50" width="60" height="100" rx="6" />
-      <rect className="g-tower-far" x="1020" y="72" width="72" height="78" rx="6" />
-      {/* near row */}
-      <rect x="120" y="40" width="72" height="110" rx="8" />
-      <rect x="330" y="18" width="86" height="132" rx="8" />
-      <rect x="610" y="34" width="76" height="116" rx="8" />
-      <rect x="860" y="10" width="92" height="140" rx="8" />
-      <rect x="1090" y="46" width="70" height="104" rx="8" />
-      {/* lit windows */}
-      <rect className="g-win" x="352" y="40" width="12" height="12" rx="2" />
-      <rect className="g-win" x="374" y="64" width="12" height="12" rx="2" />
-      <rect className="g-win" x="884" y="34" width="12" height="12" rx="2" />
-      <rect className="g-win" x="906" y="58" width="12" height="12" rx="2" />
-      <rect className="g-win" x="884" y="82" width="12" height="12" rx="2" />
-      <rect className="g-win" x="140" y="64" width="11" height="11" rx="2" />
-      <rect className="g-win" x="630" y="56" width="11" height="11" rx="2" />
+    <svg width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden>
+      <rect width="32" height="32" rx="9" fill="url(#logo-grad)" />
+      <path
+        d="M12.5 13.5v-1.8a3.5 3.5 0 0 1 7 0v1.8"
+        stroke="#fff"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        fill="none"
+      />
+      <rect x="8.5" y="13.5" width="15" height="13" rx="3.2" fill="#F5F8FF" />
+      <path d="M11.8 19.2 16 15.4l4.2 3.8Z" fill="#2F6FED" />
+      <rect x="13" y="19" width="6" height="5.6" rx="0.8" fill="#2F6FED" />
+      <rect x="15.1" y="21" width="1.8" height="3.6" rx="0.5" fill="#F5F8FF" />
+      <defs>
+        <linearGradient id="logo-grad" x1="3" y1="1" x2="29" y2="31" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#2F8CFF" />
+          <stop offset="0.55" stopColor="#2F6FED" />
+          <stop offset="1" stopColor="#4536D6" />
+        </linearGradient>
+      </defs>
     </svg>
   );
 }
 
 function CommandBar() {
   const router = useRouter();
-  const [mode, setMode] = useState<"link" | "addr">("link");
-  const reduce = useReducedMotion();
 
   return (
     <form
-      className="g-panel g-bar flex w-full flex-col gap-3 p-3 sm:flex-row sm:items-center"
+      className="g-panel g-bar flex w-full items-center gap-2 p-1.5 sm:gap-3"
       onSubmit={(e) => {
         e.preventDefault();
         router.push("/analyze");
       }}
     >
-      <div className="g-seg self-start sm:self-auto" role="group" aria-label="입력 방식">
-        {(["link", "addr"] as const).map((m) => (
-          <button key={m} type="button" aria-pressed={mode === m} onClick={() => setMode(m)}>
-            {mode === m && (
-              <motion.span
-                layoutId="seg-thumb"
-                className="g-seg-thumb inset-x-0"
-                transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 500, damping: 38 }}
-                aria-hidden
-              />
-            )}
-            <span className="relative z-10">{m === "link" ? "링크 붙여넣기" : "주소 입력"}</span>
-          </button>
-        ))}
-      </div>
       <input
-        type={mode === "link" ? "url" : "text"}
-        inputMode={mode === "link" ? "url" : "text"}
-        aria-label={mode === "link" ? "매물 링크" : "매물 주소"}
-        placeholder={
-          mode === "link"
-            ? "네이버부동산·직방·다방 매물 링크를 붙여넣으세요"
-            : "예) 수원시 영통구 매탄동 000-0"
-        }
-        className="min-h-11 flex-1 px-2"
+        type="text"
+        inputMode="text"
+        aria-label="매물 링크 또는 주소"
+        placeholder="매물 링크나 주소를 붙여넣으세요"
+        className="min-h-10 flex-1 px-3"
       />
-      <button type="submit" className="g-cta min-h-12 px-6 text-[15px]">
+      <button type="submit" className="g-cta min-h-10 shrink-0 px-5 text-[14px]">
         무료로 확인하기
       </button>
     </form>
@@ -128,7 +100,8 @@ export default function LandingPage() {
       {/* nav */}
       <header className="g-navbar sticky top-0 z-40">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
-          <Link href="/" className="text-[17px] font-extrabold tracking-tight">
+          <Link href="/" className="flex items-center gap-2 text-[17px] font-extrabold tracking-tight">
+            <Logo />
             홈쇼퍼
           </Link>
           <nav className="flex items-center gap-2">
@@ -154,12 +127,6 @@ export default function LandingPage() {
           variants={{ show: { transition: { staggerChildren: 0.09 } } }}
         >
           {[
-            <span key="pill" className="g-chip inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[13px] font-semibold text-(--royal-deep)">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                <path d="M20 6L9 17l-5-5" />
-              </svg>
-              가입 없이 무료 · 30초
-            </span>,
             <h1 key="h1" className="text-[30px] leading-[1.22] font-extrabold tracking-[-0.03em] text-balance break-keep sm:text-[46px]">
               그 매물, 임장 가기 전에
               <br />
@@ -185,7 +152,7 @@ export default function LandingPage() {
           ].map((node, i) => (
             <motion.div
               key={i}
-              className={i === 3 ? "w-full max-w-xl" : undefined}
+              className={i === 2 ? "w-full max-w-xl" : undefined}
               variants={{
                 hide: { opacity: 0, y: 18 },
                 show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] } },
@@ -195,8 +162,6 @@ export default function LandingPage() {
             </motion.div>
           ))}
         </motion.div>
-
-        <GlassSkyline />
       </section>
 
       {/* how it works */}

@@ -49,33 +49,9 @@
   border-bottom: 1px solid var(--glass-edge);
 }
 
-/* ---------- signature: glass skyline ---------- */
-.g-skyline {
-  position: absolute;
-  inset-inline: 0;
-  bottom: 0;
-  pointer-events: none;
-}
-
-.g-skyline rect {
-  fill: rgba(255, 255, 255, 0.38);
-  stroke: rgba(255, 255, 255, 0.75);
-  stroke-width: 1;
-}
-
-.g-skyline .g-tower-far {
-  fill: rgba(255, 255, 255, 0.22);
-  stroke: rgba(255, 255, 255, 0.4);
-}
-
-.g-skyline .g-win {
-  fill: rgba(10, 92, 255, 0.22);
-  stroke: none;
-}
-
 /* ---------- command bar ---------- */
 .g-bar {
-  border-radius: 22px;
+  border-radius: 999px;
   transition:
     box-shadow 0.25s ease,
     transform 0.25s ease;
@@ -94,7 +70,7 @@
   border: none;
   outline: none;
   width: 100%;
-  font-size: 16px;
+  font-size: 15px;
   color: var(--ink);
 }
 
@@ -102,45 +78,11 @@
   color: var(--faint);
 }
 
-.g-seg {
-  position: relative;
-  display: flex;
-  border-radius: 12px;
-  background: rgba(13, 42, 92, 0.06);
-  padding: 3px;
-}
-
-.g-seg button {
-  position: relative;
-  z-index: 1;
-  padding: 7px 14px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--muted);
-  border-radius: 10px;
-  cursor: pointer;
-  transition: color 0.2s ease;
-  white-space: nowrap;
-}
-
-.g-seg button[aria-pressed="true"] {
-  color: var(--royal-deep);
-}
-
-.g-seg-thumb {
-  position: absolute;
-  top: 3px;
-  bottom: 3px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 2px 8px rgba(11, 59, 167, 0.16);
-}
-
 .g-cta {
   background: linear-gradient(180deg, #2f79ff, var(--royal) 60%);
   color: #fff;
   font-weight: 700;
-  border-radius: 14px;
+  border-radius: 999px;
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.35) inset,
     0 8px 20px -6px rgba(10, 92, 255, 0.55);
