@@ -14,14 +14,6 @@
   --warn: #e8a13a;
   --nav-h: 61px;
 
-  /* brand gradient: blue -> indigo -> cyan, used for both text and fills */
-  --brand-1: #2563eb;
-  --brand-2: #4f46e5;
-  --brand-3: #06b6d4;
-  --brand-grad: linear-gradient(90deg, var(--brand-1) 0%, var(--brand-2) 50%, var(--brand-3) 100%);
-  --brand-grad-v: linear-gradient(180deg, var(--brand-1) 0%, var(--brand-2) 55%, var(--brand-3) 100%);
-  --brand-grad-diag: linear-gradient(135deg, var(--brand-1) 0%, var(--brand-2) 50%, var(--brand-3) 100%);
-
   color: var(--ink);
   letter-spacing: -0.01em;
   overflow-x: clip;
@@ -137,13 +129,13 @@
 }
 
 .g-cta {
-  background: var(--brand-grad);
+  background: linear-gradient(180deg, #2f79ff, var(--royal) 60%);
   color: #fff;
   font-weight: 700;
   border-radius: 999px;
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.35) inset,
-    0 8px 20px -6px rgba(37, 99, 235, 0.55);
+    0 8px 20px -6px rgba(10, 92, 255, 0.55);
   cursor: pointer;
   transition:
     transform 0.18s ease,
@@ -155,7 +147,7 @@
   filter: brightness(1.06);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.35) inset,
-    0 10px 26px -6px rgba(37, 99, 235, 0.6);
+    0 10px 26px -6px rgba(10, 92, 255, 0.6);
 }
 
 .g-cta:active {
@@ -200,7 +192,7 @@
       rgba(125, 180, 255, 0.55),
       transparent 55%
     ),
-    var(--brand-grad-diag);
+    linear-gradient(135deg, #0b3ba7 0%, #0a5cff 100%);
   color: #fff;
   overflow: hidden;
   position: relative;

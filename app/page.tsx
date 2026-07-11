@@ -101,9 +101,9 @@ function Logo() {
       <rect x="15.1" y="21" width="1.8" height="3.6" rx="0.5" fill="#F5F8FF" />
       <defs>
         <linearGradient id="logo-grad" x1="3" y1="1" x2="29" y2="31" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#2563eb" />
-          <stop offset="0.55" stopColor="#4f46e5" />
-          <stop offset="1" stopColor="#06b6d4" />
+          <stop stopColor="#2F8CFF" />
+          <stop offset="0.55" stopColor="#2F6FED" />
+          <stop offset="1" stopColor="#4536D6" />
         </linearGradient>
       </defs>
     </svg>
@@ -351,7 +351,7 @@ export default function LandingPage() {
                 <h1 key="h1" className="text-[30px] leading-[1.22] font-extrabold tracking-[-0.03em] text-balance break-keep sm:text-[46px]">
                   그 매물, 임장 가기 전에
                   <br />
-                  <span className="text-(--royal)">30초 만에 서류부터</span> 확인하세요
+                  <span className="text-grad">30초 만에 서류부터</span> 확인하세요
                 </h1>,
                 <p key="sub" className="max-w-md break-keep text-[15.5px] leading-relaxed text-(--muted) sm:text-[17px]">
                   링크 하나만 붙여넣으면 등기부등본부터 실거래가까지, 계약 전에 꼭
@@ -392,7 +392,7 @@ export default function LandingPage() {
                 width={1792}
                 height={2400}
                 priority
-                className="h-auto w-[230px] sm:w-[290px] lg:w-[360px] [filter:drop-shadow(0_20px_38px_rgba(37,99,235,0.22))]"
+                className="h-auto w-[230px] sm:w-[290px] lg:w-[360px] [filter:drop-shadow(0_24px_44px_rgba(11,59,167,0.2))]"
               />
             </motion.div>
 
@@ -459,7 +459,7 @@ export default function LandingPage() {
                     {/* vertical (mobile) */}
                     <motion.span
                       className="absolute left-[27px] top-[64px] bottom-2 w-[2.5px] origin-top rounded-full sm:hidden"
-                      style={{ background: "linear-gradient(180deg, #2563eb, rgba(6,182,212,0.25))" }}
+                      style={{ background: "linear-gradient(180deg, var(--royal), rgba(10,92,255,0.25))" }}
                       aria-hidden
                       variants={{
                         hide: { scaleY: 0 },
@@ -472,7 +472,7 @@ export default function LandingPage() {
                     {/* horizontal (desktop) */}
                     <motion.span
                       className="absolute top-[27px] left-[calc(50%+40px)] hidden h-[2.5px] w-[calc(100%-64px)] origin-left rounded-full sm:block"
-                      style={{ background: "linear-gradient(90deg, #2563eb, rgba(6,182,212,0.25))" }}
+                      style={{ background: "linear-gradient(90deg, var(--royal), rgba(10,92,255,0.25))" }}
                       aria-hidden
                       variants={{
                         hide: { scaleX: 0 },
@@ -487,7 +487,7 @@ export default function LandingPage() {
 
                 <span
                   className="relative z-10 flex h-[56px] w-[56px] shrink-0 items-center justify-center rounded-full text-white shadow-[0_8px_20px_-6px_rgba(10,92,255,0.55)]"
-                  style={{ background: "var(--brand-grad-v)" }}
+                  style={{ background: "linear-gradient(180deg,#2f79ff,var(--royal))" }}
                   aria-hidden
                 >
                   {s.icon}
@@ -525,7 +525,7 @@ export default function LandingPage() {
                 <article className="g-panel h-full rounded-3xl p-6">
                   <span
                     className="flex h-10 w-10 items-center justify-center rounded-xl text-white"
-                    style={{ background: "var(--brand-grad-v)" }}
+                    style={{ background: "linear-gradient(180deg,#2f79ff,var(--royal))" }}
                     aria-hidden
                   >
                     {c.icon}
