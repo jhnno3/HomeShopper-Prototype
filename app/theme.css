@@ -81,10 +81,17 @@ body {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  filter: blur(50px);
+  filter: blur(64px);
   mix-blend-mode: multiply;
   pointer-events: none;
   transform: rotate(var(--rot, 0deg));
+  transition: opacity 0.5s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ink-bloom {
+    transition: none;
+  }
 }
 
 @keyframes ink-drift-a {

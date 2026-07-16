@@ -321,7 +321,7 @@ export default function LandingPage() {
         className={`g-navbar sticky top-0 z-40 transition-shadow duration-300 ${scrolled ? "shadow-[0_8px_24px_-14px_rgba(11,59,167,0.35)]" : ""}`}
       >
         <div
-          className={`mx-auto flex max-w-5xl items-center justify-between px-4 transition-[padding] duration-300 sm:px-6 ${scrolled ? "py-2" : "py-3"}`}
+          className={`mx-auto flex max-w-5xl items-center justify-between px-4 transition-[padding] duration-300 sm:px-6 ${scrolled ? "py-1.5" : "py-3"}`}
         >
           <Link href="/" className="flex items-center gap-2 text-[17px] font-extrabold tracking-tight">
             <Logo />
