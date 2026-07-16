@@ -71,6 +71,22 @@
   pointer-events: none;
 }
 
+/* ---------- checklist glass card ---------- */
+.g-check-card {
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
+}
+
+.g-check-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(10, 92, 255, 0.4);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 20px 44px -14px rgba(11, 59, 167, 0.32);
+}
+
 .g-chip {
   background: var(--glass-strong);
   -webkit-backdrop-filter: blur(12px);

@@ -52,8 +52,10 @@ const CHECKS = [
     doc: "등기부등본",
     desc: "권리관계의 위험 신호를 찾습니다",
     items: ["근저당권 · 채권최고액 규모", "가압류 · 가처분 · 경매개시 여부", "등기상 소유자와 임대인 일치"],
+    tint: "rgba(10,92,255,0.1)",
+    fg: "var(--royal)",
     icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
         <path d="M14 2v6h6" />
         <path d="M8 13h8M8 17h5" />
@@ -64,8 +66,10 @@ const CHECKS = [
     doc: "건축물대장",
     desc: "건물 자체의 하자를 확인합니다",
     items: ["위반건축물 등재 여부", "주용도 · 전용면적 대조", "사용승인 연도"],
+    tint: "rgba(11,59,167,0.08)",
+    fg: "var(--royal-deep)",
     icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <rect x="4" y="3" width="16" height="18" rx="2" />
         <path d="M9 8h1M14 8h1M9 12h1M14 12h1M9 16h6" />
       </svg>
@@ -75,8 +79,10 @@ const CHECKS = [
     doc: "실거래가",
     desc: "가격의 적정성을 검증합니다",
     items: ["최근 국토부 실거래 이력", "시세 대비 보증금 비율", "역전세 · 깡통전세 위험 신호"],
+    tint: "rgba(15,157,88,0.12)",
+    fg: "var(--ok)",
     icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <path d="M3 3v18h18" />
         <path d="m7 14 4-4 3 3 5-6" />
       </svg>
@@ -519,19 +525,19 @@ export default function LandingPage() {
             </p>
           </Reveal>
 
-          <div className="mt-10 grid gap-4 sm:grid-cols-3 sm:gap-5">
+          <div className="mt-14 grid justify-center gap-5 sm:mt-16 sm:gap-6 sm:grid-cols-3">
             {CHECKS.map((c, i) => (
               <Reveal key={c.doc} delay={i * 0.1}>
-                <article className="g-panel h-full rounded-3xl p-6">
+                <article className="g-panel g-check-card h-full rounded-3xl p-7">
                   <span
-                    className="flex h-10 w-10 items-center justify-center rounded-xl text-white"
-                    style={{ background: "linear-gradient(180deg,#2f79ff,var(--royal))" }}
+                    className="flex h-12 w-12 items-center justify-center rounded-2xl"
+                    style={{ background: c.tint, color: c.fg }}
                     aria-hidden
                   >
                     {c.icon}
                   </span>
-                  <h3 className="mt-4 text-[17px] font-bold">{c.doc}</h3>
-                  <p className="mt-1 text-[13px] font-semibold text-(--royal-deep)">{c.desc}</p>
+                  <h3 className="mt-5 text-[18px] font-bold">{c.doc}</h3>
+                  <p className="mt-1.5 text-[14px] font-semibold text-(--royal-deep)">{c.desc}</p>
                   <ul className="mt-4 space-y-2.5">
                     {c.items.map((item) => (
                       <li key={item} className="flex items-start gap-2 text-[14px] leading-snug text-(--muted)">
@@ -548,7 +554,7 @@ export default function LandingPage() {
           </div>
 
           <Reveal delay={0.15}>
-            <div className="mx-auto mt-12 flex max-w-lg flex-col items-center gap-5 text-center">
+            <div className="mx-auto mt-16 flex max-w-lg flex-col items-center gap-5 text-center sm:mt-20">
               <p className="break-keep text-[15px] leading-relaxed text-(--muted)">
                 보고 있는 매물도 같은 기준으로 확인할 수 있어요. 링크를
                 붙여넣으면 위 항목 전부를 실제 서류 기준으로 검증한 상세
