@@ -81,7 +81,7 @@ body {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  filter: blur(64px);
+  filter: blur(50px);
   mix-blend-mode: multiply;
   pointer-events: none;
   transform: rotate(var(--rot, 0deg));
