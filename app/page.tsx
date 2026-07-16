@@ -228,16 +228,6 @@ const REPORT_SECTIONS: {
 function SampleReport() {
   return (
     <div className="g-panel g-window mx-auto w-full max-w-2xl text-left">
-      {/* window chrome */}
-      <div className="flex items-center gap-1.5 border-b border-white/70 px-4 py-3">
-        <span className="h-2.5 w-2.5 rounded-full bg-[#f26d63]" aria-hidden />
-        <span className="h-2.5 w-2.5 rounded-full bg-[#f5be4f]" aria-hidden />
-        <span className="h-2.5 w-2.5 rounded-full bg-[#58c26a]" aria-hidden />
-        <span className="ml-3 truncate text-[12px] font-semibold text-(--faint)">
-          homeshopper.report
-        </span>
-      </div>
-
       {/* report head */}
       <div className="border-b border-(--blue-edge) px-5 py-4 sm:px-7 sm:py-5">
         <div className="flex flex-wrap items-center justify-between gap-3">

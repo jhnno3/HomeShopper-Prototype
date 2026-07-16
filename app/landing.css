@@ -46,10 +46,9 @@
 .hero-mesh {
   pointer-events: none;
   background:
-    radial-gradient(120% 90% at 88% -10%, rgba(255, 214, 179, 0.55), transparent 55%),
-    radial-gradient(95% 90% at 100% 45%, rgba(255, 190, 200, 0.3), transparent 55%),
-    radial-gradient(100% 100% at 94% 102%, rgba(122, 132, 212, 0.38), transparent 60%),
-    radial-gradient(110% 110% at -8% 35%, rgba(140, 178, 232, 0.48), transparent 60%);
+    radial-gradient(130% 100% at 92% -10%, rgba(255, 227, 199, 0.4), transparent 62%),
+    radial-gradient(120% 120% at 100% 100%, rgba(150, 158, 205, 0.24), transparent 62%),
+    radial-gradient(120% 120% at -10% 30%, rgba(148, 183, 232, 0.42), transparent 62%);
   -webkit-mask-image: linear-gradient(to bottom, black 0%, black 65%, transparent 100%);
   mask-image: linear-gradient(to bottom, black 0%, black 65%, transparent 100%);
 }
