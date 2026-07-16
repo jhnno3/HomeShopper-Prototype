@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
@@ -352,7 +351,7 @@ export default function LandingPage() {
             right spanning both rows.
           */}
           <div
-            className="grid grid-cols-1 gap-y-9 [grid-template-areas:'heading'_'image'_'search'] sm:gap-y-10 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-x-16 lg:gap-y-9 lg:[grid-template-areas:'heading_image'_'search_image']"
+            className="grid grid-cols-1 gap-y-9 [grid-template-areas:'heading'_'report'_'search'] sm:gap-y-10 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-x-12 lg:gap-y-9 lg:[grid-template-areas:'heading_report'_'search_report']"
           >
             <motion.div
               className="mx-auto flex w-full max-w-xl flex-col items-center gap-6 text-center [grid-area:heading] lg:mx-0 lg:items-start lg:text-left"
@@ -394,19 +393,15 @@ export default function LandingPage() {
             </motion.div>
 
             <motion.div
-              className="shrink-0 justify-self-center [grid-area:image] lg:justify-self-end lg:self-center"
-              initial={reduce ? false : { opacity: 0, x: 24 }}
-              animate={{ opacity: 1, x: 0 }}
+              className="mx-auto w-full max-w-md shrink-0 [grid-area:report] lg:mx-0 lg:w-[380px] lg:max-w-none lg:justify-self-end lg:self-center"
+              initial={reduce ? false : { opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.65, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
             >
-              <Image
-                src="/hero-docs-v2.png"
-                alt="돋보기로 부동산 서류와 평면도를 살펴보는 일러스트"
-                width={1792}
-                height={2400}
-                priority
-                className="h-auto w-[230px] sm:w-[290px] lg:w-[360px] [filter:drop-shadow(0_24px_44px_rgba(11,59,167,0.2))]"
-              />
+              <p className="mb-3 text-center text-[12px] font-bold tracking-[0.12em] text-(--royal) lg:text-left">
+                SAMPLE REPORT
+              </p>
+              <SampleReport />
             </motion.div>
 
             <motion.div
@@ -418,23 +413,6 @@ export default function LandingPage() {
               <CommandBar />
             </motion.div>
           </div>
-
-          {/* sample report preview */}
-          <motion.div
-            className="mx-auto mt-12 w-full max-w-2xl sm:mt-14"
-            initial={reduce ? false : { opacity: 0, y: 28 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false, margin: "-80px" }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <div className="mb-5 text-center">
-              <p className="text-[13px] font-bold tracking-[0.12em] text-(--royal)">SAMPLE REPORT</p>
-              <h2 className="mt-1.5 break-keep text-[20px] font-extrabold tracking-[-0.02em] sm:text-[24px]">
-                분석이 끝나면 이런 리포트를 받아요
-              </h2>
-            </div>
-            <SampleReport />
-          </motion.div>
         </div>
       </section>
 
