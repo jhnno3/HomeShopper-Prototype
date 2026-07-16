@@ -343,6 +343,7 @@ export default function LandingPage() {
 
       {/* hero */}
       <section className="relative px-4 pt-12 pb-20 sm:pt-16 sm:pb-28">
+        <div className="hero-mesh absolute inset-0 z-[1]" aria-hidden />
         <div className="relative z-10 mx-auto w-full max-w-5xl">
           {/*
             Grid areas keep the DOM order (heading, image, search) identical

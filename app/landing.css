@@ -38,6 +38,22 @@
   }
 }
 
+/* ---------- hero mesh gradient ---------- */
+/* Soft multi-hue wash behind the hero only: blue on the left, a warm
+   peach glow top-right, dusty violet-blue in the bottom-right corner,
+   blended into near-white — layered above the page-wide InkBackground
+   blobs, below the hero content. */
+.hero-mesh {
+  pointer-events: none;
+  background:
+    radial-gradient(120% 90% at 88% -10%, rgba(255, 214, 179, 0.55), transparent 55%),
+    radial-gradient(95% 90% at 100% 45%, rgba(255, 190, 200, 0.3), transparent 55%),
+    radial-gradient(100% 100% at 94% 102%, rgba(122, 132, 212, 0.38), transparent 60%),
+    radial-gradient(110% 110% at -8% 35%, rgba(140, 178, 232, 0.48), transparent 60%);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 65%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 0%, black 65%, transparent 100%);
+}
+
 /* ---------- glass primitives ---------- */
 .g-panel {
   position: relative;
