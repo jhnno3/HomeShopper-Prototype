@@ -65,8 +65,14 @@ body {
   pointer-events: none;
 }
 
+.ink-bloom-wrap {
+  position: absolute;
+  will-change: transform;
+}
+
 .ink-bloom {
   position: absolute;
+  inset: 0;
   border-radius: 50%;
   filter: blur(50px);
   mix-blend-mode: multiply;
