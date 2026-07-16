@@ -11,17 +11,17 @@ import { useEffect, useRef, type CSSProperties } from "react";
  * element so the two transforms never fight over the same style property.
  */
 const INK_BLOOMS = [
-  { top: "-10%", left: "-22vmax", w: "64vmax", h: "78vmax", rot: -8, color: "var(--ink-blue)", opacity: 0.38, drift: "ink-drift-a", depth: 0.6 },
-  { top: "4%", left: "38vmax", w: "34vmax", h: "26vmax", rot: 14, color: "var(--ink-violet-soft)", opacity: 0.26, drift: "ink-drift-b", depth: 1.2 },
-  { top: "18%", right: "-32vmax", w: "72vmax", h: "48vmax", rot: 6, color: "var(--ink-violet)", opacity: 0.32, drift: "ink-drift-a", depth: 0.5 },
-  { top: "38%", left: "-16vmax", w: "44vmax", h: "62vmax", rot: -16, color: "var(--ink-mid)", opacity: 0.26, drift: "ink-drift-b", depth: 1.0 },
-  { top: "50%", left: "22vmax", w: "30vmax", h: "38vmax", rot: 4, color: "var(--ink-blue-soft)", opacity: 0.24, drift: "ink-drift-a", depth: 1.4 },
+  { top: "-10%", left: "-22vmax", w: "64vmax", h: "78vmax", rot: -8, color: "var(--ink-blue)", opacity: 0.38, drift: "ink-drift-a", depth: 0.5 },
+  { top: "4%", left: "38vmax", w: "34vmax", h: "26vmax", rot: 14, color: "var(--ink-violet-soft)", opacity: 0.26, drift: "ink-drift-b", depth: 1.5 },
+  { top: "18%", right: "-32vmax", w: "72vmax", h: "48vmax", rot: 6, color: "var(--ink-violet)", opacity: 0.32, drift: "ink-drift-a", depth: 0.4 },
+  { top: "38%", left: "-16vmax", w: "44vmax", h: "62vmax", rot: -16, color: "var(--ink-mid)", opacity: 0.26, drift: "ink-drift-b", depth: 1.1 },
+  { top: "50%", left: "22vmax", w: "30vmax", h: "38vmax", rot: 4, color: "var(--ink-blue-soft)", opacity: 0.24, drift: "ink-drift-a", depth: 1.7 },
   { top: "62%", right: "-24vmax", w: "56vmax", h: "40vmax", rot: -10, color: "var(--ink-blue)", opacity: 0.28, drift: "ink-drift-b", depth: 0.7 },
   { top: "76%", left: "-36vmax", w: "68vmax", h: "54vmax", rot: 10, color: "var(--ink-violet-soft)", opacity: 0.3, drift: "ink-drift-a", depth: 0.9 },
-  { top: "92%", right: "-16vmax", w: "42vmax", h: "58vmax", rot: -5, color: "var(--ink-violet)", opacity: 0.3, drift: "ink-drift-b", depth: 1.1 },
+  { top: "92%", right: "-16vmax", w: "42vmax", h: "58vmax", rot: -5, color: "var(--ink-violet)", opacity: 0.3, drift: "ink-drift-b", depth: 1.3 },
 ] as const;
 
-const MAX_PARALLAX_PX = 22;
+const MAX_PARALLAX_PX = 90;
 
 export function InkBackground() {
   const wrapRefs = useRef<(HTMLDivElement | null)[]>([]);
