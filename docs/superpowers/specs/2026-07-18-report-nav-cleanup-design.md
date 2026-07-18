@@ -21,12 +21,13 @@ Remove the `details` step entirely:
 
 ## 2. Shared site header on non-landing pages
 
-Today only the landing page (`app/page.tsx`) has a header, built inline (logo + "홈쇼퍼" + nav links + CTA). `components/kit/Nav.tsx` is a similar but unused component. Report, premium report, reserve, and admin pages have no site header.
+Today only the landing page (`app/page.tsx`) has a header, built inline (logo + "홈쇼퍼" + nav links + CTA). `components/kit/Nav.tsx` is a similar but unused component. Analyze, report, premium report, reserve, and admin pages have no site header.
 
 Changes:
 - Extract the `Logo` SVG out of `app/page.tsx` into `components/kit/Logo.tsx` so it can be shared. Landing page imports it from there instead of defining it locally.
 - Repurpose `components/kit/Nav.tsx` into a minimal header: logo + "홈쇼퍼" wordmark, the whole bar wrapped in a `Link` to `/`, no CTA button, no extra nav links. Sticky, glass background (`bg-glass` / `border-glass`), consistent with existing design tokens in `app/theme.css`.
 - Add a small client component (e.g. `components/kit/SiteHeader.tsx`) rendered in `app/layout.tsx`, above `{children}`. It reads `usePathname()` and shows the minimal header only on an explicit allowlist of routes:
+  - `/analyze`
   - `/report/*` (covers both `/report/[id]` and `/report/[id]/premium`)
   - `/reserve`
   - `/admin`
