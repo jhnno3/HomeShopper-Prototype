@@ -6,9 +6,8 @@ import { Button } from '@/components/kit/Button';
 import { GlassCard } from '@/components/kit/GlassCard';
 import { trackEvent } from '@/lib/analytics';
 import { demoReportId } from '@/lib/mock-data';
-import type { DealType } from '@/lib/types';
 
-type Step = 'input' | 'details' | 'progress';
+type Step = 'input' | 'progress';
 
 function looksLikeUrl(value: string) {
   return /^https?:\/\//i.test(value.trim());
@@ -43,23 +42,16 @@ function AnalyzeFlow() {
   const searchParams = useSearchParams();
   // A source passed from the landing search box skips the 매물 정보 step.
   const initialSource = (searchParams.get('source') ?? '').trim();
-  const [step, setStep] = useState<Step>(initialSource ? 'details' : 'input');
+  const [step, setStep] = useState<Step>(initialSource ? 'progress' : 'input');
   const [inputMode, setInputMode] = useState<'link' | 'address'>(
     initialSource && !looksLikeUrl(initialSource) ? 'address' : 'link'
   );
   const [sourceValue, setSourceValue] = useState(initialSource);
-  const [dealType, setDealType] = useState<DealType>('전세');
-  const [deposit, setDeposit] = useState('');
 
   function handleStep1Submit(e: React.FormEvent) {
     e.preventDefault();
     if (!sourceValue.trim()) return;
-    setStep('details');
-  }
-
-  function handleStep2Submit(e: React.FormEvent) {
-    e.preventDefault();
-    trackEvent('analyze_start', { inputMode, dealType });
+    trackEvent('analyze_start', { inputMode });
     setStep('progress');
   }
 
@@ -89,33 +81,6 @@ function AnalyzeFlow() {
               placeholder={inputMode === 'link' ? '매물 링크를 붙여넣으세요' : '주소를 입력하세요'}
               className="w-full rounded-xl border-glass bg-white/50 px-4 py-3 text-[var(--color-ink)] placeholder:text-[var(--color-slate)] focus:outline-none"
               aria-label={inputMode === 'link' ? '매물 링크' : '매물 주소'}
-            />
-            <Button type="submit" size="lg" className="w-full">
-              다음
-            </Button>
-          </form>
-        </GlassCard>
-      )}
-
-      {step === 'details' && (
-        <GlassCard className="p-8">
-          <form onSubmit={handleStep2Submit} className="space-y-6">
-            <h1 className="text-2xl font-bold text-[var(--color-ink)]">거래 정보를 알려주세요</h1>
-            <div className="flex gap-1 rounded-xl bg-glass border-glass p-1">
-              <SegmentedButton active={dealType === '전세'} onClick={() => setDealType('전세')}>
-                전세
-              </SegmentedButton>
-              <SegmentedButton active={dealType === '월세'} onClick={() => setDealType('월세')}>
-                월세
-              </SegmentedButton>
-            </div>
-            <input
-              type="number"
-              value={deposit}
-              onChange={(e) => setDeposit(e.target.value)}
-              placeholder="보증금 (선택, 단위: 만원)"
-              className="w-full rounded-xl border-glass bg-white/50 px-4 py-3 text-[var(--color-ink)] placeholder:text-[var(--color-slate)] focus:outline-none"
-              aria-label="보증금"
             />
             <Button type="submit" size="lg" className="w-full">
               분석 시작
