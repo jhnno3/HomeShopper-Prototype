@@ -27,9 +27,7 @@ describe('ReportPage', () => {
   it('lets the user complete the login stub', async () => {
     await renderReport();
 
-    fireEvent.click(screen.getByText('카카오로 3초 만에 받기'));
-    fireEvent.change(screen.getByLabelText('이름'), { target: { value: '홍길동' } });
-    fireEvent.click(screen.getByText('카카오로 계속하기'));
+    fireEvent.click(screen.getByText('카카오 로그인'));
 
     expect(screen.getByText('접수 완료 · 접수번호 #HS-0041')).toBeInTheDocument();
   });

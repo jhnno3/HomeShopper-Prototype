@@ -28,6 +28,13 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.5),
     inset 0 -1px 0 rgba(255, 255, 255, 0.08),
     inset 0 0 24px 8px rgba(255, 255, 255, 0.18);
+
+  /* stronger "liquid glass" surface used by the sticky navbar — matches
+     the landing page's .g-navbar look (app/landing.css), pulled out to
+     :root so the shared Nav can use it outside the landing page's .v3
+     scope. */
+  --nav-glass-fill: rgba(255, 255, 255, 0.78);
+  --nav-glass-border: rgba(255, 255, 255, 0.85);
 }
 
 @theme inline {

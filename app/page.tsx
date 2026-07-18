@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { FaqAccordion } from "@/components/landing/FaqAccordion";
 import { Logo } from "@/components/kit/Logo";
+import { ReportSummary } from "@/components/report/ReportSummary";
+import { resultSummary } from "@/lib/report-data";
 import "./landing.css";
 
 const DOCS = ["등기부등본", "건축물대장", "실거래가"];
@@ -210,94 +212,16 @@ function CommandBar() {
   );
 }
 
-function StatusTag({ level }: { level: "safe" | "caution" }) {
-  const safe = level === "safe";
-  return (
-    <span
-      className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold text-white"
-      style={{ background: safe ? "var(--ok)" : "var(--warn)" }}
-    >
-      {safe ? "안전" : "주의"}
-    </span>
-  );
-}
-
-const REPORT_SECTIONS: {
-  doc: string;
-  rows: { item: string; value: string; level: "safe" | "caution" }[];
-}[] = [
-  {
-    doc: "등기부등본",
-    rows: [
-      { item: "근저당권", value: "채권최고액 3억 6,000만 원 · 시세 대비 42%", level: "safe" },
-      { item: "가압류 · 가처분", value: "해당 없음", level: "safe" },
-      { item: "소유자 확인", value: "등기상 소유자 1인 · 임대인과 일치", level: "safe" },
-    ],
-  },
-  {
-    doc: "건축물대장",
-    rows: [
-      { item: "위반건축물", value: "등재 이력 없음", level: "safe" },
-      { item: "주용도 · 면적", value: "공동주택(아파트) · 전용 84.9㎡", level: "safe" },
-    ],
-  },
-  {
-    doc: "실거래가",
-    rows: [
-      { item: "시세 대비 보증금", value: "보증금 5.4억 / 최근 실거래 6.2억 · 87%", level: "caution" },
-    ],
-  },
-];
-
+/* The hero preview renders the real <ReportSummary /> with the same sample
+   payload the report page uses, so the design, icons, and fields can never
+   drift from what the user actually receives. Wrapped in one outer panel
+   here so the report reads as a single grouped card in the hero, instead of
+   its inner cards floating loose against the page background. */
 function SampleReport() {
   return (
-    <div className="g-panel g-window mx-auto w-full max-w-2xl text-left">
-      {/* report head */}
-      <div className="border-b border-(--blue-edge) px-5 py-4 sm:px-7 sm:py-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <Logo />
-            <div>
-              <p className="text-[15px] font-extrabold tracking-tight">홈쇼퍼 안심 리포트</p>
-              <p className="text-[11.5px] font-medium text-(--faint)">발급일 2026.07.11 · 등기사항전부증명서 기준</p>
-            </div>
-          </div>
-          <span className="rounded-full border border-(--warn) px-3 py-1 text-[12px] font-bold" style={{ color: "var(--warn)" }}>
-            종합 판정 · 주의 1건
-          </span>
-        </div>
-        <p className="mt-3 text-[14px] font-bold sm:text-[15px]">
-          경기 수원시 영통구 매탄동 ○○아파트 101동 1203호
-        </p>
-        <div className="mt-2 flex items-center gap-4 text-[12px] font-semibold">
-          <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full" style={{ background: "var(--ok)" }} aria-hidden />안전 5</span>
-          <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full" style={{ background: "var(--warn)" }} aria-hidden />주의 1</span>
-          <span className="flex items-center gap-1.5 text-(--faint)"><span className="h-2 w-2 rounded-full bg-[#e5484d]" aria-hidden />위험 0</span>
-        </div>
-      </div>
-
-      {/* report body */}
-      <div className="space-y-5 px-5 py-5 sm:px-7 sm:py-6">
-        {REPORT_SECTIONS.map((sec) => (
-          <div key={sec.doc}>
-            <p className="text-[11.5px] font-bold tracking-[0.08em] text-(--royal)">{sec.doc}</p>
-            <div className="mt-2 space-y-1.5">
-              {sec.rows.map((row) => (
-                <div key={row.item} className="flex items-center justify-between gap-3 rounded-xl bg-white/70 px-4 py-2.5">
-                  <div className="min-w-0">
-                    <p className="text-[13px] font-bold">{row.item}</p>
-                    <p className="truncate text-[12px] text-(--muted)">{row.value}</p>
-                  </div>
-                  <StatusTag level={row.level} />
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-        <p className="text-[11px] leading-relaxed text-(--faint)">
-          자동 분석 결과는 공부상 기재 사항 기준이며, 계약 판단의 참고 자료로만 사용하세요.
-        </p>
-      </div>
+    <div className="g-panel g-window mx-auto w-full max-w-md p-5 text-left">
+      <p className="mb-3 text-[15px] font-extrabold tracking-tight">매물 확인 리포트</p>
+      <ReportSummary summary={resultSummary} compact />
     </div>
   );
 }
@@ -355,7 +279,7 @@ export default function LandingPage() {
       </header>
 
       {/* hero */}
-      <section className="relative px-4 pt-12 pb-20 sm:pt-16 sm:pb-28">
+      <section className="relative px-4 pt-[38px] pb-16 sm:pt-[51px] sm:pb-[90px]">
         <div className="relative z-10 mx-auto w-full max-w-5xl">
           {/*
             Grid areas keep the DOM order (heading, image, search) identical
@@ -406,14 +330,11 @@ export default function LandingPage() {
             </motion.div>
 
             <motion.div
-              className="mx-auto w-full max-w-md shrink-0 [grid-area:report] lg:mx-0 lg:w-[380px] lg:max-w-none lg:justify-self-end lg:self-center"
+              className="mx-auto w-full max-w-sm shrink-0 [grid-area:report] lg:mx-0 lg:w-[340px] lg:max-w-none lg:justify-self-end lg:self-center"
               initial={reduce ? false : { opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.65, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
             >
-              <p className="mb-3 text-center text-[12px] font-bold tracking-[0.12em] text-(--royal) lg:text-left">
-                SAMPLE REPORT
-              </p>
               <SampleReport />
             </motion.div>
 
@@ -431,7 +352,7 @@ export default function LandingPage() {
 
       {/* how it works — centered header while the puzzle stacks vertically
           (below lg), left-aligned once it becomes a horizontal row (lg+) */}
-      <section id="how" className="scroll-mt-24 px-4 py-20 sm:py-32">
+      <section id="how" className="scroll-mt-24 px-4 py-16 sm:py-[102px]">
         <div className="mx-auto max-w-5xl">
           <Reveal>
             <div className="text-center lg:text-left">
@@ -514,7 +435,7 @@ export default function LandingPage() {
       </section>
 
       {/* what the analyzer checks */}
-      <section className="px-4 py-20 sm:py-32">
+      <section className="px-4 py-16 sm:py-[102px]">
         <div className="mx-auto max-w-5xl">
           <Reveal>
             <p className="text-center text-[14px] font-bold tracking-[0.12em] text-(--royal)">WHAT WE CHECK</p>
@@ -575,7 +496,7 @@ export default function LandingPage() {
       </section>
 
       {/* trust + faq */}
-      <section id="faq" className="scroll-mt-24 px-4 py-20 sm:py-32">
+      <section id="faq" className="scroll-mt-24 px-4 py-16 sm:py-[102px]">
         <div className="mx-auto max-w-3xl">
           <Reveal>
             <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
@@ -601,7 +522,7 @@ export default function LandingPage() {
       </section>
 
       {/* reserve banner */}
-      <section className="px-4 pb-24 pt-8 sm:pb-36 sm:pt-12">
+      <section className="px-4 pb-[77px] pt-[26px] sm:pb-[115px] sm:pt-[38px]">
         <Reveal>
           <div className="g-banner mx-auto flex max-w-5xl flex-col items-start gap-6 p-8 sm:flex-row sm:items-center sm:justify-between sm:p-10">
             <div>
