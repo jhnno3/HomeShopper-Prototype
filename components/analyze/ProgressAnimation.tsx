@@ -29,10 +29,10 @@ export function ProgressAnimation({ onComplete, durationMs = 3000 }: ProgressAni
         animate={
           reducedMotion
             ? { opacity: 1 }
-            : { borderRadius: ['6%', '50%', '6%'], rotate: [0, 180, 360] }
+            : { borderRadius: ['20%', '50%', '20%'], rotate: [0, 180, 360] }
         }
         transition={
-          reducedMotion ? { duration: 0 } : { duration: 2, repeat: Infinity, ease: 'easeInOut' }
+          reducedMotion ? { duration: 0 } : { duration: 2.5, repeat: Infinity, ease: 'easeInOut' }
         }
       />
     </div>
