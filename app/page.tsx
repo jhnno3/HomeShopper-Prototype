@@ -15,6 +15,7 @@ const STEPS = [
     n: "1",
     title: "링크 붙여넣기",
     body: "보고 있는 매물 링크나 주소를 그대로 붙여넣으세요. 가입도, 앱 설치도 없습니다.",
+    grad: "linear-gradient(135deg, #4f93ff 0%, #0a5cff 100%)",
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
@@ -26,6 +27,7 @@ const STEPS = [
     n: "2",
     title: "30초 자동 분석",
     body: "등기부등본·건축물대장·실거래가를 자동으로 대조해 위험 신호를 찾습니다.",
+    grad: "linear-gradient(135deg, #0a5cff 0%, #0b3ba7 100%)",
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <circle cx="11" cy="11" r="7" />
@@ -37,6 +39,7 @@ const STEPS = [
     n: "3",
     title: "리포트 확인",
     body: "근저당·가압류 같은 항목을 신호등 색으로 정리한 리포트를 바로 받습니다.",
+    grad: "linear-gradient(135deg, #0b3ba7 0%, #0a2f80 100%)",
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -47,6 +50,46 @@ const STEPS = [
   },
 ];
 
+/* Jigsaw piece artwork for the "how it works" stack (designer-supplied,
+   matching set). All three share one 561.56-unit square body and the same
+   x-range, so every viewBox is the body box — the SVG fills the card like
+   a normal rounded rect and text uses regular padding. Piece 2's tabs and
+   the notch mouths extend past the body box, so the <svg> keeps
+   overflow-visible; tabs poke vertically into the gaps and nest into the
+   neighbors' notches. Piece 1 ships rotated 180° upstream (notch ends up
+   on its bottom edge); piece 3 is the same artwork unrotated (notch on
+   top). Gradients mirror STEPS[i].grad. */
+const PUZZLE_PIECES = [
+  {
+    // rounded square, single notch on the bottom edge (after rotation;
+    // right edge once the row goes horizontal) — padding clears the
+    // ~28%-deep notch on whichever side it lands
+    viewBox: "1402.4 1407.91 561.56 561.56",
+    transform: "rotate(180 1683.178 1688.691)",
+    from: "#4f93ff",
+    to: "#0a5cff",
+    padClass: "p-7 pb-24 lg:pb-7 lg:pr-24",
+    d: "M1483.751,1407.911h118.52c11.554,0,18.418,13.025,11.766,22.473c-9.901,14.06-15.621,31.277-15.353,49.842c0.652,45.14,37.302,82.156,82.435,83.229c47.618,1.133,86.563-37.129,86.563-84.479c0-18.096-5.685-34.864-15.37-48.611c-6.648-9.437,0.238-22.454,11.781-22.454h118.512c44.93,0,81.354,36.423,81.354,81.354v398.842c0,44.936-36.428,81.364-81.364,81.364h-398.833c-44.936,0-81.364-36.428-81.364-81.364v-398.842c0-44.93,36.423-81.354,81.354-81.354z",
+  },
+  {
+    // rounded square with a tab out the top (into piece 1's notch) and a
+    // tab out the bottom (into piece 3's notch); body edges stay clean
+    viewBox: "1402.4 386.1 561.56 561.56",
+    from: "#0a5cff",
+    to: "#0b3ba7",
+    padClass: "p-7",
+    d: "M1483.762,386.098H1602.271C1613.825,386.098,1620.689,373.073,1614.037,363.625C1604.136,349.565,1598.416,332.348,1598.684,313.782C1599.336,268.642,1635.986,231.626,1681.119,230.553C1728.737,229.42,1767.682,267.682,1767.682,315.032C1767.682,333.128,1761.997,349.896,1752.312,363.643C1745.664,373.08,1752.55,386.098,1764.093,386.098H1882.605C1927.535,386.098,1963.959,422.521,1963.959,467.452V866.304C1963.959,911.234,1927.536,947.658,1882.605,947.658H1764.083C1752.526,947.658,1745.667,960.686,1752.321,970.136C1762.207,984.175,1767.924,1001.363,1767.674,1019.901C1767.065,1065.038,1730.46,1102.088,1685.332,1103.211C1637.682,1104.397,1598.675,1066.116,1598.675,1018.734C1598.675,1000.632,1604.364,983.862,1614.052,970.114C1620.702,960.677,1613.816,947.658,1602.272,947.658H1483.763C1438.827,947.658,1402.399,911.23,1402.399,866.294V467.462C1402.398,422.526,1438.826,386.098,1483.762,386.098Z",
+  },
+  {
+    // same artwork as piece 1, unrotated — notch on the top edge
+    // (left edge in the horizontal row); padding clears it
+    viewBox: "1402.4 1407.91 561.56 561.56",
+    from: "#0b3ba7",
+    to: "#0a2f80",
+    padClass: "p-7 pt-24 lg:pt-7 lg:pl-24",
+    d: "M1483.751,1407.911h118.52c11.554,0,18.418,13.025,11.766,22.473c-9.901,14.06-15.621,31.277-15.353,49.842c0.652,45.14,37.302,82.156,82.435,83.229c47.618,1.133,86.563-37.129,86.563-84.479c0-18.096-5.685-34.864-15.37-48.611c-6.648-9.437,0.238-22.454,11.781-22.454h118.512c44.93,0,81.354,36.423,81.354,81.354v398.842c0,44.936-36.428,81.364-81.364,81.364h-398.833c-44.936,0-81.364-36.428-81.364-81.364v-398.842c0-44.93,36.423-81.354,81.354-81.354z",
+  },
+];
 const CHECKS = [
   {
     doc: "등기부등본",
@@ -431,82 +474,86 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* how it works — connected process flow */}
+      {/* how it works — centered header while the puzzle stacks vertically
+          (below lg), left-aligned once it becomes a horizontal row (lg+) */}
       <section id="how" className="scroll-mt-24 px-4 py-16 sm:py-24">
         <div className="mx-auto max-w-5xl">
           <Reveal>
-            <p className="text-center text-[13px] font-bold tracking-[0.12em] text-(--royal)">
-              HOW IT WORKS
-            </p>
-            <h2 className="break-keep mt-2 text-center text-[24px] font-extrabold tracking-[-0.02em] sm:text-[32px]">
-              세 걸음이면 끝납니다
-            </h2>
+            <div className="text-center lg:text-left">
+              <p className="text-[13px] font-bold tracking-[0.12em] text-(--royal)">HOW IT WORKS</p>
+              <h2 className="break-keep mt-2 text-[26px] font-extrabold tracking-[-0.02em] sm:text-[34px]">
+                세 걸음이면 끝납니다
+              </h2>
+              <p className="mx-auto mt-4 max-w-md break-keep text-[15px] leading-relaxed text-(--muted) lg:mx-0">
+                매물 링크 하나면 충분해요. 복잡한 서류 확인을 세 단계 자동
+                분석으로 압축했습니다.
+              </p>
+            </div>
           </Reveal>
-          <ol className="mx-auto mt-12 flex max-w-4xl flex-col sm:flex-row sm:gap-4">
-            {STEPS.map((s, i) => (
-              <motion.li
-                key={s.n}
-                className="relative flex gap-5 pb-10 last:pb-0 sm:flex-1 sm:flex-col sm:items-center sm:gap-0 sm:pb-0 sm:text-center"
-                initial={reduce ? false : "hide"}
-                whileInView="show"
-                viewport={{ once: true, margin: "-60px" }}
-                variants={{
-                  hide: { opacity: 0, y: 24 },
-                  show: {
-                    opacity: 1,
-                    y: 0,
-                    transition: { duration: 0.5, delay: i * 0.15, ease: [0.22, 1, 0.36, 1] },
-                  },
-                }}
-              >
-                {/* connector to next step */}
-                {i < STEPS.length - 1 && (
-                  <>
-                    {/* vertical (mobile) */}
-                    <motion.span
-                      className="absolute left-[27px] top-[64px] bottom-2 w-[2.5px] origin-top rounded-full sm:hidden"
-                      style={{ background: "linear-gradient(180deg, var(--royal), rgba(10,92,255,0.25))" }}
-                      aria-hidden
-                      variants={{
-                        hide: { scaleY: 0 },
-                        show: {
-                          scaleY: 1,
-                          transition: { duration: 0.5, delay: i * 0.15 + 0.25, ease: [0.22, 1, 0.36, 1] },
-                        },
-                      }}
-                    />
-                    {/* horizontal (desktop) */}
-                    <motion.span
-                      className="absolute top-[27px] left-[calc(50%+40px)] hidden h-[2.5px] w-[calc(100%-64px)] origin-left rounded-full sm:block"
-                      style={{ background: "linear-gradient(90deg, var(--royal), rgba(10,92,255,0.25))" }}
-                      aria-hidden
-                      variants={{
-                        hide: { scaleX: 0 },
-                        show: {
-                          scaleX: 1,
-                          transition: { duration: 0.5, delay: i * 0.15 + 0.25, ease: [0.22, 1, 0.36, 1] },
-                        },
-                      }}
-                    />
-                  </>
-                )}
 
-                <span
-                  className="relative z-10 flex h-[56px] w-[56px] shrink-0 items-center justify-center rounded-full text-white shadow-[0_8px_20px_-6px_rgba(10,92,255,0.55)]"
-                  style={{ background: "linear-gradient(180deg,#2f79ff,var(--royal))" }}
-                  aria-hidden
+          {/* designer jigsaw pieces as standalone cards at their native 1:1
+              ratio — stacked vertically on phones (chain runs downward),
+              a 3-across row from sm up (each piece rotated -90° via
+              .pz-orient so the chain runs left → right); spacing keeps the
+              tabs pointing at the notches without inserting */}
+          <ol className="mx-auto mt-12 grid w-full max-w-[300px] gap-y-24 lg:mt-16 lg:max-w-none lg:grid-cols-3 lg:gap-x-20 lg:gap-y-0">
+            {STEPS.map((s, i) => {
+              const piece = PUZZLE_PIECES[i];
+              const path = <path d={piece.d} fill={`url(#pz-grad-${i})`} />;
+              return (
+                <motion.li
+                  key={s.n}
+                  className="jigsaw-shadow relative"
+                  initial={reduce ? false : "hide"}
+                  whileInView="show"
+                  viewport={{ once: true, margin: "-60px" }}
+                  variants={{
+                    hide: { opacity: 0, y: 24 },
+                    show: {
+                      opacity: 1,
+                      y: 0,
+                      transition: { duration: 0.5, delay: i * 0.15, ease: [0.22, 1, 0.36, 1] },
+                    },
+                  }}
                 >
-                  {s.icon}
-                </span>
-                <div className="pt-1 sm:pt-5">
-                  <p className="text-[12px] font-bold tracking-[0.1em] text-(--faint)">STEP {s.n}</p>
-                  <h3 className="mt-1 text-[17px] font-bold">{s.title}</h3>
-                  <p className="mt-1.5 max-w-[260px] break-keep text-[14px] leading-relaxed text-(--muted)">
-                    {s.body}
-                  </p>
-                </div>
-              </motion.li>
-            ))}
+                  <svg
+                    className="absolute inset-0 h-full w-full overflow-visible"
+                    viewBox={piece.viewBox}
+                    aria-hidden
+                  >
+                    <defs>
+                      <linearGradient id={`pz-grad-${i}`} x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0" stopColor={piece.from} />
+                        <stop offset="1" stopColor={piece.to} />
+                      </linearGradient>
+                    </defs>
+                    <g className={`pz-orient-${i + 1}`}>
+                      {piece.transform ? <g transform={piece.transform}>{path}</g> : path}
+                    </g>
+                  </svg>
+
+                  <div
+                    className={`relative z-10 flex aspect-square items-center text-white ${piece.padClass}`}
+                  >
+                    <div className="flex flex-col items-center gap-3 text-center lg:-translate-y-3 lg:items-start lg:gap-3.5 lg:text-left">
+                      <span
+                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/15"
+                        aria-hidden
+                      >
+                        {s.icon}
+                      </span>
+                      <div>
+                        <p className="text-[12px] font-bold tracking-[0.1em] text-white/70">STEP {s.n}</p>
+                        <h3 className="mt-1 text-[17px] font-bold">{s.title}</h3>
+                        <p className="mt-1.5 break-keep text-[14px] leading-relaxed text-white/85">
+                          {s.body}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </motion.li>
+              );
+            })}
           </ol>
         </div>
       </section>

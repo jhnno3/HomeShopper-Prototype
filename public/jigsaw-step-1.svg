@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Step 1 piece: rounded square with a single notch, bottom edge (before
+     rotation upstream) — extracted from PUZZLE_PIECES[0] in app/page.tsx -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="1402.4 1407.91 561.56 561.56">
+  <defs>
+    <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4f93ff" />
+      <stop offset="1" stop-color="#0a5cff" />
+    </linearGradient>
+  </defs>
+  <g transform="rotate(180 1683.178 1688.691)">
+    <path
+      fill="url(#grad)"
+      d="M1483.751,1407.911h118.52c11.554,0,18.418,13.025,11.766,22.473c-9.901,14.06-15.621,31.277-15.353,49.842c0.652,45.14,37.302,82.156,82.435,83.229c47.618,1.133,86.563-37.129,86.563-84.479c0-18.096-5.685-34.864-15.37-48.611c-6.648-9.437,0.238-22.454,11.781-22.454h118.512c44.93,0,81.354,36.423,81.354,81.354v398.842c0,44.936-36.428,81.364-81.364,81.364h-398.833c-44.936,0-81.364-36.428-81.364-81.364v-398.842c0-44.93,36.423-81.354,81.354-81.354z"
+    />
+  </g>
+</svg>

@@ -193,6 +193,33 @@
   border-radius: 8px;
 }
 
+/* ---------- jigsaw step row (how it works) ----------
+   The card surface is designer SVG puzzle artwork; drop-shadow (not
+   box-shadow) so the shadow hugs the piece silhouette, tabs and all. */
+.jigsaw-shadow {
+  filter: drop-shadow(0 14px 20px rgba(11, 59, 167, 0.32));
+}
+
+/* The artwork ships as a vertical chain (tabs/notches on top + bottom
+   edges). Below lg the steps stack vertically, so it renders as-is;
+   from lg up the steps sit in a row, so each piece rotates -90° about
+   its viewBox centre and the chain runs left → right instead. The
+   centre is baked in as translate() pairs (user units) because
+   transform-box: view-box isn't reliable on SVG groups everywhere;
+   pieces 1/3 share a viewBox, piece 2's sits higher. */
+@media (min-width: 1024px) {
+  .pz-orient-1,
+  .pz-orient-3 {
+    transform: translate(1683.178px, 1688.691px) rotate(-90deg)
+      translate(-1683.178px, -1688.691px);
+  }
+
+  .pz-orient-2 {
+    transform: translate(1683.178px, 666.88px) rotate(-90deg)
+      translate(-1683.178px, -666.88px);
+  }
+}
+
 /* ---------- report mock ---------- */
 .g-window {
   border-radius: 20px;
