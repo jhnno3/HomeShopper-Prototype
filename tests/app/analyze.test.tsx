@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import AnalyzePage from '@/app/analyze/page';
+import { trackEvent } from '@/lib/analytics';
 
 const pushMock = vi.fn();
 let searchParamsValue = '';
@@ -10,10 +11,15 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(searchParamsValue),
 }));
 
+vi.mock('@/lib/analytics', () => ({
+  trackEvent: vi.fn(),
+}));
+
 describe('AnalyzePage', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     pushMock.mockClear();
+    vi.mocked(trackEvent).mockClear();
     searchParamsValue = '';
   });
 
@@ -31,6 +37,8 @@ describe('AnalyzePage', () => {
 
     expect(screen.getByText('서류를 확인하고 있어요')).toBeInTheDocument();
     expect(screen.queryByText('거래 정보를 알려주세요')).not.toBeInTheDocument();
+    expect(trackEvent).toHaveBeenCalledWith('analyze_start', { inputMode: 'link' });
+    expect(trackEvent).toHaveBeenCalledTimes(1);
 
     act(() => {
       vi.advanceTimersByTime(4000);
@@ -44,5 +52,16 @@ describe('AnalyzePage', () => {
     render(<AnalyzePage />);
 
     expect(screen.getByText('서류를 확인하고 있어요')).toBeInTheDocument();
+    expect(trackEvent).toHaveBeenCalledWith('analyze_start', { inputMode: 'link' });
+    expect(trackEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it('fires analyze_start with inputMode "address" when the source does not look like a URL', () => {
+    searchParamsValue = 'source=서울시 강남구 테헤란로 123';
+    render(<AnalyzePage />);
+
+    expect(screen.getByText('서류를 확인하고 있어요')).toBeInTheDocument();
+    expect(trackEvent).toHaveBeenCalledWith('analyze_start', { inputMode: 'address' });
+    expect(trackEvent).toHaveBeenCalledTimes(1);
   });
 });

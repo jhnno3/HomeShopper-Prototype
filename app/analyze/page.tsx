@@ -1,5 +1,5 @@
 'use client';
-import { Suspense, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ProgressAnimation } from '@/components/analyze/ProgressAnimation';
 import { Button } from '@/components/kit/Button';
@@ -47,6 +47,11 @@ function AnalyzeFlow() {
     initialSource && !looksLikeUrl(initialSource) ? 'address' : 'link'
   );
   const [sourceValue, setSourceValue] = useState(initialSource);
+
+  useEffect(() => {
+    if (initialSource) trackEvent('analyze_start', { inputMode });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function handleStep1Submit(e: React.FormEvent) {
     e.preventDefault();
