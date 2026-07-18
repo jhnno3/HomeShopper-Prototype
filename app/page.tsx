@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
@@ -278,16 +277,6 @@ const REPORT_SECTIONS: {
 function SampleReport() {
   return (
     <div className="g-panel g-window mx-auto w-full max-w-2xl text-left">
-      {/* window chrome */}
-      <div className="flex items-center gap-1.5 border-b border-white/70 px-4 py-3">
-        <span className="h-2.5 w-2.5 rounded-full bg-[#f26d63]" aria-hidden />
-        <span className="h-2.5 w-2.5 rounded-full bg-[#f5be4f]" aria-hidden />
-        <span className="h-2.5 w-2.5 rounded-full bg-[#58c26a]" aria-hidden />
-        <span className="ml-3 truncate text-[12px] font-semibold text-(--faint)">
-          homeshopper.report
-        </span>
-      </div>
-
       {/* report head */}
       <div className="border-b border-(--blue-edge) px-5 py-4 sm:px-7 sm:py-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -344,7 +333,7 @@ function Reveal({ children, delay = 0 }: { children: React.ReactNode; delay?: nu
     <motion.div
       initial={reduce ? false : { opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
+      viewport={{ once: false, margin: "-60px" }}
       transition={{ duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] }}
     >
       {children}
@@ -354,12 +343,24 @@ function Reveal({ children, delay = 0 }: { children: React.ReactNode; delay?: nu
 
 export default function LandingPage() {
   const reduce = useReducedMotion();
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
     <div className="v3 min-h-dvh">
       {/* nav */}
-      <header className="g-navbar sticky top-0 z-40">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
+      <header
+        className={`g-navbar sticky top-0 z-40 transition-shadow duration-300 ${scrolled ? "shadow-[0_8px_24px_-14px_rgba(11,59,167,0.35)]" : ""}`}
+      >
+        <div
+          className={`mx-auto flex max-w-5xl items-center justify-between px-4 transition-[padding] duration-300 sm:px-6 ${scrolled ? "py-1.5" : "py-3"}`}
+        >
           <Link href="/" className="flex items-center gap-2 text-[17px] font-extrabold tracking-tight">
             <Logo />
             홈쇼퍼
@@ -379,7 +380,7 @@ export default function LandingPage() {
       </header>
 
       {/* hero */}
-      <section className="relative px-4 pt-12 pb-16 sm:pt-16 sm:pb-20">
+      <section className="relative px-4 pt-12 pb-20 sm:pt-16 sm:pb-28">
         <div className="relative z-10 mx-auto w-full max-w-5xl">
           {/*
             Grid areas keep the DOM order (heading, image, search) identical
@@ -388,25 +389,25 @@ export default function LandingPage() {
             right spanning both rows.
           */}
           <div
-            className="grid gap-y-9 [grid-template-areas:'heading'_'image'_'search'] sm:gap-y-10 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-x-16 lg:gap-y-9 lg:[grid-template-areas:'heading_image'_'search_image']"
+            className="grid grid-cols-1 gap-y-9 [grid-template-areas:'heading'_'report'_'search'] sm:gap-y-10 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-x-12 lg:gap-y-9 lg:[grid-template-areas:'heading_report'_'search_report']"
           >
             <motion.div
-              className="flex w-full max-w-xl flex-col items-center gap-6 text-center [grid-area:heading] lg:items-start lg:text-left"
+              className="mx-auto flex w-full max-w-xl flex-col items-center gap-6 text-center [grid-area:heading] lg:mx-0 lg:items-start lg:text-left"
               initial={reduce ? false : "hide"}
               animate="show"
               variants={{ show: { transition: { staggerChildren: 0.09 } } }}
             >
               {[
-                <h1 key="h1" className="text-[30px] leading-[1.22] font-extrabold tracking-[-0.03em] text-balance break-keep sm:text-[46px]">
+                <h1 key="h1" className="text-[34px] leading-[1.25] font-extrabold tracking-[-0.035em] text-balance break-keep sm:text-[60px]">
                   그 매물, 임장 가기 전에
                   <br />
                   <span className="text-grad">30초 만에 서류부터</span> 확인하세요
                 </h1>,
-                <p key="sub" className="max-w-md break-keep text-[15.5px] leading-relaxed text-(--muted) sm:text-[17px]">
+                <p key="sub" className="max-w-lg break-keep text-[16.5px] leading-relaxed text-(--muted) sm:text-[19px]">
                   링크 하나만 붙여넣으면 등기부등본부터 실거래가까지, 계약 전에 꼭
                   봐야 할 서류를 대신 읽어드립니다.
                 </p>,
-                <ul key="docs" className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[13.5px] font-medium text-(--muted) lg:justify-start">
+                <ul key="docs" className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[14.5px] font-medium text-(--muted) lg:justify-start">
                   {DOCS.map((d) => (
                     <li key={d} className="flex items-center gap-1.5">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--royal)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -430,19 +431,15 @@ export default function LandingPage() {
             </motion.div>
 
             <motion.div
-              className="shrink-0 justify-self-center [grid-area:image] lg:justify-self-end lg:self-center"
-              initial={reduce ? false : { opacity: 0, x: 24 }}
-              animate={{ opacity: 1, x: 0 }}
+              className="mx-auto w-full max-w-md shrink-0 [grid-area:report] lg:mx-0 lg:w-[380px] lg:max-w-none lg:justify-self-end lg:self-center"
+              initial={reduce ? false : { opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.65, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
             >
-              <Image
-                src="/hero-docs-v2.png"
-                alt="돋보기로 부동산 서류와 평면도를 살펴보는 일러스트"
-                width={1792}
-                height={2400}
-                priority
-                className="h-auto w-[230px] sm:w-[290px] lg:w-[360px] [filter:drop-shadow(0_24px_44px_rgba(11,59,167,0.2))]"
-              />
+              <p className="mb-3 text-center text-[12px] font-bold tracking-[0.12em] text-(--royal) lg:text-left">
+                SAMPLE REPORT
+              </p>
+              <SampleReport />
             </motion.div>
 
             <motion.div
@@ -454,29 +451,12 @@ export default function LandingPage() {
               <CommandBar />
             </motion.div>
           </div>
-
-          {/* sample report preview */}
-          <motion.div
-            className="mx-auto mt-12 w-full max-w-2xl sm:mt-14"
-            initial={reduce ? false : { opacity: 0, y: 28 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <div className="mb-5 text-center">
-              <p className="text-[13px] font-bold tracking-[0.12em] text-(--royal)">SAMPLE REPORT</p>
-              <h2 className="mt-1.5 break-keep text-[20px] font-extrabold tracking-[-0.02em] sm:text-[24px]">
-                분석이 끝나면 이런 리포트를 받아요
-              </h2>
-            </div>
-            <SampleReport />
-          </motion.div>
         </div>
       </section>
 
       {/* how it works — centered header while the puzzle stacks vertically
           (below lg), left-aligned once it becomes a horizontal row (lg+) */}
-      <section id="how" className="scroll-mt-24 px-4 py-16 sm:py-24">
+      <section id="how" className="scroll-mt-24 px-4 py-20 sm:py-32">
         <div className="mx-auto max-w-5xl">
           <Reveal>
             <div className="text-center lg:text-left">
@@ -506,7 +486,7 @@ export default function LandingPage() {
                   className="jigsaw-shadow relative"
                   initial={reduce ? false : "hide"}
                   whileInView="show"
-                  viewport={{ once: true, margin: "-60px" }}
+                  viewport={{ once: false, margin: "-60px" }}
                   variants={{
                     hide: { opacity: 0, y: 24 },
                     show: {
@@ -559,14 +539,14 @@ export default function LandingPage() {
       </section>
 
       {/* what the analyzer checks */}
-      <section className="px-4 py-16 sm:py-24">
+      <section className="px-4 py-20 sm:py-32">
         <div className="mx-auto max-w-5xl">
           <Reveal>
-            <p className="text-center text-[13px] font-bold tracking-[0.12em] text-(--royal)">WHAT WE CHECK</p>
-            <h2 className="break-keep mt-2 text-center text-[24px] font-extrabold tracking-[-0.02em] sm:text-[32px]">
+            <p className="text-center text-[14px] font-bold tracking-[0.12em] text-(--royal)">WHAT WE CHECK</p>
+            <h2 className="break-keep mt-3 text-center text-[28px] font-extrabold tracking-[-0.025em] sm:text-[42px]">
               분석기가 확인하고 검증하는 것들
             </h2>
-            <p className="mx-auto mt-4 max-w-lg break-keep text-center text-[15px] leading-relaxed text-(--muted)">
+            <p className="mx-auto mt-4 max-w-lg break-keep text-center text-[16px] leading-relaxed text-(--muted) sm:text-[17px]">
               공공 데이터에 등록된 서류 세 가지를 항목별로 대조해, 계약 전에
               놓치기 쉬운 위험 신호를 찾아냅니다.
             </p>
@@ -583,11 +563,11 @@ export default function LandingPage() {
                   >
                     {c.icon}
                   </span>
-                  <h3 className="mt-5 text-[18px] font-bold">{c.doc}</h3>
-                  <p className="mt-1.5 text-[14px] font-semibold text-(--royal-deep)">{c.desc}</p>
+                  <h3 className="mt-4 text-[19px] font-bold">{c.doc}</h3>
+                  <p className="mt-1 text-[14px] font-semibold text-(--royal-deep)">{c.desc}</p>
                   <ul className="mt-4 space-y-2.5">
                     {c.items.map((item) => (
-                      <li key={item} className="flex items-start gap-2 text-[14px] leading-snug text-(--muted)">
+                      <li key={item} className="flex items-start gap-2 text-[15px] leading-snug text-(--muted)">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="mt-0.5 shrink-0">
                           <path d="M20 6L9 17l-5-5" />
                         </svg>
@@ -602,7 +582,7 @@ export default function LandingPage() {
 
           <Reveal delay={0.15}>
             <div className="mx-auto mt-16 flex max-w-lg flex-col items-center gap-5 text-center sm:mt-20">
-              <p className="break-keep text-[15px] leading-relaxed text-(--muted)">
+              <p className="break-keep text-[16px] leading-relaxed text-(--muted)">
                 보고 있는 매물도 같은 기준으로 확인할 수 있어요. 링크를
                 붙여넣으면 위 항목 전부를 실제 서류 기준으로 검증한 상세
                 리포트를 30초 안에 보여드립니다.
@@ -620,7 +600,7 @@ export default function LandingPage() {
       </section>
 
       {/* trust + faq */}
-      <section id="faq" className="scroll-mt-24 px-4 py-16 sm:py-24">
+      <section id="faq" className="scroll-mt-24 px-4 py-20 sm:py-32">
         <div className="mx-auto max-w-3xl">
           <Reveal>
             <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
@@ -637,7 +617,7 @@ export default function LandingPage() {
           </Reveal>
 
           <Reveal delay={0.08}>
-            <h2 className="break-keep mt-14 text-center text-[24px] font-extrabold tracking-[-0.02em] sm:text-[30px]">
+            <h2 className="break-keep mt-14 text-center text-[28px] font-extrabold tracking-[-0.025em] sm:text-[38px]">
               자주 묻는 질문
             </h2>
             <FaqAccordion />
@@ -646,15 +626,15 @@ export default function LandingPage() {
       </section>
 
       {/* reserve banner */}
-      <section className="px-4 pb-20 pt-4 sm:pb-28">
+      <section className="px-4 pb-24 pt-8 sm:pb-36 sm:pt-12">
         <Reveal>
           <div className="g-banner mx-auto flex max-w-5xl flex-col items-start gap-6 p-8 sm:flex-row sm:items-center sm:justify-between sm:p-10">
             <div>
               <p className="text-[13px] font-bold tracking-[0.1em] text-white/70">COMING SOON</p>
-              <h2 className="break-keep mt-2 text-[22px] font-extrabold tracking-[-0.02em] sm:text-[26px]">
+              <h2 className="break-keep mt-2 text-[26px] font-extrabold tracking-[-0.025em] sm:text-[32px]">
                 동행 임장 · 반값 정찰 중개
               </h2>
-              <p className="mt-2 max-w-md text-[14.5px] leading-relaxed text-white/85">
+              <p className="mt-2 max-w-md text-[15.5px] leading-relaxed text-white/85">
                 서류 확인 다음 단계까지 함께합니다. 전문가 동행 임장과 정찰제
                 반값 중개, 지금 사전예약을 받고 있어요.
               </p>
