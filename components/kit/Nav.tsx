@@ -1,14 +1,7 @@
-"use client";
-import { Button } from "./Button";
+import Link from "next/link";
+import { Logo } from "@/components/kit/Logo";
 
-type Props = {
-  wordmark?: string;
-  ctaLabel: string;
-  onCtaClick?: () => void;
-  ctaHref?: string;
-};
-
-export function Nav({ wordmark = "홈쇼퍼", ctaLabel, onCtaClick, ctaHref }: Props) {
+export function Nav() {
   return (
     <header
       className="bg-glass sticky inset-x-0 top-0 z-30"
@@ -17,19 +10,14 @@ export function Nav({ wordmark = "홈쇼퍼", ctaLabel, onCtaClick, ctaHref }: P
         borderBottom: "1px solid var(--glass-border)",
       }}
     >
-      <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-6">
-        <span className="text-[17px] font-bold tracking-[-0.3px] text-[var(--color-ink)]">
-          {wordmark}
-        </span>
-        {ctaHref ? (
-          <Button variant="primary" size="md" href={ctaHref}>
-            {ctaLabel}
-          </Button>
-        ) : (
-          <Button variant="primary" size="md" onClick={onCtaClick}>
-            {ctaLabel}
-          </Button>
-        )}
+      <div className="mx-auto flex h-14 max-w-5xl items-center px-6">
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-[17px] font-bold tracking-[-0.3px] text-[var(--color-ink)]"
+        >
+          <Logo />
+          홈쇼퍼
+        </Link>
       </div>
     </header>
   );
