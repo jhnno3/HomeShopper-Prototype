@@ -3,32 +3,29 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import ReportPage from '@/app/report/[id]/page';
 
+function renderReport() {
+  return act(async () => {
+    render(
+      <Suspense>
+        <ReportPage params={Promise.resolve({ id: 'demo-1' })} />
+      </Suspense>
+    );
+  });
+}
+
 describe('ReportPage', () => {
-  it('shows a pending message for facts whose API call failed', async () => {
-    await act(async () => {
-      render(
-        <Suspense>
-          <ReportPage params={Promise.resolve({ id: 'demo-2' })} />
-        </Suspense>
-      );
-    });
-    expect(
-      screen.getAllByText('확인이 지연되고 있어요. 완료되면 알려드릴까요?').length
-    ).toBeGreaterThan(0);
+  it('renders the summary cards from the result_summary data', async () => {
+    await renderReport();
+
+    expect(screen.getByText('7억 5,670만원')).toBeInTheDocument();
+    expect(screen.getByText('403건')).toBeInTheDocument();
+    expect(screen.getByText('공동주택')).toBeInTheDocument();
+    expect(screen.getByText('1992년')).toBeInTheDocument();
+    expect(screen.getByText('정상 등록')).toBeInTheDocument();
   });
 
-  it('renders concerns and lets the user complete the login stub', async () => {
-    await act(async () => {
-      render(
-        <Suspense>
-          <ReportPage params={Promise.resolve({ id: 'demo-1' })} />
-        </Suspense>
-      );
-    });
-
-    expect(
-      screen.getByText('해당 매물의 보증금은 인근 실거래 평균 대비 다소 낮은 편입니다.')
-    ).toBeInTheDocument();
+  it('lets the user complete the login stub', async () => {
+    await renderReport();
 
     fireEvent.click(screen.getByText('카카오로 3초 만에 받기'));
     fireEvent.change(screen.getByLabelText('이름'), { target: { value: '홍길동' } });
@@ -38,13 +35,8 @@ describe('ReportPage', () => {
   });
 
   it('links the visit CTA to the reserve page with the basic_report source', async () => {
-    await act(async () => {
-      render(
-        <Suspense>
-          <ReportPage params={Promise.resolve({ id: 'demo-1' })} />
-        </Suspense>
-      );
-    });
+    await renderReport();
+
     const link = screen.getByText('이 매물, 전문가와 동행 임장하기').closest('a');
     expect(link).toHaveAttribute('href', '/reserve?src=basic_report&reportId=demo-1');
   });

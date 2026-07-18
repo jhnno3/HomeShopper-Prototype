@@ -5,7 +5,7 @@ import { ProgressAnimation } from '@/components/analyze/ProgressAnimation';
 import { Button } from '@/components/kit/Button';
 import { GlassCard } from '@/components/kit/GlassCard';
 import { trackEvent } from '@/lib/analytics';
-import { demoReportId } from '@/lib/mock-data';
+import { demoReportId } from '@/lib/report-data';
 
 type Step = 'input' | 'progress';
 

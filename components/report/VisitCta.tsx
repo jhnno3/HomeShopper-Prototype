@@ -4,15 +4,7 @@ import { GlassCard } from '@/components/kit/GlassCard';
 import { Button } from '@/components/kit/Button';
 import type { ReservationSource } from '@/lib/types';
 
-export function VisitCta({
-  reportId,
-  tier,
-  src,
-}: {
-  reportId: string;
-  tier: 'basic' | 'premium';
-  src: ReservationSource;
-}) {
+export function VisitCta({ reportId, src }: { reportId: string; src: ReservationSource }) {
   return (
     <GlassCard className="text-center">
       <p className="text-sm text-[var(--color-slate)]">
@@ -22,7 +14,7 @@ export function VisitCta({
         variant="primary"
         size="lg"
         href={`/reserve?src=${src}&reportId=${reportId}`}
-        onClick={() => trackEvent('visit_cta_click', { reportId, tier })}
+        onClick={() => trackEvent('visit_cta_click', { reportId })}
         className="mt-4 w-full"
       >
         이 매물, 전문가와 동행 임장하기

@@ -42,13 +42,9 @@ export function UpgradeCard({ reportId }: { reportId: string }) {
           />
           <button
             type="submit"
-            className={
-              pendingProvider === 'kakao'
-                ? 'rounded-xl bg-[#FEE500] px-3 py-2 text-sm font-semibold text-[#1a1a2e] transition-all duration-150 active:scale-95'
-                : 'rounded-xl bg-[#03C75A] px-3 py-2 text-sm font-semibold text-white transition-all duration-150 active:scale-95'
-            }
+            className="rounded-xl bg-[#FEE500] px-3 py-2 text-sm font-semibold text-[#1a1a2e] transition-all duration-150 active:scale-95"
           >
-            {pendingProvider === 'kakao' ? '카카오로 계속하기' : '네이버로 계속하기'}
+            카카오로 계속하기
           </button>
         </form>
       ) : (
@@ -58,12 +54,6 @@ export function UpgradeCard({ reportId }: { reportId: string }) {
             className="rounded-xl bg-[#FEE500] px-4 py-2 text-sm font-semibold text-[#1a1a2e] transition-all duration-150 active:scale-95"
           >
             카카오로 3초 만에 받기
-          </button>
-          <button
-            onClick={() => openLoginStub('naver')}
-            className="rounded-xl bg-[#03C75A] px-4 py-2 text-sm font-semibold text-white transition-all duration-150 active:scale-95"
-          >
-            네이버로 받기
           </button>
         </div>
       )}

@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { mockPremiumRequests } from '@/lib/mock-data';
+import { mockPremiumRequests } from '@/lib/admin-data';
 import type { PremiumRequest } from '@/lib/types';
 import { GlassCard } from '@/components/kit/GlassCard';
 import { Button } from '@/components/kit/Button';

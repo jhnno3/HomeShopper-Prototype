@@ -1,9 +1,8 @@
 'use client';
 import { use, useEffect } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
-import { getReportById, mockReports } from '@/lib/mock-data';
-import { FactsTable } from '@/components/report/FactsTable';
-import { ConcernsList } from '@/components/report/ConcernsList';
+import { resultSummary } from '@/lib/report-data';
+import { ReportSummary } from '@/components/report/ReportSummary';
 import { UpgradeCard } from '@/components/report/UpgradeCard';
 import { VisitCta } from '@/components/report/VisitCta';
 import { Disclaimer } from '@/components/report/Disclaimer';
@@ -11,24 +10,22 @@ import { trackEvent } from '@/lib/analytics';
 
 export default function ReportPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const report = getReportById(id) ?? mockReports[0];
   const reduceMotion = useReducedMotion();
 
   useEffect(() => {
-    trackEvent('report_view', { reportId: report.id, tier: report.tier });
-  }, [report.id, report.tier]);
+    trackEvent('report_view', { reportId: id });
+  }, [id]);
 
   const sections = [
     <header key="header">
-      <p className="text-sm text-[var(--color-slate)]">
-        {report.dealType} · 보증금 {report.deposit?.toLocaleString()}만원
+      <h1 className="text-xl font-bold text-[var(--color-ink)]">매물 확인 리포트</h1>
+      <p className="mt-1 text-sm text-[var(--color-slate)]">
+        공개 데이터로 확인한 결과를 정리했어요
       </p>
-      <h1 className="text-xl font-bold text-[var(--color-ink)]">{report.addressMasked}</h1>
     </header>,
-    <FactsTable key="facts" facts={report.facts} apiStatus={report.apiStatus} />,
-    <ConcernsList key="concerns" concerns={report.concerns} />,
-    <UpgradeCard key="upgrade" reportId={report.id} />,
-    <VisitCta key="visit" reportId={report.id} tier={report.tier} src="basic_report" />,
+    <ReportSummary key="summary" summary={resultSummary} />,
+    <UpgradeCard key="upgrade" reportId={id} />,
+    <VisitCta key="visit" reportId={id} src="basic_report" />,
     <Disclaimer key="disclaimer" />,
   ];
 
