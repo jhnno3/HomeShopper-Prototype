@@ -95,12 +95,16 @@ function AnalyzeFlow() {
       )}
 
       {step === 'progress' && (
-        <GlassCard className="p-8">
-          <div className="space-y-6">
-            <h1 className="text-2xl font-bold text-[var(--color-ink)]">서류를 확인하고 있어요</h1>
-            <ProgressAnimation onComplete={handleProgressComplete} />
-          </div>
-        </GlassCard>
+        // No card here — the loader sits directly on the ambient background,
+        // centered so it reads as a full-screen loading state.
+        <div className="flex min-h-[60vh] flex-col justify-center space-y-3 px-2">
+          <ProgressAnimation onComplete={handleProgressComplete} />
+          {/* Placeholder copy — replace with real benefit messaging */}
+          <p className="mx-auto max-w-sm text-center text-base leading-relaxed text-[var(--color-slate)]">
+            등기부등본부터 실거래가까지, 계약 전 꼭 확인해야 할 서류를 홈쇼퍼가 대신 확인하고 있어요.
+          </p>
+          <div className="mx-auto h-px w-24" style={{ backgroundColor: 'rgba(91,100,114,0.25)' }} />
+        </div>
       )}
     </main>
   );

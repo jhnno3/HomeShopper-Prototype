@@ -35,7 +35,7 @@ describe('AnalyzePage', () => {
     });
     fireEvent.click(screen.getByText('분석 시작'));
 
-    expect(screen.getByText('서류를 확인하고 있어요')).toBeInTheDocument();
+    expect(screen.getByText('리포트를 준비하고 있어요')).toBeInTheDocument();
     expect(screen.queryByText('거래 정보를 알려주세요')).not.toBeInTheDocument();
     expect(trackEvent).toHaveBeenCalledWith('analyze_start', { inputMode: 'link' });
     expect(trackEvent).toHaveBeenCalledTimes(1);
@@ -51,7 +51,7 @@ describe('AnalyzePage', () => {
     searchParamsValue = 'source=https://land.naver.com/article/1';
     render(<AnalyzePage />);
 
-    expect(screen.getByText('서류를 확인하고 있어요')).toBeInTheDocument();
+    expect(screen.getByText('리포트를 준비하고 있어요')).toBeInTheDocument();
     expect(trackEvent).toHaveBeenCalledWith('analyze_start', { inputMode: 'link' });
     expect(trackEvent).toHaveBeenCalledTimes(1);
   });
@@ -60,7 +60,7 @@ describe('AnalyzePage', () => {
     searchParamsValue = 'source=서울시 강남구 테헤란로 123';
     render(<AnalyzePage />);
 
-    expect(screen.getByText('서류를 확인하고 있어요')).toBeInTheDocument();
+    expect(screen.getByText('리포트를 준비하고 있어요')).toBeInTheDocument();
     expect(trackEvent).toHaveBeenCalledWith('analyze_start', { inputMode: 'address' });
     expect(trackEvent).toHaveBeenCalledTimes(1);
   });
