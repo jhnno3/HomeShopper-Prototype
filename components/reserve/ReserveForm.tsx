@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { motion, useReducedMotion } from 'motion/react';
 import { trackEvent } from '@/lib/analytics';
@@ -99,12 +100,12 @@ function CardStack({ children }: { children: React.ReactNode }) {
       <CardBloom />
       <div
         aria-hidden
-        className="absolute inset-0 rounded-[28px] bg-white/40 shadow-[0_8px_24px_-18px_rgba(23,31,68,0.35)]"
+        className="absolute inset-0 rounded-[28px] bg-white/20 shadow-[0_8px_24px_-18px_rgba(23,31,68,0.35)]"
         style={{ transform: 'rotate(-8deg)' }}
       />
       <div
         aria-hidden
-        className="absolute inset-0 rounded-[28px] bg-white/70 shadow-[0_10px_28px_-20px_rgba(23,31,68,0.4)]"
+        className="absolute inset-0 rounded-[28px] bg-white/40 shadow-[0_10px_28px_-20px_rgba(23,31,68,0.4)]"
         style={{ transform: 'rotate(-4deg)' }}
       />
       <div className="relative rounded-[28px] border border-white/70 bg-white/85 p-6 shadow-[0_28px_64px_-28px_rgba(23,31,68,0.32),0_2px_6px_rgba(23,31,68,0.04)] backdrop-blur-xl backdrop-saturate-150">
@@ -330,20 +331,21 @@ export function ReserveForm() {
         <motion.div {...enter} className="relative w-full max-w-[420px]">
           <CardStack>
             <div className="text-center">
-              <span
+              <svg
                 aria-hidden
-                className="mx-auto flex size-12 items-center justify-center rounded-full bg-[rgba(31,181,122,0.12)]"
+                viewBox="0 0 24 24"
+                fill="none"
+                className="mx-auto size-9 text-[var(--color-success)]"
               >
-                <svg viewBox="0 0 24 24" fill="none" className="size-6 text-[var(--color-success)]">
-                  <path
-                    d="m5 12.5 4.5 4.5L19 7"
-                    stroke="currentColor"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </span>
+                <circle cx="12" cy="12" r="9.25" stroke="currentColor" strokeWidth="1.5" />
+                <path
+                  d="M8 12.4l2.6 2.6L16.3 9"
+                  stroke="currentColor"
+                  strokeWidth="1.75"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
               <h1 className="mt-3 text-[21px] font-bold tracking-tight text-[var(--color-ink)]">
                 사전예약이 완료됐어요
               </h1>
@@ -359,12 +361,19 @@ export function ReserveForm() {
               </p>
             </div>
 
+            <Link
+              href="/"
+              className="mt-5 flex h-11 w-full items-center justify-center rounded-xl bg-[var(--color-blue)] text-[14px] font-semibold text-white transition-all duration-150 hover:bg-[#0072e0] active:scale-[0.98]"
+            >
+              홈으로 돌아가기
+            </Link>
+
             <button
               type="button"
-              className="mt-5 flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#FEE500] text-[14px] font-semibold text-black/85 transition-all duration-150 hover:brightness-95 active:scale-[0.98]"
+              className="mt-2.5 flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#FEE500] text-[14px] font-semibold text-black/85 transition-all duration-150 hover:brightness-95 active:scale-[0.98]"
             >
               <KakaoIcon className="size-[18px]" />
-              카톡으로 오픈 소식 받기
+              카카오톡으로 오픈 소식 받기
             </button>
           </CardStack>
         </motion.div>
@@ -496,7 +505,7 @@ export function ReserveForm() {
               aria-disabled={!complete}
               className={`mt-1 flex h-[50px] w-full cursor-pointer items-center justify-center rounded-xl text-[15px] font-semibold text-white transition-all duration-150 active:scale-[0.98] ${
                 complete
-                  ? 'bg-[var(--color-ink)] shadow-[0_10px_24px_-12px_rgba(26,26,46,0.7)] hover:bg-[#24243f]'
+                  ? 'bg-[var(--color-blue)] shadow-[0_10px_24px_-12px_rgba(0,131,255,0.55)] hover:bg-[#0072e0]'
                   : 'bg-[#B8BDC9]'
               }`}
             >
