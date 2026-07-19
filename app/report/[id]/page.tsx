@@ -5,6 +5,7 @@ import { resultSummary } from '@/lib/report-data';
 import { ReportSummary } from '@/components/report/ReportSummary';
 import { UpgradeCard } from '@/components/report/UpgradeCard';
 import { VisitCta } from '@/components/report/VisitCta';
+import { SurveyCard } from '@/components/report/SurveyCard';
 import { Disclaimer } from '@/components/report/Disclaimer';
 import { trackEvent } from '@/lib/analytics';
 
@@ -26,6 +27,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
     <ReportSummary key="summary" summary={resultSummary} />,
     <UpgradeCard key="upgrade" reportId={id} />,
     <VisitCta key="visit" reportId={id} src="basic_report" />,
+    <SurveyCard key="survey" />,
     <Disclaimer key="disclaimer" />,
   ];
 

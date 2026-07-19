@@ -39,7 +39,7 @@ describe('ReportPage', () => {
   it('links the visit CTA to the reserve page with the basic_report source', async () => {
     await renderReport();
 
-    const link = screen.getByText('이 매물, 전문가와 동행 임장하기').closest('a');
+    const link = screen.getByText('원하는 전문가 선택하기').closest('a');
     expect(link).toHaveAttribute('href', '/reserve?src=basic_report&reportId=demo-1');
   });
 });

@@ -6,7 +6,7 @@ describe('LandingPage', () => {
   it('renders the hero headline and a link into the analyze flow', () => {
     render(<LandingPage />);
     expect(
-      screen.getByText('그 매물, 임장 가기 전에 30초 만에 서류부터 확인하세요')
+      screen.getByText('매물 주소만 입력하세요 반값 수수료로, 계약까지 다 해드립니다')
     ).toBeInTheDocument();
     expect(screen.getByText('무료로 서류 확인하기').closest('a')).toHaveAttribute('href', '/analyze');
   });

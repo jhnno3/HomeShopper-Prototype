@@ -10,7 +10,7 @@ import { ReportSummary } from "@/components/report/ReportSummary";
 import { resultSummary } from "@/lib/report-data";
 import "./landing.css";
 
-const DOCS = ["등기부등본", "건축물대장", "실거래가"];
+const DOCS = ["허위매물 검증", "전문가 동행 임장", "협상·특약 대행", "수수료 반값"];
 
 const STEPS = [
   {
@@ -92,13 +92,20 @@ const PUZZLE_PIECES = [
     d: "M1483.75,1407.91L1622.5,1407.91C1631.16,1407.91,1636.31,1417.68,1631.32,1424.77C1623.9,1435.31,1619.61,1448.22,1619.81,1462.15C1620.3,1496,1647.79,1523.76,1681.63,1524.57C1717.35,1525.42,1746.56,1496.72,1746.56,1461.21C1746.56,1447.64,1742.29,1435.06,1735.03,1424.75C1730.04,1417.67,1735.21,1407.91,1743.87,1407.91L1882.61,1407.91C1927.54,1407.91,1963.96,1444.33,1963.96,1489.27L1963.96,1888.11C1963.96,1933.04,1927.53,1969.47,1882.6,1969.47L1483.76,1969.47C1438.83,1969.47,1402.4,1933.04,1402.4,1888.11L1402.4,1489.27C1402.4,1444.34,1438.82,1407.91,1483.75,1407.91Z",
   },
 ];
-const CHECKS = [
+const SERVICES = [
   {
-    doc: "등기부등본",
-    desc: "권리관계의 위험 신호를 찾습니다",
-    items: ["근저당권 · 채권최고액 규모", "가압류 · 가처분 · 경매개시 여부", "등기상 소유자와 임대인 일치"],
-    tint: "rgba(10,92,255,0.1)",
-    fg: "var(--royal)",
+    title: "매물 검증 · 시세 조사",
+    body: "링크나 주소 하나로 허위매물 여부와 적정 시세를 확인해요. 원하는 조건을 입력하면 계약 만료 예정 매물까지 포함해 추천하고, 과거 중개 계약서와 공공데이터로 거래가·계약기간·특약의 기준을 알려드립니다.",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <circle cx="11" cy="11" r="7" />
+        <path d="m21 21-4.3-4.3" />
+      </svg>
+    ),
+  },
+  {
+    title: "부동산 서류 분석",
+    body: "등기부등본·건축물대장 같은 계약 전 필수 서류를 전문가가 직접 분석해 근저당·위반건축물 같은 위험 신호를 짚어드려요.",
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -108,28 +115,63 @@ const CHECKS = [
     ),
   },
   {
-    doc: "건축물대장",
-    desc: "건물 자체의 하자를 확인합니다",
-    items: ["위반건축물 등재 여부", "주용도 · 전용면적 대조", "사용승인 연도"],
-    tint: "rgba(11,59,167,0.08)",
-    fg: "var(--royal-deep)",
+    title: "전문가 동행 임장",
+    body: "홈쇼퍼 소속 전문가가 직접 함께 매물을 방문해요. 서류로는 알 수 없는 누수·곰팡이·소음·실측까지 대신 확인해드려요.",
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-        <rect x="4" y="3" width="16" height="18" rx="2" />
-        <path d="M9 8h1M14 8h1M9 12h1M14 12h1M9 16h6" />
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
       </svg>
     ),
   },
   {
-    doc: "실거래가",
-    desc: "가격의 적정성을 검증합니다",
-    items: ["최근 국토부 실거래 이력", "시세 대비 보증금 비율", "역전세 · 깡통전세 위험 신호"],
-    tint: "rgba(15,157,88,0.12)",
-    fg: "var(--ok)",
+    title: "협상 · 특약 조율 대행",
+    body: "가격 협상부터 특약 조율까지, 혼자 하기 어려운 순간마다 홈쇼퍼가 대신 나서서 유리한 조건을 만들어드려요.",
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-        <path d="M3 3v18h18" />
-        <path d="m7 14 4-4 3 3 5-6" />
+        <path d="M12 20h9" />
+        <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+      </svg>
+    ),
+  },
+  {
+    title: "매도인 · 임대인 서류 검증",
+    body: "상대방의 서류도 함께 검토해 나뿐 아니라 거래 상대방 쪽 리스크까지 미리 걸러내고, 양쪽 모두 안전한 거래를 만들어요.",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
+        <path d="m9 12 2 2 4-4" />
+      </svg>
+    ),
+  },
+  {
+    title: "후속 서비스 · 갈등 조정",
+    body: "입주 후 하자보수 접수부터 매도자-매수자, 임대인-임차인 사이의 갈등 조정까지 — 계약이 끝난 뒤에도 책임지고 도와드려요.",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+      </svg>
+    ),
+  },
+  {
+    title: "권리 행사 알림",
+    body: "계약 종료 전 행사할 수 있는 권리(갱신청구권 등)와 행사 가능 기간을 미리 확인해 놓치지 않도록 알려드려요.",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+      </svg>
+    ),
+  },
+  {
+    title: "다음 매물 추천",
+    body: "계약 종료가 다가오면 조건에 맞는 다음 매물을 미리 추천해드려, 이사 시점에도 헤매지 않도록 도와드려요.",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+        <path d="M9 22V12h6v10" />
       </svg>
     ),
   },
@@ -298,13 +340,15 @@ export default function LandingPage() {
             >
               {[
                 <h1 key="h1" className="text-[34px] leading-[1.25] font-extrabold tracking-[-0.035em] text-balance break-keep sm:text-[60px]">
-                  그 매물, 임장 가기 전에
+                  매물 주소만 입력하세요
                   <br />
-                  <span className="text-grad">30초 만에 서류부터</span> 확인하세요
+                  <span className="text-grad">반값 수수료</span>로,
+                  <br />
+                  계약까지 다 해드립니다
                 </h1>,
                 <p key="sub" className="max-w-lg break-keep text-[16.5px] leading-relaxed text-(--muted) sm:text-[19px]">
-                  링크 하나만 붙여넣으면 등기부등본부터 실거래가까지, 계약 전에 꼭
-                  봐야 할 서류를 대신 읽어드립니다.
+                  부동산 거래 전 과정을 홈쇼퍼가 안내하는 대로 따라오시면
+                  끝납니다.
                 </p>,
                 <ul key="docs" className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[14.5px] font-medium text-(--muted) lg:justify-start">
                   {DOCS.map((d) => (
@@ -312,7 +356,7 @@ export default function LandingPage() {
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--royal)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                         <path d="M20 6L9 17l-5-5" />
                       </svg>
-                      {d} 자동 확인
+                      {d}
                     </li>
                   ))}
                 </ul>,
@@ -438,39 +482,32 @@ export default function LandingPage() {
       <section className="px-4 py-16 sm:py-[102px]">
         <div className="mx-auto max-w-5xl">
           <Reveal>
-            <p className="text-center text-[14px] font-bold tracking-[0.12em] text-(--royal)">WHAT WE CHECK</p>
+            <p className="text-center text-[14px] font-bold tracking-[0.12em] text-(--royal)">FULL LIFECYCLE SERVICE</p>
             <h2 className="break-keep mt-3 text-center text-[28px] font-extrabold tracking-[-0.025em] sm:text-[42px]">
-              분석기가 확인하고 검증하는 것들
+              서류 검증은 시작일 뿐, <span className="text-grad">계약이 끝난 뒤까지</span> 함께합니다
             </h2>
-            <p className="mx-auto mt-4 max-w-lg break-keep text-center text-[16px] leading-relaxed text-(--muted) sm:text-[17px]">
-              공공 데이터에 등록된 서류 세 가지를 항목별로 대조해, 계약 전에
-              놓치기 쉬운 위험 신호를 찾아냅니다.
+            <p className="mx-auto mt-4 max-w-2xl break-keep text-center text-[16px] leading-relaxed text-(--muted) sm:text-[17px]">
+              매물 검증부터 임장, 협상, 계약, 입주 후 하자보수와 다음 이사까지 —
+              부동산 거래의 전 생애주기를 홈쇼퍼가 반값 수수료로 대신
+              처리해드립니다.
             </p>
           </Reveal>
 
-          <div className="mt-14 grid justify-center gap-5 sm:mt-16 sm:gap-6 sm:grid-cols-3">
-            {CHECKS.map((c, i) => (
-              <Reveal key={c.doc} delay={i * 0.1}>
+          <div className="mt-14 grid justify-center gap-5 sm:mt-16 sm:gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {SERVICES.map((c, i) => (
+              <Reveal key={c.title} delay={i * 0.05}>
                 <article className="g-panel g-check-card h-full rounded-3xl p-7">
                   <span
                     className="flex h-12 w-12 items-center justify-center rounded-2xl"
-                    style={{ background: c.tint, color: c.fg }}
+                    style={{ background: "rgba(10,92,255,0.1)", color: "var(--royal)" }}
                     aria-hidden
                   >
                     {c.icon}
                   </span>
-                  <h3 className="mt-4 text-[19px] font-bold">{c.doc}</h3>
-                  <p className="mt-1 text-[14px] font-semibold text-(--royal-deep)">{c.desc}</p>
-                  <ul className="mt-4 space-y-2.5">
-                    {c.items.map((item) => (
-                      <li key={item} className="flex items-start gap-2 text-[15px] leading-snug text-(--muted)">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="mt-0.5 shrink-0">
-                          <path d="M20 6L9 17l-5-5" />
-                        </svg>
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
+                  <h3 className="break-keep mt-4 text-[17px] font-bold">{c.title}</h3>
+                  <p className="mt-2 break-keep text-[14px] leading-relaxed text-(--muted)">
+                    {c.body}
+                  </p>
                 </article>
               </Reveal>
             ))}
@@ -479,9 +516,8 @@ export default function LandingPage() {
           <Reveal delay={0.15}>
             <div className="mx-auto mt-16 flex max-w-lg flex-col items-center gap-5 text-center sm:mt-20">
               <p className="break-keep text-[16px] leading-relaxed text-(--muted)">
-                보고 있는 매물도 같은 기준으로 확인할 수 있어요. 링크를
-                붙여넣으면 위 항목 전부를 실제 서류 기준으로 검증한 상세
-                리포트를 30초 안에 보여드립니다.
+                이 모든 과정을 홈쇼퍼가 대신 처리하는데, 수수료는 절반이에요.
+                주소만 입력하고 안내하는 대로만 따라오시면 됩니다.
               </p>
               <button type="button" onClick={focusHeroSearch} className="g-cta inline-flex items-center gap-2 px-7 py-3.5 text-[15px]">
                 무료로 상세 분석 받기

@@ -6,9 +6,13 @@ import type { ReservationSource } from '@/lib/types';
 
 export function VisitCta({ reportId, src }: { reportId: string; src: ReservationSource }) {
   return (
-    <GlassCard className="text-center">
-      <p className="text-sm text-[var(--color-slate)]">
-        서류로 확인할 수 없는 것들: 누수 · 곰팡이 · 소음 · 실측 — 임장에서 확인합니다
+    <GlassCard>
+      <h2 className="text-[19px] font-bold tracking-tight text-[var(--color-ink)]">
+        <span className="text-[var(--color-blue)]">4단계.</span> 전문가와 함께 매물 하자
+        뜯어보기
+      </h2>
+      <p className="mt-2 text-sm text-[var(--color-slate)]">
+        서류로 확인할 수 없는 누수·곰팡이·소음·실측 등을 전문가와 함께 점검해보세요
       </p>
       <Button
         variant="primary"
@@ -17,7 +21,7 @@ export function VisitCta({ reportId, src }: { reportId: string; src: Reservation
         onClick={() => trackEvent('visit_cta_click', { reportId })}
         className="mt-4 w-full"
       >
-        이 매물, 전문가와 동행 임장하기
+        원하는 전문가 선택하기
       </Button>
     </GlassCard>
   );
