@@ -34,14 +34,14 @@ export function CardBloom() {
         {
           filter: "blur(72px)",
           background: [
-            // cool blue high and left, where the light falls on the card
-            "radial-gradient(46% 32% at 20% 12%, rgba(96,175,255,0.9) 0%, rgba(96,175,255,0.4) 55%, transparent 90%)",
+            // cool blue on the left, sunk down into the card's body rather than its header
+            "radial-gradient(46% 32% at 20% 42%, rgba(96,175,255,0.9) 0%, rgba(96,175,255,0.4) 55%, transparent 90%)",
             // violet down the right side
             "radial-gradient(44% 36% at 88% 38%, rgba(132,109,236,0.75) 0%, rgba(132,109,236,0.3) 58%, transparent 90%)",
             // warm blush low and centered, the quiet counterweight
             "radial-gradient(50% 30% at 54% 92%, rgba(232,160,208,0.85) 0%, rgba(232,160,208,0.35) 55%, transparent 90%)",
-            // second blue keeping the top-right from going flat
-            "radial-gradient(40% 24% at 74% 6%, rgba(120,196,255,0.6) 0%, transparent 88%)",
+            // second blue, a subtle top accent so the header isn't left toneless
+            "radial-gradient(36% 18% at 76% 22%, rgba(120,196,255,0.45) 0%, transparent 88%)",
             // violet pooling bottom-left so the blush isn't isolated
             "radial-gradient(36% 26% at 14% 80%, rgba(150,130,240,0.5) 0%, transparent 88%)",
           ].join(","),
