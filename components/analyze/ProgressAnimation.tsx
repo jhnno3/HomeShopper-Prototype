@@ -25,7 +25,7 @@ export function ProgressAnimation({ onComplete, durationMs = 3000 }: ProgressAni
         리포트를 준비하고 있어요
       </span>
       <motion.div
-        className="bg-grad h-10 w-10"
+        className="bg-grad h-6 w-6"
         animate={
           reducedMotion
             ? { opacity: 1 }

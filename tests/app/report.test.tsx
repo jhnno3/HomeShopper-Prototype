@@ -24,12 +24,16 @@ describe('ReportPage', () => {
     expect(screen.getByText('정상 등록')).toBeInTheDocument();
   });
 
-  it('lets the user complete the login stub', async () => {
+  it('lets the user complete the login stub after filling in 동/호수', async () => {
     await renderReport();
 
-    fireEvent.click(screen.getByText('카카오 로그인'));
+    fireEvent.click(screen.getByText('정확한 동·호수 입력하기'));
+    fireEvent.change(screen.getByLabelText('동'), { target: { value: '101동' } });
+    fireEvent.change(screen.getByLabelText('호수'), { target: { value: '1502호' } });
+    fireEvent.click(screen.getByText('카카오 로그인하고 무료로 받기'));
 
-    expect(screen.getByText('접수 완료 · 접수번호 #HS-0041')).toBeInTheDocument();
+    expect(screen.getByText('접수 완료')).toBeInTheDocument();
+    expect(screen.getByText('접수번호 #HS-0041 · 카카오톡으로 곧 보내드릴게요')).toBeInTheDocument();
   });
 
   it('links the visit CTA to the reserve page with the basic_report source', async () => {
