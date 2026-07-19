@@ -26,7 +26,7 @@ const INK_BLOOMS = [
 ] as const;
 
 /** Routes that supply their own focused backdrop and want a plain page behind it. */
-const PLAIN_BACKDROP_ROUTES = ["/reserve"];
+const PLAIN_BACKDROP_ROUTES = ["/reserve", "/report"];
 
 const MAX_PARALLAX_PX = 30;
 const PROXIMITY_RADIUS_PX = 480;

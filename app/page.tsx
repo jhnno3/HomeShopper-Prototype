@@ -321,7 +321,7 @@ export default function LandingPage() {
       </header>
 
       {/* hero */}
-      <section className="relative px-4 pt-[38px] pb-16 sm:pt-[51px] sm:pb-[90px]">
+      <section className="band band-hero relative px-4 pt-[38px] pb-16 sm:pt-[51px] sm:pb-[90px]">
         <div className="relative z-10 mx-auto w-full max-w-5xl">
           {/*
             Grid areas keep the DOM order (heading, image, search) identical
@@ -396,7 +396,7 @@ export default function LandingPage() {
 
       {/* how it works — centered header while the puzzle stacks vertically
           (below lg), left-aligned once it becomes a horizontal row (lg+) */}
-      <section id="how" className="scroll-mt-24 px-4 py-16 sm:py-[102px]">
+      <section id="how" className="band band-blue scroll-mt-24 px-4 py-16 sm:py-[102px]">
         <div className="mx-auto max-w-5xl">
           <Reveal>
             <div className="text-center lg:text-left">
@@ -479,7 +479,7 @@ export default function LandingPage() {
       </section>
 
       {/* what the analyzer checks */}
-      <section className="px-4 py-16 sm:py-[102px]">
+      <section className="band band-lavender px-4 py-16 sm:py-[102px]">
         <div className="mx-auto max-w-5xl">
           <Reveal>
             <p className="text-center text-[14px] font-bold tracking-[0.12em] text-(--royal)">FULL LIFECYCLE SERVICE</p>
@@ -532,7 +532,7 @@ export default function LandingPage() {
       </section>
 
       {/* trust + faq */}
-      <section id="faq" className="scroll-mt-24 px-4 py-16 sm:py-[102px]">
+      <section id="faq" className="band band-sky scroll-mt-24 px-4 py-16 sm:py-[102px]">
         <div className="mx-auto max-w-3xl">
           <Reveal>
             <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
@@ -558,7 +558,7 @@ export default function LandingPage() {
       </section>
 
       {/* reserve banner */}
-      <section className="px-4 pb-[77px] pt-[26px] sm:pb-[115px] sm:pt-[38px]">
+      <section className="band band-foot px-4 pb-[77px] pt-[26px] sm:pb-[115px] sm:pt-[38px]">
         <Reveal>
           <div className="g-banner mx-auto flex max-w-5xl flex-col items-start gap-6 p-8 sm:flex-row sm:items-center sm:justify-between sm:p-10">
             <div>

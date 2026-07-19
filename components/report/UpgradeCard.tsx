@@ -27,13 +27,6 @@ export function UpgradeCard({ reportId }: { reportId: string }) {
 
   return (
     <GlassCard className="relative overflow-hidden">
-      {/* Soft brand-gradient bloom, tucked behind the eyebrow — the card's
-          only hit of color, so it reads as "premium" without a heavy fill. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-12 -top-16 size-44 rounded-full bg-[radial-gradient(closest-side,rgba(76,44,226,0.22),transparent)] blur-2xl"
-      />
-
       <div className="relative">
         <span className="inline-flex items-center rounded-full bg-[rgba(76,44,226,0.1)] px-2.5 py-1 text-[12px] font-semibold text-[var(--color-purple)]">
           프리미엄 리포트
