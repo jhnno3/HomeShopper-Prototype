@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type CSSProperties } from "react";
+import { usePathname } from "next/navigation";
 
 /**
  * Page-wide ambient background: varied, edge-blended color blooms derived from
@@ -24,14 +25,22 @@ const INK_BLOOMS = [
   { top: "92%", right: "-16vmax", w: "42vmax", h: "58vmax", rot: -5, color: "var(--ink-violet)", opacity: 0.3, drift: "ink-drift-b", depth: 1.1 },
 ] as const;
 
+/** Routes that supply their own focused backdrop and want a plain page behind it. */
+const PLAIN_BACKDROP_ROUTES = ["/reserve"];
+
 const MAX_PARALLAX_PX = 30;
 const PROXIMITY_RADIUS_PX = 480;
 const OPACITY_BOOST = 0.28;
 
 export function InkBackground() {
   const wrapRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const pathname = usePathname();
+  const plain = PLAIN_BACKDROP_ROUTES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+  );
 
   useEffect(() => {
+    if (plain) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     let frame = 0;
@@ -72,7 +81,9 @@ export function InkBackground() {
       document.removeEventListener("mouseleave", resetOpacity);
       cancelAnimationFrame(frame);
     };
-  }, []);
+  }, [plain]);
+
+  if (plain) return null;
 
   return (
     <div className="ink-bg" aria-hidden>
