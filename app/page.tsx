@@ -324,13 +324,15 @@ export default function LandingPage() {
       <section className="band band-hero relative px-4 pt-[38px] pb-16 sm:pt-[51px] sm:pb-[90px]">
         <div className="relative z-10 mx-auto w-full max-w-5xl">
           {/*
-            Grid areas keep the DOM order (heading, image, search) identical
-            for mobile stacking, while desktop remaps the same three areas
-            into a 2-column layout: heading+search on the left, image on the
-            right spanning both rows.
+            Grid areas decouple visual order from DOM order: mobile stacks
+            heading → search → report (search stays reachable above the fold
+            instead of getting pushed below the tall sample-report image),
+            while desktop remaps the same three areas into a 2-column layout
+            — heading+search on the left, image on the right spanning both
+            rows.
           */}
           <div
-            className="grid grid-cols-1 gap-y-9 [grid-template-areas:'heading'_'report'_'search'] sm:gap-y-10 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-x-12 lg:gap-y-9 lg:[grid-template-areas:'heading_report'_'search_report']"
+            className="grid grid-cols-1 gap-y-9 [grid-template-areas:'heading'_'search'_'report'] sm:gap-y-10 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-x-12 lg:gap-y-9 lg:[grid-template-areas:'heading_report'_'search_report']"
           >
             <motion.div
               className="mx-auto flex w-full max-w-xl flex-col items-center gap-6 text-center [grid-area:heading] lg:mx-0 lg:items-start lg:text-left"
@@ -396,7 +398,7 @@ export default function LandingPage() {
 
       {/* how it works — centered header while the puzzle stacks vertically
           (below lg), left-aligned once it becomes a horizontal row (lg+) */}
-      <section id="how" className="band band-blue scroll-mt-24 px-4 py-16 sm:py-[102px]">
+      <section id="how" className="scroll-mt-24 px-4 py-16 sm:py-[102px]">
         <div className="mx-auto max-w-5xl">
           <Reveal>
             <div className="text-center lg:text-left">
@@ -479,7 +481,7 @@ export default function LandingPage() {
       </section>
 
       {/* what the analyzer checks */}
-      <section className="band band-lavender px-4 py-16 sm:py-[102px]">
+      <section className="px-4 py-16 sm:py-[102px]">
         <div className="mx-auto max-w-5xl">
           <Reveal>
             <p className="text-center text-[14px] font-bold tracking-[0.12em] text-(--royal)">FULL LIFECYCLE SERVICE</p>
@@ -532,7 +534,7 @@ export default function LandingPage() {
       </section>
 
       {/* trust + faq */}
-      <section id="faq" className="band band-sky scroll-mt-24 px-4 py-16 sm:py-[102px]">
+      <section id="faq" className="scroll-mt-24 px-4 py-16 sm:py-[102px]">
         <div className="mx-auto max-w-3xl">
           <Reveal>
             <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
@@ -558,7 +560,7 @@ export default function LandingPage() {
       </section>
 
       {/* reserve banner */}
-      <section className="band band-foot px-4 pb-[77px] pt-[26px] sm:pb-[115px] sm:pt-[38px]">
+      <section className="px-4 pb-[77px] pt-[26px] sm:pb-[115px] sm:pt-[38px]">
         <Reveal>
           <div className="g-banner mx-auto flex max-w-5xl flex-col items-start gap-6 p-8 sm:flex-row sm:items-center sm:justify-between sm:p-10">
             <div>

@@ -38,16 +38,10 @@
   }
 }
 
-/* ---------- section washes ----------
-   The landing supplies its own backdrop: each section carries a full-bleed
-   gradient wash that peaks mid-section and fades to near-white before the
-   next one starts. The white seam between washes is what reads as the
-   division between sections, so no rules or borders are needed. The global
-   ink blooms are hidden here — two ambient systems would fight. */
-body:has(.v3) .ink-bg {
-  display: none;
-}
-
+/* ---------- hero wash ----------
+   The hero carries its own self-contained gradient wash, confined to its
+   own section. Every section below it keeps the site-wide <InkBackground />
+   ambient blooms (same atmosphere as main) — no override needed here. */
 .v3 > section {
   position: relative;
 }
@@ -72,38 +66,6 @@ body:has(.v3) .ink-bg {
     radial-gradient(60% 58% at 46% 34%, rgba(255, 255, 255, 0.55), transparent 80%),
     radial-gradient(90% 84% at 0% 22%, rgba(96, 140, 232, 0.4), transparent 80%),
     radial-gradient(100% 82% at 54% 112%, rgba(70, 108, 224, 0.44), transparent 82%);
-}
-
-/* how it works: the boldest wash on the page — cool blue, centered */
-.band-blue::before {
-  background:
-    radial-gradient(64% 50% at 50% 54%, rgba(10, 92, 255, 0.2), transparent 72%),
-    radial-gradient(46% 42% at 16% 38%, rgba(96, 165, 250, 0.24), transparent 70%),
-    radial-gradient(44% 40% at 86% 64%, rgba(122, 132, 255, 0.22), transparent 70%);
-}
-
-/* services: shifts lavender so the section reads as its own chapter */
-.band-lavender::before {
-  background:
-    radial-gradient(60% 46% at 50% 50%, rgba(124, 108, 255, 0.16), transparent 72%),
-    radial-gradient(44% 40% at 82% 30%, rgba(10, 92, 255, 0.13), transparent 70%),
-    radial-gradient(42% 38% at 12% 70%, rgba(140, 150, 255, 0.17), transparent 70%);
-}
-
-/* faq: quiet sky wash, lighter than its neighbours */
-.band-sky::before {
-  background:
-    radial-gradient(56% 46% at 42% 52%, rgba(96, 165, 250, 0.16), transparent 72%),
-    radial-gradient(40% 38% at 84% 60%, rgba(122, 132, 255, 0.13), transparent 70%);
-}
-
-/* reserve banner: the wash sinks to the bottom edge and deepens, closing
-   the page the way the reference art pools colour at its foot */
-.band-foot::before {
-  background:
-    radial-gradient(70% 62% at 50% 108%, rgba(10, 92, 255, 0.26), transparent 74%),
-    radial-gradient(42% 46% at 12% 112%, rgba(76, 44, 226, 0.2), transparent 70%),
-    radial-gradient(40% 42% at 88% 104%, rgba(96, 165, 250, 0.2), transparent 70%);
 }
 
 /* ---------- glass primitives ---------- */
