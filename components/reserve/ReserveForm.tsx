@@ -1,16 +1,20 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, useReducedMotion } from 'motion/react';
 import { trackEvent } from '@/lib/analytics';
+import { apiFetch, ApiError } from '@/lib/api';
+import { startKakaoLogin, stashPending, takePending } from '@/lib/oauth';
 import { KakaoIcon } from '@/components/kit/KakaoIcon';
+import { ErrorPopup } from '@/components/kit/ErrorPopup';
 import { ReserveBackdrop } from '@/components/reserve/ReserveBackdrop';
 import { CardStack } from '@/components/reserve/CardStack';
 import { SuccessCard } from '@/components/reserve/SuccessCard';
 import { demoReportId } from '@/lib/report-data';
-import type { VisitTiming, ReservationSource } from '@/lib/types';
+import type { VisitTiming, ReservationSource, ReservationApiResponse } from '@/lib/types';
 
 const VISIT_TIMINGS: VisitTiming[] = ['1주 내', '1개월 내', '미정'];
+const PENDING_KEY = 'hs_pending_reservation';
 
 type FieldKey = 'name' | 'phone' | 'region' | 'visitTiming';
 type Values = {
@@ -191,6 +195,7 @@ function TimingOption({
 /* -------------------------------------------------------------------- page */
 
 export function ReserveForm() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const src = (searchParams.get('src') as ReservationSource) ?? 'landing';
   const reportId = searchParams.get('reportId') ?? undefined;
@@ -200,11 +205,13 @@ export function ReserveForm() {
   const doneFromUrl = searchParams.get('done') === '1';
   const queueFromUrl = searchParams.get('queue');
   const regionFromUrl = searchParams.get('region') ?? '';
-  // Temporary preview hook for the premium variant of the same success card
-  // (not yet reachable through the real premium flow — that lands here once
-  // the OAuth wiring in section C is built). Safe to remove once that exists.
+  // The premium request flow (UpgradeCard) also lands on this same success
+  // card after its own OAuth round trip completes — see `variant`/`requestId`.
   const previewVariant = searchParams.get('variant');
   const requestIdFromUrl = searchParams.get('requestId') ?? undefined;
+  // Set by the backend when it redirects back from Kakao login
+  // (PROTOTYPE_API.md §2) — handled once in the effect below.
+  const oauthResult = searchParams.get('oauth');
   const reduceMotion = useReducedMotion();
 
   const [values, setValues] = useState<Values>({
@@ -215,7 +222,9 @@ export function ReserveForm() {
   });
   const [errors, setErrors] = useState<Errors>({});
   const [touched, setTouched] = useState<Partial<Record<FieldKey, boolean>>>({});
-  const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const processedOAuthRef = useRef(false);
 
   const refs = {
     name: useRef<HTMLInputElement>(null),
@@ -248,8 +257,11 @@ export function ReserveForm() {
     setErrors((prev) => ({ ...prev, [key]: validate(values)[key] }));
   }
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  // The single Kakao button both logs the user in and submits this form —
+  // there is no separate submit button. It validates locally, stashes the
+  // values (a full-page OAuth redirect destroys React state), then starts
+  // the Kakao login. `oauth=success` on return resumes and posts them.
+  function beginKakaoSubmit() {
     const found = validate(values);
     setErrors(found);
     setTouched({ name: true, phone: true, region: true, visitTiming: true });
@@ -263,8 +275,59 @@ export function ReserveForm() {
     }
 
     trackEvent('reserve_phone_complete', { src, reportId });
-    setSubmitted(true);
+    stashPending(PENDING_KEY, values);
+    startKakaoLogin(`${window.location.pathname}${window.location.search}`);
   }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    beginKakaoSubmit();
+  }
+
+  // Resumes the stashed form values after the Kakao redirect returns, then
+  // submits the reservation exactly once (PROTOTYPE_API.md §2, §6).
+  useEffect(() => {
+    if (!oauthResult || processedOAuthRef.current) return;
+    processedOAuthRef.current = true;
+
+    if (oauthResult === 'error') {
+      const pending = takePending<Values>(PENDING_KEY);
+      if (pending) setValues(pending);
+      setApiError('카카오 로그인에 실패했어요. 다시 시도해주세요.');
+      return;
+    }
+
+    const pending = takePending<Values>(PENDING_KEY);
+    if (!pending) {
+      setApiError('입력한 정보를 찾을 수 없어요. 다시 입력해주세요.');
+      return;
+    }
+
+    setValues(pending);
+    trackEvent('login_complete', { src, reportId, provider: 'kakao' });
+    setIsSubmitting(true);
+    apiFetch<ReservationApiResponse>('/reservations', {
+      method: 'POST',
+      body: JSON.stringify({
+        reportId,
+        name: pending.name,
+        phone: pending.phone,
+        region: pending.region,
+        visitTiming: pending.visitTiming,
+        src,
+      }),
+    })
+      .then((response) => {
+        router.replace(
+          `/reserve?done=1&queue=${response.queueNumber}&region=${encodeURIComponent(response.region)}`
+        );
+      })
+      .catch((err) => {
+        setIsSubmitting(false);
+        setApiError(err instanceof ApiError ? err.message : '예약 접수에 실패했어요. 다시 시도해주세요.');
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [oauthResult]);
 
   const enter = {
     initial: reduceMotion ? false : ({ opacity: 0, y: 14 } as const),
@@ -276,7 +339,7 @@ export function ReserveForm() {
     return <SuccessCard variant="premium" requestId={requestIdFromUrl} reportId={reportId ?? demoReportId} />;
   }
 
-  if (submitted || doneFromUrl) {
+  if (doneFromUrl) {
     return (
       <SuccessCard
         variant="reservation"
@@ -406,14 +469,25 @@ export function ReserveForm() {
 
           <button
             type="button"
-            onClick={() => trackEvent('login_complete', { src, reportId, provider: 'kakao' })}
-            className="mt-2 flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#FEE500] text-[14px] font-semibold text-black/85 transition-all duration-150 hover:brightness-95 active:scale-[0.98]"
+            onClick={beginKakaoSubmit}
+            disabled={isSubmitting}
+            className="mt-2 flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#FEE500] text-[14px] font-semibold text-black/85 transition-all duration-150 hover:brightness-95 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
           >
             <KakaoIcon className="size-[17px]" />
-            카카오로 사전예약 하기
+            {isSubmitting ? '접수 처리 중...' : '카카오로 사전예약 하기'}
           </button>
         </CardStack>
       </motion.div>
+      {apiError ? (
+        <ErrorPopup
+          message={apiError}
+          onRetry={() => {
+            setApiError(null);
+            beginKakaoSubmit();
+          }}
+          onDismiss={() => setApiError(null)}
+        />
+      ) : null}
     </main>
   );
 }

@@ -1,5 +1,6 @@
 'use client';
-import { use, useEffect } from 'react';
+import { Suspense, use, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { motion, useReducedMotion } from 'motion/react';
 import { demoReport } from '@/lib/report-data';
 import { ReportSummary } from '@/components/report/ReportSummary';
@@ -10,8 +11,11 @@ import { SurveyCard } from '@/components/report/SurveyCard';
 import { Disclaimer } from '@/components/report/Disclaimer';
 import { trackEvent } from '@/lib/analytics';
 
-export default function ReportPage({ params }: { params: Promise<{ id: string }> }) {
+function ReportContent({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  // Set by the backend when it redirects back from Kakao login, consumed by
+  // UpgradeCard's premium-request flow (PROTOTYPE_API.md §2).
+  const oauthResult = useSearchParams().get('oauth');
   const reduceMotion = useReducedMotion();
 
   useEffect(() => {
@@ -26,7 +30,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
       </p>
     </header>,
     <ReportSummary key="summary" report={demoReport} />,
-    <UpgradeCard key="upgrade" reportId={id} />,
+    <UpgradeCard key="upgrade" reportId={id} oauthResult={oauthResult} />,
     <VisitCta key="visit" reportId={id} src="basic_report" />,
     <SurveyCard key="survey" />,
     <Disclaimer key="disclaimer" />,
@@ -48,5 +52,14 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
         ))}
       </div>
     </main>
+  );
+}
+
+export default function ReportPage({ params }: { params: Promise<{ id: string }> }) {
+  // useSearchParams requires a Suspense boundary for prerendering (Next docs).
+  return (
+    <Suspense fallback={null}>
+      <ReportContent params={params} />
+    </Suspense>
   );
 }

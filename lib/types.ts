@@ -88,3 +88,22 @@ export interface Reservation {
   visitTiming: VisitTiming;
   src: ReservationSource;
 }
+
+// Response shapes for the OAuth-gated submission calls (PROTOTYPE_API.md §5, §6).
+
+export interface ReservationApiResponse extends Reservation {
+  queueNumber: number;
+  status: 'received' | 'contacted' | 'confirmed' | 'cancelled';
+}
+
+export interface PremiumRequestApiResponse {
+  id: string;
+  reportId: string;
+  userId: string;
+  provider: LoginProvider;
+  dong: string;
+  ho: string;
+  status: 'queued' | 'writing' | 'sent';
+  requestedAt: string;
+  sentAt: string | null;
+}
