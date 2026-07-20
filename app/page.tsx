@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { FaqAccordion } from "@/components/landing/FaqAccordion";
 import { HeroGradient } from "@/components/landing/HeroGradient";
+import { SheetGradient } from "@/components/landing/SheetGradient";
 import { Logo } from "@/components/kit/Logo";
 import { ReportSummary } from "@/components/report/ReportSummary";
 import { demoReport } from "@/lib/report-data";
@@ -454,6 +455,9 @@ export default function LandingPage() {
           its rounded top corner peeks into the hero above, hinting at the
           next section before the visitor scrolls. */}
       <div className="main-sheet -mt-8 sm:-mt-12">
+      <div className="sheet-canvas" aria-hidden>
+        <SheetGradient />
+      </div>
       {/* how it works — centered header while the puzzle stacks vertically
           (below lg), left-aligned once it becomes a horizontal row (lg+) */}
       <section id="how" className="scroll-mt-24 px-4 py-16 sm:py-[102px]">

@@ -89,8 +89,89 @@ body:has(.v3) .ink-bg {
   }
 }
 
-.main-sheet > section {
+.main-sheet > section,
+.main-sheet > footer {
   position: relative;
+  z-index: 1;
+}
+
+/* ---------- main-sheet ambient blobs ----------
+   Faint theme-colored gradient blooms tinting the white sheet under the
+   "how it works" section and everything below it (see SheetGradient).
+   Absolutely positioned and clipped to the sheet's rounded top so they
+   scroll with the content; z-index 0 keeps them behind the sections. */
+.sheet-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  border-top-left-radius: 40px;
+  border-top-right-radius: 40px;
+  pointer-events: none;
+}
+
+@media (min-width: 640px) {
+  .sheet-canvas {
+    border-top-left-radius: 64px;
+    border-top-right-radius: 64px;
+  }
+}
+
+.sheet-bloom-wrap {
+  position: absolute;
+  width: 44vw;
+  height: 44vw;
+  min-width: 340px;
+  min-height: 340px;
+  will-change: transform;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sheet-bloom {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  filter: blur(76px);
+  transition: opacity 0.5s ease-out;
+  pointer-events: none;
+}
+
+@keyframes sheet-drift-a {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(1.5vmax, -1.2vmax);
+  }
+}
+
+@keyframes sheet-drift-b {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(-1.2vmax, 1.6vmax);
+  }
+}
+
+.sheet-drift-a {
+  animation: sheet-drift-a 26s ease-in-out infinite;
+}
+
+.sheet-drift-b {
+  animation: sheet-drift-b 30s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet-bloom-wrap {
+    transition: none;
+  }
+  .sheet-drift-a,
+  .sheet-drift-b {
+    animation: none;
+  }
 }
 
 /* ---------- hero scroll cue ---------- */
