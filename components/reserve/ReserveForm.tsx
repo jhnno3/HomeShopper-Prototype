@@ -284,8 +284,6 @@ export function ReserveForm() {
     if (values.visitTiming) timingRevealedRef.current = true;
   }, [values.visitTiming]);
 
-  const complete = Object.keys(validate(values)).length === 0;
-
   function set<K extends keyof Values>(key: K, value: Values[K]) {
     const next = { ...values, [key]: value };
     setValues(next);
@@ -497,20 +495,6 @@ export function ReserveForm() {
             </span>{' '}
             표시된 항목을 모두 입력해야 접수돼요.
           </p>
-
-            {/* Kept clickable while incomplete so pressing it surfaces what's missing
-                rather than leaving the user staring at a dead button. */}
-            <button
-              type="submit"
-              aria-disabled={!complete}
-              className={`mt-1 flex h-[50px] w-full cursor-pointer items-center justify-center rounded-xl text-[15px] font-semibold text-white transition-all duration-150 active:scale-[0.98] ${
-                complete
-                  ? 'bg-[var(--color-blue)] shadow-[0_10px_24px_-12px_rgba(0,131,255,0.55)] hover:bg-[#0072e0]'
-                  : 'bg-[#B8BDC9]'
-              }`}
-            >
-              사전예약 신청
-            </button>
           </form>
 
           <button
@@ -519,7 +503,7 @@ export function ReserveForm() {
             className="mt-2 flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#FEE500] text-[14px] font-semibold text-black/85 transition-all duration-150 hover:brightness-95 active:scale-[0.98]"
           >
             <KakaoIcon className="size-[17px]" />
-            카카오 로그인
+            카카오로 사전예약 하기
           </button>
         </CardStack>
       </motion.div>
