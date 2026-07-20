@@ -40,14 +40,15 @@
 }
 
 /* ---------- ambient canvas backdrop ----------
-   Reference composition: a fixed, viewport-sized mist field with two
-   enormous soft orbs drifting behind everything. Only the hero sits
-   directly on it — every later section rides the white .main-sheet that
-   slides over the canvas as you scroll. The site-wide ink blooms are
-   hidden here; two ambient systems would fight. The reference builds its
-   softness with filter: blur(120px), but a page-sized blur layer hangs
-   the compositor — the identical look comes from long radial-gradient
-   falloffs at low alpha, so the orbs stay filter-free. */
+   Holds the hero's floating-gradient blobs (see HeroGradient), scoped to
+   the hero section itself — absolutely positioned and clipped to its
+   bounds, not a page-wide fixed layer. It used to be `position: fixed`
+   covering the whole viewport, but that made the glow appear to drift as
+   you scrolled: the fixed canvas kept animating underneath while the
+   white .main-sheet rose to cover it, and the two motions together read
+   as the gradient sliding down the page. Scoping it to the hero means it
+   simply scrolls away with the hero's own box instead. The site-wide ink
+   blooms are hidden here; two ambient systems would fight. */
 body:has(.v3) .ink-bg {
   display: none;
 }
@@ -61,56 +62,17 @@ body:has(.v3) .ink-bg {
 }
 
 .ambient-canvas {
-  position: fixed;
+  position: absolute;
   inset: 0;
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
-  background: #f6f8fc;
-}
-
-.orb {
-  position: absolute;
-  border-radius: 50%;
-  will-change: transform;
-}
-
-.orb-1 {
-  width: 80vw;
-  height: 80vw;
-  top: -20%;
-  left: 10%;
-  background: radial-gradient(circle, rgba(126, 169, 255, 0.42) 0%, rgba(126, 169, 255, 0) 70%);
-  animation: orb-float 25s ease-in-out infinite alternate;
-}
-
-.orb-2 {
-  width: 60vw;
-  height: 60vw;
-  bottom: -10%;
-  right: -10%;
-  background: radial-gradient(circle, rgba(190, 213, 250, 0.55) 0%, rgba(190, 213, 250, 0) 70%);
-  animation: orb-float 30s ease-in-out infinite alternate-reverse;
-}
-
-@keyframes orb-float {
-  0% {
-    transform: translate(0, 0) scale(1);
-  }
-  100% {
-    transform: translate(5%, 10%) scale(1.1);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .orb {
-    animation: none;
-  }
 }
 
 /* ---------- main sheet ----------
    White surface with a big rounded top that carries everything after the
-   hero and scrolls over the fixed ambient canvas, per the reference. */
+   hero, pulled up slightly (see the -mt-* utility where it's used) so its
+   corner peeks into the hero above, per the reference. */
 .main-sheet {
   position: relative;
   z-index: 10;

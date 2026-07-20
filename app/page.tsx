@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { FaqAccordion } from "@/components/landing/FaqAccordion";
+import { HeroGradient } from "@/components/landing/HeroGradient";
 import { Logo } from "@/components/kit/Logo";
 import { ReportSummary } from "@/components/report/ReportSummary";
 import { resultSummary } from "@/lib/report-data";
@@ -300,14 +301,6 @@ export default function LandingPage() {
 
   return (
     <div className="v3 min-h-dvh">
-      {/* ambient canvas — fixed mist field with two drifting orbs; only the
-          hero sits on it, later sections ride .main-sheet over it. Styled in
-          landing.css */}
-      <div className="ambient-canvas" aria-hidden>
-        <div className="orb orb-1" />
-        <div className="orb orb-2" />
-      </div>
-
       {/* nav */}
       <header
         className={`g-navbar sticky top-0 z-40 transition-shadow duration-300 ${scrolled ? "shadow-[0_8px_24px_-14px_rgba(11,59,167,0.35)]" : ""}`}
@@ -333,12 +326,21 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* hero — fills the viewport (minus navbar) and centers, sitting
-          directly on the ambient canvas like the reference. The content
+      {/* hero — fills the viewport (minus navbar) and centers. The content
           wrapper widens at larger breakpoints (and the columns' gap grows
           with it) so the layout spreads across the available width instead
-          of staying pinned to a fixed, narrow column on big screens. */}
+          of staying pinned to a fixed, narrow column on big screens.
+
+          The ambient canvas is scoped to this section (absolute + clipped,
+          not page-wide fixed) so the floating-gradient blobs scroll away
+          with the hero instead of continuing to animate on a fixed layer
+          underneath — a fixed canvas made the color appear to drift/slide
+          as the white .main-sheet below rose to cover it during scroll. */}
       <section className="relative flex min-h-[calc(100svh-var(--nav-h))] items-center px-4 py-12 sm:px-6 sm:py-16 lg:px-10 xl:px-16">
+        <div className="ambient-canvas" aria-hidden>
+          <HeroGradient />
+        </div>
+
         <div className="relative z-10 mx-auto w-full max-w-5xl lg:max-w-6xl xl:max-w-7xl">
           {/*
             Grid areas decouple visual order from DOM order: mobile stacks
