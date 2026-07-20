@@ -4,7 +4,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { GlassCard } from "@/components/kit/GlassCard";
 
 const STEPS = [
-  { icon: ClipboardPaste, title: "붙여넣기", desc: "매물 링크나 주소를 입력하세요" },
+  { icon: ClipboardPaste, title: "붙여넣기", desc: "다방 매물 링크를 붙여넣으세요" },
   { icon: Timer, title: "30초 분석", desc: "공공 데이터로 서류를 자동 확인해요" },
   { icon: FileCheck2, title: "리포트", desc: "실거래가·건축물대장·중개업소 확인 결과를 받아보세요" },
 ];

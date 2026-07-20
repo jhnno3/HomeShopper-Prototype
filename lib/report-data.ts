@@ -1,21 +1,45 @@
-import type { ResultSummary } from './types';
+import type { ApiReport } from './types';
 
 export const demoReportId = 'demo-1';
 
-// Sample result_summary payload — replaced by the analysis API once connected.
-export const resultSummary: ResultSummary = {
-  market_price: {
-    deal_count: 403,
-    avg_deposit_manwon: 75670,
-    avg_deposit_text: '7억 5,670만원',
-    avg_monthly_rent_manwon: null,
-    avg_monthly_rent_text: null,
+// Sample GET /api/v1/reports/{reportId} payload — replaced by the real API
+// response once connected. Shape follows PROTOTYPE_API.md §3.
+export const demoReport: ApiReport = {
+  id: demoReportId,
+  submissionId: demoReportId,
+  tier: 'basic',
+  addressMasked: '서울 마포구 연남동 OO번지 인근',
+  dealType: '전세',
+  deposit: 75670,
+  price: { deposit: 75670, monthly_rent: null },
+  sourceUrl: null,
+  roomId: null,
+  regId: '가3691-공2001',
+  facts: {
+    recentTransactions: {
+      summary: '인근 전세 실거래 403건, 보정 평균 7억 5,670만원',
+      count: 403,
+      priceRangeLow: 70000,
+      priceRangeHigh: 80000,
+    },
+    buildingRegistry: {
+      summary: '주용도: 공동주택, 사용승인연도: 1992년',
+      hasViolation: false,
+      mainUse: '공동주택',
+      approvalYear: 1992,
+    },
+    agencyValidity: {
+      summary: '등록 상태 정상',
+      isValid: true,
+      registrationNumber: '가3691-공2001',
+    },
   },
-  building: {
-    main_purpose: '공동주택',
-    use_approval_year: 1992,
+  concerns: [],
+  apiStatus: {
+    transactions: 'ok',
+    registry: 'ok',
+    agency: 'ok',
   },
-  agency: {
-    reg_no_valid: true,
-  },
+  shareCount: 0,
+  viewedAt: new Date().toISOString(),
 };

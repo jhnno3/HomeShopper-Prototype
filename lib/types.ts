@@ -1,20 +1,64 @@
-// Shape of the analysis API's result_summary payload — field names follow the
-// API contract (snake_case), not JS convention.
-export interface ResultSummary {
-  market_price: {
-    deal_count: number;
-    avg_deposit_manwon: number;
-    avg_deposit_text: string;
-    avg_monthly_rent_manwon: number | null;
-    avg_monthly_rent_text: string | null;
+// Shape of `GET /api/v1/reports/{reportId}` (PROTOTYPE_API.md §3). Each
+// `facts.*` section can independently be missing (address input has no
+// agencyValidity at all) or fail (`apiStatus` per section), so every field
+// that isn't guaranteed is nullable — components must render a fallback
+// rather than assume presence.
+export type ApiStatus = 'ok' | 'failed' | 'pending';
+
+export interface ReportFacts {
+  recentTransactions: {
+    summary: string;
+    count: number;
+    priceRangeLow: number;
+    priceRangeHigh: number;
+  } | null;
+  buildingRegistry: {
+    summary: string;
+    /**
+     * Whether the building is a registered violation (위반건축물). The
+     * Python analysis server doesn't provide this for every listing, so it
+     * is frequently `null` — that must render as "확인 불가", never as a
+     * safe/no-violation result (PROTOTYPE_API.md §3).
+     */
+    hasViolation: boolean | null;
+    mainUse: string;
+    approvalYear: number;
+  } | null;
+  agencyValidity: {
+    summary: string;
+    isValid: boolean;
+    registrationNumber: string;
+  } | null;
+}
+
+export interface RegistryFacts {
+  ownerMatchesLandlord: boolean;
+  maxClaimAmount: number;
+  priorLienSummary: string;
+  priorDepositInfo: string;
+}
+
+export interface ApiReport {
+  id: string;
+  submissionId: string;
+  tier: 'basic' | 'premium';
+  addressMasked: string;
+  dealType: '전세' | '월세' | '매매';
+  deposit: number | null;
+  price: { deposit: number | null; monthly_rent: number | null };
+  sourceUrl: string | null;
+  roomId: string | null;
+  regId: string | null;
+  facts: ReportFacts;
+  registryFacts?: RegistryFacts;
+  concerns: string[];
+  apiStatus: {
+    transactions: ApiStatus;
+    registry: ApiStatus;
+    agency: ApiStatus;
   };
-  building: {
-    main_purpose: string;
-    use_approval_year: number;
-  };
-  agency: {
-    reg_no_valid: boolean | null;
-  };
+  shareCount: number;
+  viewedAt: string;
 }
 
 export type LoginProvider = 'kakao' | 'naver';
@@ -31,7 +75,7 @@ export interface PremiumRequest {
 
 export type VisitTiming = '1주 내' | '1개월 내' | '미정';
 
-export type ReservationSource = 'basic_report' | 'landing';
+export type ReservationSource = 'basic_report' | 'premium_report' | 'premium_upsell' | 'landing';
 
 export interface Reservation {
   id: string;

@@ -1,7 +1,7 @@
 'use client';
 import { use, useEffect } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
-import { resultSummary } from '@/lib/report-data';
+import { demoReport } from '@/lib/report-data';
 import { ReportSummary } from '@/components/report/ReportSummary';
 import { UpgradeCard } from '@/components/report/UpgradeCard';
 import { VisitCta } from '@/components/report/VisitCta';
@@ -25,7 +25,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
         공개 데이터로 확인한 결과를 정리했어요
       </p>
     </header>,
-    <ReportSummary key="summary" summary={resultSummary} />,
+    <ReportSummary key="summary" report={demoReport} />,
     <UpgradeCard key="upgrade" reportId={id} />,
     <VisitCta key="visit" reportId={id} src="basic_report" />,
     <SurveyCard key="survey" />,

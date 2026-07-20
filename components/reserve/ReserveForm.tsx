@@ -1,11 +1,13 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { motion, useReducedMotion } from 'motion/react';
 import { trackEvent } from '@/lib/analytics';
 import { KakaoIcon } from '@/components/kit/KakaoIcon';
-import { ReserveBackdrop, CardBloom } from '@/components/reserve/ReserveBackdrop';
+import { ReserveBackdrop } from '@/components/reserve/ReserveBackdrop';
+import { CardStack } from '@/components/reserve/CardStack';
+import { SuccessCard } from '@/components/reserve/SuccessCard';
+import { demoReportId } from '@/lib/report-data';
 import type { VisitTiming, ReservationSource } from '@/lib/types';
 
 const VISIT_TIMINGS: VisitTiming[] = ['1주 내', '1개월 내', '미정'];
@@ -27,8 +29,10 @@ function validate(values: Values): Errors {
 
   const digits = values.phone.replace(/\D/g, '');
   if (!digits) errors.phone = '연락 가능한 전화번호를 입력해주세요.';
-  else if (digits.length < 10 || digits.length > 11)
-    errors.phone = '숫자 10~11자리로 입력해주세요. 예: 010-1234-5678';
+  // Server accepts 9~11 digits (PROTOTYPE_API.md §5) — 9 covers 02-xxx-xxxx
+  // Seoul landlines without an area-code prefix.
+  else if (digits.length < 9 || digits.length > 11)
+    errors.phone = '숫자 9~11자리로 입력해주세요. 예: 010-1234-5678';
 
   if (!values.region.trim()) errors.region = '희망 지역을 입력해주세요. 예: 서울 마포구';
   if (!values.visitTiming) errors.visitTiming = '방문 예정 시기를 하나 골라주세요.';
@@ -50,71 +54,6 @@ function formatPhone(raw: string): string {
 }
 
 /* ---------------------------------------------------------------- surfaces */
-
-/**
- * Fractal-noise grain, tiled at low opacity with `mix-blend-overlay` so it
- * reads as paper texture rather than dirt. Encoded inline as an SVG data URI —
- * no network request, no binary asset to track in the repo.
- */
-const GRAIN_SVG =
-  "data:image/svg+xml;utf8," +
-  encodeURIComponent(
-    `<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'>
-      <filter id='n'>
-        <feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch' />
-        <feColorMatrix type='saturate' values='0' />
-      </filter>
-      <rect width='100%' height='100%' filter='url(#n)' />
-    </svg>`
-  );
-
-function CardGrain() {
-  return (
-    <div
-      aria-hidden
-      className="pointer-events-none absolute inset-0 rounded-[28px] opacity-[0.05] mix-blend-overlay"
-      style={{ backgroundImage: `url("${GRAIN_SVG}")`, backgroundRepeat: 'repeat', backgroundSize: '180px 180px' }}
-    />
-  );
-}
-
-/**
- * The card, with two paper layers fanned out behind it. Each layer is the
- * exact same size as the front card (inset-0, not shrunk or top-shifted) and
- * only rotated around its own center — that's what makes the rotated corners
- * peek out past every edge of the front card, like a dealt stack of pages,
- * instead of only overhanging the top. Both layers rotate the same direction
- * (progressively less as they get closer to the front) so the stack reads as
- * one deck fanned one way, not two cards splayed to opposite sides. The
- * layers are purely decorative and carry no content, so they're hidden from AT.
- *
- * The front card itself is real glass — translucent fill plus backdrop blur
- * and saturation boost, so the bloom behind it tints through — not just the
- * paper layers behind it. Kept at 85% opacity rather than the ~70% the
- * site-wide .bg-glass utility uses, since a form's labels and input text need
- * more contrast than a decorative panel does.
- */
-function CardStack({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="relative">
-      <CardBloom />
-      <div
-        aria-hidden
-        className="absolute inset-0 rounded-[28px] bg-white/20 shadow-[0_8px_24px_-18px_rgba(23,31,68,0.35)]"
-        style={{ transform: 'rotate(-8deg)' }}
-      />
-      <div
-        aria-hidden
-        className="absolute inset-0 rounded-[28px] bg-white/40 shadow-[0_10px_28px_-20px_rgba(23,31,68,0.4)]"
-        style={{ transform: 'rotate(-4deg)' }}
-      />
-      <div className="relative rounded-[28px] border border-white/70 bg-white/85 p-6 shadow-[0_28px_64px_-28px_rgba(23,31,68,0.32),0_2px_6px_rgba(23,31,68,0.04)] backdrop-blur-xl backdrop-saturate-150">
-        <CardGrain />
-        {children}
-      </div>
-    </div>
-  );
-}
 
 /** Brand-tinted status pill — the page's first hit of color. */
 function Eyebrow({ children }: { children: React.ReactNode }) {
@@ -255,6 +194,17 @@ export function ReserveForm() {
   const searchParams = useSearchParams();
   const src = (searchParams.get('src') as ReservationSource) ?? 'landing';
   const reportId = searchParams.get('reportId') ?? undefined;
+  // The success card is URL-addressable (`?done=1`) so flows that re-enter
+  // the app via a full page load — like the Kakao OAuth redirect — can land
+  // on it directly. `queue` and `region` carry the values the card shows.
+  const doneFromUrl = searchParams.get('done') === '1';
+  const queueFromUrl = searchParams.get('queue');
+  const regionFromUrl = searchParams.get('region') ?? '';
+  // Temporary preview hook for the premium variant of the same success card
+  // (not yet reachable through the real premium flow — that lands here once
+  // the OAuth wiring in section C is built). Safe to remove once that exists.
+  const previewVariant = searchParams.get('variant');
+  const requestIdFromUrl = searchParams.get('requestId') ?? undefined;
   const reduceMotion = useReducedMotion();
 
   const [values, setValues] = useState<Values>({
@@ -322,60 +272,17 @@ export function ReserveForm() {
     transition: { duration: 0.28, ease: 'easeOut' as const },
   };
 
-  if (submitted) {
+  if (doneFromUrl && previewVariant === 'premium') {
+    return <SuccessCard variant="premium" requestId={requestIdFromUrl} reportId={reportId ?? demoReportId} />;
+  }
+
+  if (submitted || doneFromUrl) {
     return (
-      <main className="relative flex flex-1 items-center justify-center overflow-hidden px-5 py-16">
-        <ReserveBackdrop />
-        <motion.div {...enter} className="relative w-full max-w-[420px]">
-          <CardStack>
-            <div className="text-center">
-              <svg
-                aria-hidden
-                viewBox="0 0 24 24"
-                fill="none"
-                className="mx-auto size-9 text-[var(--color-success)]"
-              >
-                <circle cx="12" cy="12" r="9.25" stroke="currentColor" strokeWidth="1.5" />
-                <path
-                  d="M8 12.4l2.6 2.6L16.3 9"
-                  stroke="currentColor"
-                  strokeWidth="1.75"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <h1 className="mt-3 text-[21px] font-bold tracking-tight text-[var(--color-ink)]">
-                사전예약이 완료됐어요
-              </h1>
-              <p className="mt-2 text-[13.5px] leading-snug text-[var(--color-slate)]">
-                오픈하면{' '}
-                <span className="font-semibold text-[var(--color-ink)]">
-                  {values.region.trim()}
-                </span>{' '}
-                지역 동행 임장을 우선 배정해드릴게요.
-              </p>
-              <p className="mt-3.5 inline-flex rounded-full bg-[rgba(0,131,255,0.1)] px-3.5 py-1.5 text-[13px] font-semibold tabular-nums text-[var(--color-blue)]">
-                예약 순번 #128
-              </p>
-            </div>
-
-            <Link
-              href="/"
-              className="mt-5 flex h-11 w-full items-center justify-center rounded-xl bg-[var(--color-blue)] text-[14px] font-semibold text-white transition-all duration-150 hover:bg-[#0072e0] active:scale-[0.98]"
-            >
-              홈으로 돌아가기
-            </Link>
-
-            <button
-              type="button"
-              className="mt-2.5 flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#FEE500] text-[14px] font-semibold text-black/85 transition-all duration-150 hover:brightness-95 active:scale-[0.98]"
-            >
-              <KakaoIcon className="size-[18px]" />
-              카카오톡으로 오픈 소식 받기
-            </button>
-          </CardStack>
-        </motion.div>
-      </main>
+      <SuccessCard
+        variant="reservation"
+        queueNumber={queueFromUrl ?? undefined}
+        region={values.region.trim() || regionFromUrl || undefined}
+      />
     );
   }
 
