@@ -184,6 +184,11 @@ function focusHeroSearch() {
   el.focus({ preventScroll: true });
 }
 
+function scrollToHow(e: React.MouseEvent) {
+  e.preventDefault();
+  document.getElementById("how")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function CommandBar() {
   const router = useRouter();
   const reduce = useReducedMotion();
@@ -295,6 +300,14 @@ export default function LandingPage() {
 
   return (
     <div className="v3 min-h-dvh">
+      {/* ambient canvas — fixed mist field with two drifting orbs; only the
+          hero sits on it, later sections ride .main-sheet over it. Styled in
+          landing.css */}
+      <div className="ambient-canvas" aria-hidden>
+        <div className="orb orb-1" />
+        <div className="orb orb-2" />
+      </div>
+
       {/* nav */}
       <header
         className={`g-navbar sticky top-0 z-40 transition-shadow duration-300 ${scrolled ? "shadow-[0_8px_24px_-14px_rgba(11,59,167,0.35)]" : ""}`}
@@ -320,9 +333,13 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* hero */}
-      <section className="band band-hero relative px-4 pt-[38px] pb-16 sm:pt-[51px] sm:pb-[90px]">
-        <div className="relative z-10 mx-auto w-full max-w-5xl">
+      {/* hero — fills the viewport (minus navbar) and centers, sitting
+          directly on the ambient canvas like the reference. The content
+          wrapper widens at larger breakpoints (and the columns' gap grows
+          with it) so the layout spreads across the available width instead
+          of staying pinned to a fixed, narrow column on big screens. */}
+      <section className="relative flex min-h-[calc(100svh-var(--nav-h))] items-center px-4 py-12 sm:px-6 sm:py-16 lg:px-10 xl:px-16">
+        <div className="relative z-10 mx-auto w-full max-w-5xl lg:max-w-6xl xl:max-w-7xl">
           {/*
             Grid areas decouple visual order from DOM order: mobile stacks
             heading → search → report (search stays reachable above the fold
@@ -332,7 +349,7 @@ export default function LandingPage() {
             rows.
           */}
           <div
-            className="grid grid-cols-1 gap-y-9 [grid-template-areas:'heading'_'search'_'report'] sm:gap-y-10 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-x-12 lg:gap-y-9 lg:[grid-template-areas:'heading_report'_'search_report']"
+            className="grid grid-cols-1 gap-y-9 [grid-template-areas:'heading'_'search'_'report'] sm:gap-y-10 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-x-16 lg:gap-y-9 xl:gap-x-24 lg:[grid-template-areas:'heading_report'_'search_report']"
           >
             <motion.div
               className="mx-auto flex w-full max-w-xl flex-col items-center gap-6 text-center [grid-area:heading] lg:mx-0 lg:items-start lg:text-left"
@@ -376,7 +393,7 @@ export default function LandingPage() {
             </motion.div>
 
             <motion.div
-              className="mx-auto w-full max-w-sm shrink-0 [grid-area:report] lg:mx-0 lg:w-[340px] lg:max-w-none lg:justify-self-end lg:self-center"
+              className="mx-auto w-full max-w-sm shrink-0 [grid-area:report] lg:mx-0 lg:w-[340px] lg:max-w-none lg:justify-self-end lg:self-center xl:w-[380px]"
               initial={reduce ? false : { opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.65, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
@@ -394,8 +411,26 @@ export default function LandingPage() {
             </motion.div>
           </div>
         </div>
+
+        {/* scroll cue — short label + bouncing chevron inviting the visitor
+            into the next section; sits above the sheet's peeking corner */}
+        <a
+          href="#how"
+          onClick={scrollToHow}
+          className="scroll-cue absolute inset-x-0 bottom-6 z-10 mx-auto flex w-fit flex-col items-center gap-1.5 text-[12px] font-bold tracking-[0.14em] text-(--muted) transition-colors hover:text-(--royal-deep) sm:bottom-8"
+        >
+          이용 방법 보기
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </a>
       </section>
 
+      {/* white sheet — everything after the hero rides this rounded surface
+          as it scrolls over the fixed ambient canvas. Pulled up slightly so
+          its rounded top corner peeks into the hero above, hinting at the
+          next section before the visitor scrolls. */}
+      <div className="main-sheet -mt-8 sm:-mt-12">
       {/* how it works — centered header while the puzzle stacks vertically
           (below lg), left-aligned once it becomes a horizontal row (lg+) */}
       <section id="how" className="scroll-mt-24 px-4 py-16 sm:py-[102px]">
@@ -585,6 +620,7 @@ export default function LandingPage() {
           © 2026 홈쇼퍼 · 본 페이지는 서비스 검증을 위한 프리토타입입니다
         </p>
       </footer>
+      </div>
     </div>
   );
 }

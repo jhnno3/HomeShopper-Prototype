@@ -1,5 +1,5 @@
-/* Landing surface styling. Scoped under .v3. The ambient background lives
-   globally in theme.css (<InkBackground />), so .v3 stays transparent. */
+/* Landing surface styling. Scoped under .v3. The landing brings its own
+   fixed ambient canvas (mist + orbs) and hides the site-wide ink blooms. */
 .v3 {
   --royal: #0a5cff;
   --royal-deep: #0b3ba7;
@@ -33,39 +33,123 @@
     scroll-padding-top: 61px;
   }
 
-  .v3 > section {
+  .v3 > section,
+  .v3 .main-sheet > section {
     scroll-snap-align: start;
   }
 }
 
-/* ---------- hero wash ----------
-   The hero carries its own self-contained gradient wash, confined to its
-   own section. Every section below it keeps the site-wide <InkBackground />
-   ambient blooms (same atmosphere as main) — no override needed here. */
+/* ---------- ambient canvas backdrop ----------
+   Reference composition: a fixed, viewport-sized mist field with two
+   enormous soft orbs drifting behind everything. Only the hero sits
+   directly on it — every later section rides the white .main-sheet that
+   slides over the canvas as you scroll. The site-wide ink blooms are
+   hidden here; two ambient systems would fight. The reference builds its
+   softness with filter: blur(120px), but a page-sized blur layer hangs
+   the compositor — the identical look comes from long radial-gradient
+   falloffs at low alpha, so the orbs stay filter-free. */
+body:has(.v3) .ink-bg {
+  display: none;
+}
+
+.v3 {
+  background: #f6f8fc;
+}
+
 .v3 > section {
   position: relative;
 }
 
-.band::before {
-  content: "";
-  position: absolute;
-  inset: -70px 0;
-  z-index: -1;
+.ambient-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
   pointer-events: none;
+  background: #f6f8fc;
 }
 
-/* hero: soft atmospheric blend — periwinkle rising from the left and
-   bottom, a near-white core, and a warm cream-to-blush corner at the top
-   right, like light hitting haze. Wide, heavily-overlapping stops (rather
-   than tight isolated blooms) so each color bleeds into its neighbour
-   instead of reading as separate patches. */
-.band-hero::before {
-  background:
-    radial-gradient(65% 70% at 96% 6%, rgba(255, 241, 222, 0.5), transparent 78%),
-    radial-gradient(55% 66% at 92% 46%, rgba(238, 190, 208, 0.24), transparent 78%),
-    radial-gradient(60% 58% at 46% 34%, rgba(255, 255, 255, 0.55), transparent 80%),
-    radial-gradient(90% 84% at 0% 22%, rgba(96, 140, 232, 0.4), transparent 80%),
-    radial-gradient(100% 82% at 54% 112%, rgba(70, 108, 224, 0.44), transparent 82%);
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  will-change: transform;
+}
+
+.orb-1 {
+  width: 80vw;
+  height: 80vw;
+  top: -20%;
+  left: 10%;
+  background: radial-gradient(circle, rgba(126, 169, 255, 0.42) 0%, rgba(126, 169, 255, 0) 70%);
+  animation: orb-float 25s ease-in-out infinite alternate;
+}
+
+.orb-2 {
+  width: 60vw;
+  height: 60vw;
+  bottom: -10%;
+  right: -10%;
+  background: radial-gradient(circle, rgba(190, 213, 250, 0.55) 0%, rgba(190, 213, 250, 0) 70%);
+  animation: orb-float 30s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes orb-float {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(5%, 10%) scale(1.1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orb {
+    animation: none;
+  }
+}
+
+/* ---------- main sheet ----------
+   White surface with a big rounded top that carries everything after the
+   hero and scrolls over the fixed ambient canvas, per the reference. */
+.main-sheet {
+  position: relative;
+  z-index: 10;
+  background: #fff;
+  border-top-left-radius: 40px;
+  border-top-right-radius: 40px;
+  box-shadow: 0 -20px 80px rgba(0, 0, 0, 0.04);
+}
+
+@media (min-width: 640px) {
+  .main-sheet {
+    border-top-left-radius: 64px;
+    border-top-right-radius: 64px;
+  }
+}
+
+.main-sheet > section {
+  position: relative;
+}
+
+/* ---------- hero scroll cue ---------- */
+.scroll-cue svg {
+  animation: scroll-cue-bounce 2s ease-in-out infinite;
+}
+
+@keyframes scroll-cue-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(5px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-cue svg {
+    animation: none;
+  }
 }
 
 /* ---------- glass primitives ---------- */
