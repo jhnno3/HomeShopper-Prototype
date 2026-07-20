@@ -6,12 +6,9 @@ import { Button } from '@/components/kit/Button';
 import { GlassCard } from '@/components/kit/GlassCard';
 import { trackEvent } from '@/lib/analytics';
 import { demoReportId } from '@/lib/report-data';
+import { classifyListingInput } from '@/lib/listing-input';
 
 type Step = 'input' | 'progress';
-
-function looksLikeUrl(value: string) {
-  return /^https?:\/\//i.test(value.trim());
-}
 
 function SegmentedButton({
   active,
@@ -40,23 +37,44 @@ function SegmentedButton({
 function AnalyzeFlow() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  // A source passed from the landing search box skips the 매물 정보 step.
+  // A valid source passed from the landing search box skips the 매물 정보
+  // step; an invalid one falls back to the input step with the error shown.
   const initialSource = (searchParams.get('source') ?? '').trim();
-  const [step, setStep] = useState<Step>(initialSource ? 'progress' : 'input');
+  const initialInput = initialSource ? classifyListingInput(initialSource) : null;
+  const startsInProgress = initialInput !== null && initialInput.kind !== 'invalid';
+
+  const [step, setStep] = useState<Step>(startsInProgress ? 'progress' : 'input');
   const [inputMode, setInputMode] = useState<'link' | 'address'>(
-    initialSource && !looksLikeUrl(initialSource) ? 'address' : 'link'
+    initialInput && initialInput.kind !== 'invalid' ? initialInput.kind : 'link'
   );
   const [sourceValue, setSourceValue] = useState(initialSource);
+  const [error, setError] = useState<string | null>(
+    initialInput?.kind === 'invalid' ? initialInput.message : null
+  );
 
   useEffect(() => {
-    if (initialSource) trackEvent('analyze_start', { inputMode });
+    if (startsInProgress) trackEvent('analyze_start', { inputMode });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  function handleSourceChange(value: string) {
+    setSourceValue(value);
+    if (error) setError(null);
+    // Auto-detect: pasting a link flips to 링크 mode and vice versa, so the
+    // segmented control reflects what will actually be sent.
+    const detected = classifyListingInput(value);
+    if (detected.kind !== 'invalid') setInputMode(detected.kind);
+  }
+
   function handleStep1Submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!sourceValue.trim()) return;
-    trackEvent('analyze_start', { inputMode });
+    const input = classifyListingInput(sourceValue);
+    if (input.kind === 'invalid') {
+      setError(input.message);
+      return;
+    }
+    setInputMode(input.kind);
+    trackEvent('analyze_start', { inputMode: input.kind });
     setStep('progress');
   }
 
@@ -82,11 +100,22 @@ function AnalyzeFlow() {
             <input
               type="text"
               value={sourceValue}
-              onChange={(e) => setSourceValue(e.target.value)}
-              placeholder={inputMode === 'link' ? '매물 링크를 붙여넣으세요' : '주소를 입력하세요'}
+              onChange={(e) => handleSourceChange(e.target.value)}
+              placeholder={inputMode === 'link' ? '다방 링크를 붙여넣으세요' : '도로명 주소를 입력하세요'}
               className="w-full rounded-xl border-glass bg-white/50 px-4 py-3 text-[var(--color-ink)] placeholder:text-[var(--color-slate)] focus:outline-none"
               aria-label={inputMode === 'link' ? '매물 링크' : '매물 주소'}
+              aria-invalid={Boolean(error)}
+              aria-describedby={error ? 'analyze-source-error' : undefined}
             />
+            {error && (
+              <p
+                id="analyze-source-error"
+                role="alert"
+                className="text-[13px] font-semibold text-[var(--color-danger)]"
+              >
+                {error}
+              </p>
+            )}
             <Button type="submit" size="lg" className="w-full">
               분석 시작
             </Button>

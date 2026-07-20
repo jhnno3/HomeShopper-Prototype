@@ -9,6 +9,7 @@ import { HeroGradient } from "@/components/landing/HeroGradient";
 import { Logo } from "@/components/kit/Logo";
 import { ReportSummary } from "@/components/report/ReportSummary";
 import { resultSummary } from "@/lib/report-data";
+import { classifyListingInput } from "@/lib/listing-input";
 import "./landing.css";
 
 const DOCS = ["허위매물 검증", "전문가 동행 임장", "협상·특약 대행", "수수료 반값"];
@@ -194,16 +195,23 @@ function CommandBar() {
   const router = useRouter();
   const reduce = useReducedMotion();
   const [value, setValue] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const hasText = value.trim().length > 0;
 
   return (
+    <>
     <form
       className="g-panel g-bar flex w-full items-center gap-2.5 py-1.5 pl-4 pr-2"
       onSubmit={(e) => {
         e.preventDefault();
-        const source = value.trim();
-        if (!source) return;
-        router.push(`/analyze?source=${encodeURIComponent(source)}`);
+        const input = classifyListingInput(value);
+        if (input.kind === "invalid") {
+          setError(input.message);
+          return;
+        }
+        router.push(
+          `/analyze?source=${encodeURIComponent(input.source)}&mode=${input.kind}`
+        );
       }}
     >
       <svg
@@ -224,9 +232,14 @@ function CommandBar() {
         type="text"
         inputMode="text"
         aria-label="매물 링크 또는 주소"
-        placeholder="매물 링크나 주소를 붙여넣으세요"
+        placeholder="도로명 주소나 다방 링크를 입력하세요"
         value={value}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={(e) => {
+          setValue(e.target.value);
+          if (error) setError(null);
+        }}
+        aria-invalid={Boolean(error)}
+        aria-describedby={error ? "hero-search-error" : undefined}
         className="min-h-10 flex-1 px-0"
       />
       <AnimatePresence>
@@ -257,6 +270,16 @@ function CommandBar() {
         )}
       </AnimatePresence>
     </form>
+    {error && (
+      <p
+        id="hero-search-error"
+        role="alert"
+        className="mt-2 pl-1 text-left text-[13px] font-semibold text-[var(--color-danger)]"
+      >
+        {error}
+      </p>
+    )}
+    </>
   );
 }
 
