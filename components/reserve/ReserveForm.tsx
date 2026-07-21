@@ -318,9 +318,13 @@ export function ReserveForm() {
       }),
     })
       .then((response) => {
-        router.replace(
-          `/reserve?done=1&queue=${response.queueNumber}&region=${encodeURIComponent(response.region)}`
-        );
+        // Build the query param only when there's a real value — a template
+        // literal would otherwise bake the literal text "undefined" into the
+        // URL if the API response were ever missing this field, which reads
+        // as a real (wrong) number instead of triggering the "missing" case.
+        const queuePart =
+          response.queueNumber != null ? `&queue=${response.queueNumber}` : '';
+        router.replace(`/reserve?done=1${queuePart}&region=${encodeURIComponent(response.region)}`);
       })
       .catch((err) => {
         setIsSubmitting(false);

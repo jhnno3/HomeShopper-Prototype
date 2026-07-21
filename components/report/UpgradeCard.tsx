@@ -82,7 +82,11 @@ export function UpgradeCard({
     })
       .then((response) => {
         trackEvent('premium_sent', { reportId, requestId: response.id });
-        router.push(`/reserve?done=1&variant=premium&requestId=${response.id}&reportId=${reportId}`);
+        // Only add requestId when there's a real value — see the matching
+        // comment in ReserveForm for why (avoids baking the literal text
+        // "undefined" into the URL if the API response were missing it).
+        const requestIdPart = response.id != null ? `&requestId=${response.id}` : '';
+        router.push(`/reserve?done=1&variant=premium${requestIdPart}&reportId=${reportId}`);
       })
       .catch((err) => {
         setIsSubmitting(false);
