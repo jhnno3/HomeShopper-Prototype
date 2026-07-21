@@ -77,16 +77,26 @@ body:has(.v3) .ink-bg {
   position: relative;
   z-index: 10;
   background: #fff;
-  border-top-left-radius: 40px;
-  border-top-right-radius: 40px;
-  box-shadow: 0 -20px 80px rgba(0, 0, 0, 0.04);
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  /* lifted-paper edge: a crisp top highlight plus a soft cast shadow so the
+     top edge reads as a sheet pulled up over the hero during the page-pull */
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 -16px 40px -8px rgba(11, 59, 167, 0.12);
 }
 
-@media (min-width: 640px) {
-  .main-sheet {
-    border-top-left-radius: 64px;
-    border-top-right-radius: 64px;
-  }
+/* ---------- hero → sheet page-pull reveal ----------
+   The hero pins just below the nav while the .main-sheet (z-10) slides up and
+   over it, so the hero→"how it works" transition reads as paper being pulled
+   over the screen. page.tsx adds .is-pinned only when the effect applies
+   (>=768px, no reduced-motion, and the hero fits in one screen), and drives
+   the hero's own recede under the same conditions. Otherwise the hero scrolls
+   normally so its full content stays reachable. */
+.v3 > section.hero-pull.is-pinned {
+  position: sticky;
+  top: var(--nav-h);
+  z-index: 0;
 }
 
 .main-sheet > section,
@@ -105,16 +115,9 @@ body:has(.v3) .ink-bg {
   inset: 0;
   z-index: 0;
   overflow: hidden;
-  border-top-left-radius: 40px;
-  border-top-right-radius: 40px;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
   pointer-events: none;
-}
-
-@media (min-width: 640px) {
-  .sheet-canvas {
-    border-top-left-radius: 64px;
-    border-top-right-radius: 64px;
-  }
 }
 
 .sheet-bloom-wrap {
@@ -170,27 +173,6 @@ body:has(.v3) .ink-bg {
   }
   .sheet-drift-a,
   .sheet-drift-b {
-    animation: none;
-  }
-}
-
-/* ---------- hero scroll cue ---------- */
-.scroll-cue svg {
-  animation: scroll-cue-bounce 2s ease-in-out infinite;
-}
-
-@keyframes scroll-cue-bounce {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(5px);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .scroll-cue svg {
     animation: none;
   }
 }
@@ -390,6 +372,14 @@ body:has(.v3) .ink-bg {
     0 1px 0 rgba(255, 255, 255, 0.95) inset,
     0 20px 25px -12px rgba(0, 0, 0, 0.16),
     0 50px 80px -24px rgba(0, 0, 0, 0.32);
+}
+
+/* Solid white surface for the hero sample report — unlike .g-panel this
+   skips the glass tint/blur/gloss so the report details read crisp against
+   the ambient blobs behind it instead of picking up their color. */
+.g-window-solid {
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.06);
 }
 
 /* ---------- banner ---------- */

@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, cubicBezier, motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { FaqAccordion } from "@/components/landing/FaqAccordion";
 import { HeroGradient } from "@/components/landing/HeroGradient";
 import { SheetGradient } from "@/components/landing/SheetGradient";
@@ -187,11 +187,6 @@ function focusHeroSearch() {
   el.focus({ preventScroll: true });
 }
 
-function scrollToHow(e: React.MouseEvent) {
-  e.preventDefault();
-  document.getElementById("how")?.scrollIntoView({ behavior: "smooth", block: "start" });
-}
-
 function CommandBar() {
   const router = useRouter();
   const reduce = useReducedMotion();
@@ -289,7 +284,7 @@ function CommandBar() {
    its inner cards floating loose against the page background. */
 function SampleReport() {
   return (
-    <div className="g-panel g-window mx-auto w-full max-w-md p-5 text-left">
+    <div className="g-window-solid g-window mx-auto w-full max-w-md p-5 text-left">
       <p className="mb-3 text-[15px] font-extrabold tracking-tight">매물 확인 리포트</p>
       <ReportSummary report={demoReport} compact />
     </div>
@@ -320,6 +315,112 @@ export default function LandingPage() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  /* Page-pull reveal: on pointer/desktop viewports the hero pins below the
+     nav (see .hero-pull in landing.css) while the rounded main-sheet slides
+     up over it. Here we drive the hero's own recede — it eases back in
+     scale/opacity and lifts slightly as the sheet covers it — so the two
+     read as one paper-pull. Gated to >=768px and no-reduced-motion to match
+     the CSS pin; mobile/reduced keeps the plain scroll. */
+  const [pullEnabled, setPullEnabled] = useState(false);
+  const [vh, setVh] = useState(0);
+  const [lockScroll, setLockScroll] = useState(0);
+  const heroRef = useRef<HTMLElement>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
+
+  /* The scroll position where the pull is complete: .main-sheet's top edge
+     sits exactly under the navbar, so the hero is fully covered and the
+     "how it works" section lands cleanly below the nav (never behind it) —
+     hence subtracting nav height, which the old vh-based target ignored.
+     Measured live from the DOM so it stays correct across resize/layout. */
+  const measureLock = useCallback(() => {
+    const hero = heroRef.current;
+    const sheet = sheetRef.current;
+    const navH = hero
+      ? parseInt(getComputedStyle(hero).getPropertyValue("--nav-h"), 10) || 61
+      : 61;
+    if (!sheet) return Math.max(0, window.innerHeight - navH);
+    const sheetTopDoc = sheet.getBoundingClientRect().top + window.scrollY;
+    return Math.max(0, Math.round(sheetTopDoc - navH));
+  }, []);
+
+  useEffect(() => {
+    const wide = window.matchMedia("(min-width: 768px)");
+    const reduceMq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => {
+      setVh(window.innerHeight);
+      setLockScroll(measureLock());
+      const hero = heroRef.current;
+      const navH = hero
+        ? parseInt(getComputedStyle(hero).getPropertyValue("--nav-h"), 10) || 61
+        : 61;
+      /* Only pin when the hero fits under the nav in a single screen. If its
+         content is taller than the viewport, pinning would strand the lower
+         part — you could never scroll to it, the sheet would just pull up
+         over it — so we fall back to plain scrolling in that case. */
+      const fits = hero ? hero.offsetHeight <= window.innerHeight - navH + 2 : true;
+      setPullEnabled(wide.matches && !reduceMq.matches && fits);
+    };
+    update();
+    window.addEventListener("resize", update);
+    wide.addEventListener("change", update);
+    reduceMq.addEventListener("change", update);
+    return () => {
+      window.removeEventListener("resize", update);
+      wide.removeEventListener("change", update);
+      reduceMq.removeEventListener("change", update);
+    };
+  }, [measureLock]);
+
+  const { scrollY } = useScroll();
+  const pullEase = cubicBezier(0.4, 0, 0.2, 1);
+  const range = lockScroll || vh || 900;
+  const heroY = useTransform(scrollY, [0, range], [0, -56], { ease: pullEase });
+  const heroScale = useTransform(scrollY, [0, range], [1, 0.92], { ease: pullEase });
+  const heroOpacity = useTransform(scrollY, [0, range * 0.72], [1, 0.08], { ease: pullEase });
+  const heroBgOpacity = useTransform(scrollY, [0, range * 0.6], [1, 0]);
+
+  /* Two-state snap across the pull: when scrolling settles anywhere between
+     the hero (0) and the locked position, ease the rest of the way — up to
+     the hero if the last move was upward, down to the locked "how it works"
+     position if it was downward. Debounced on scroll-stop so it never
+     fights an in-progress gesture, and skipped once past the lock so it
+     can't yank the visitor back out of the content below. The lock is
+     measured live, so both ends of the snap account for the navbar. */
+  useEffect(() => {
+    if (!pullEnabled) return;
+    let lastY = window.scrollY;
+    let goingUp = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (y !== lastY) goingUp = y < lastY;
+      lastY = y;
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        const current = window.scrollY;
+        const lock = measureLock();
+        if (current > 0 && current < lock) {
+          window.scrollTo({ top: goingUp ? 0 : lock, behavior: "smooth" });
+        }
+      }, 120);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (timer) clearTimeout(timer);
+    };
+  }, [pullEnabled, measureLock]);
+
+  /* Clicking the pull-up cue completes the whole reveal in one motion —
+     straight to the locked position where .main-sheet fully covers the hero
+     and "how it works" sits just below the navbar. */
+  const completePull = (e: React.MouseEvent) => {
+    e.preventDefault();
+    window.scrollTo({ top: measureLock(), behavior: "smooth" });
+  };
 
   return (
     <div className="v3 min-h-dvh">
@@ -358,12 +459,22 @@ export default function LandingPage() {
           with the hero instead of continuing to animate on a fixed layer
           underneath — a fixed canvas made the color appear to drift/slide
           as the white .main-sheet below rose to cover it during scroll. */}
-      <section className="relative flex min-h-[calc(100svh-var(--nav-h))] items-center px-4 py-12 sm:px-6 sm:py-16 lg:px-10 xl:px-16">
-        <div className="ambient-canvas" aria-hidden>
+      <section
+        ref={heroRef}
+        className={`hero-pull ${pullEnabled ? "is-pinned" : ""} relative flex min-h-[calc(100svh-var(--nav-h))] items-center px-4 py-12 sm:px-6 sm:py-16 lg:px-10 xl:px-16`}
+      >
+        <motion.div
+          className="ambient-canvas"
+          aria-hidden
+          style={pullEnabled ? { opacity: heroBgOpacity } : undefined}
+        >
           <HeroGradient />
-        </div>
+        </motion.div>
 
-        <div className="relative z-10 mx-auto w-full max-w-5xl lg:max-w-6xl xl:max-w-7xl">
+        <motion.div
+          className="relative z-10 mx-auto w-full max-w-5xl lg:max-w-6xl xl:max-w-7xl"
+          style={pullEnabled ? { opacity: heroOpacity, scale: heroScale, y: heroY } : undefined}
+        >
           {/*
             Grid areas decouple visual order from DOM order: mobile stacks
             heading → search → report (search stays reachable above the fold
@@ -434,30 +545,47 @@ export default function LandingPage() {
               <CommandBar />
             </motion.div>
           </div>
-        </div>
-
-        {/* scroll cue — short label + bouncing chevron inviting the visitor
-            into the next section; sits above the sheet's peeking corner */}
-        <a
-          href="#how"
-          onClick={scrollToHow}
-          className="scroll-cue absolute inset-x-0 bottom-6 z-10 mx-auto flex w-fit flex-col items-center gap-1.5 text-[12px] font-bold tracking-[0.14em] text-(--muted) transition-colors hover:text-(--royal-deep) sm:bottom-8"
-        >
-          이용 방법 보기
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-            <path d="m6 9 6 6 6-6" />
-          </svg>
-        </a>
+        </motion.div>
       </section>
 
       {/* white sheet — everything after the hero rides this rounded surface
           as it scrolls over the fixed ambient canvas. Pulled up slightly so
           its rounded top corner peeks into the hero above, hinting at the
           next section before the visitor scrolls. */}
-      <div className="main-sheet -mt-8 sm:-mt-12">
+      <div ref={sheetRef} className="main-sheet -mt-8 sm:-mt-12">
       <div className="sheet-canvas" aria-hidden>
         <SheetGradient />
       </div>
+
+      {/* pull-up cue — a plain, static icon (no motion/animation) sitting on
+          the white divider: main-sheet is pulled up over the hero's bottom
+          edge by -mt-8/sm:-mt-12 (32px/48px), so that exact band at the top
+          of main-sheet is the peeking sliver visible inside the hero's own
+          view, at rest, before any scroll. top-1.5/sm:top-3.5 lands the
+          icon's own visual center in the middle of that band — on the seam
+          itself, not buried in the sheet's content padding below it. A
+          normal child of .main-sheet (absolute, no scroll-linked
+          transforms), so it needs no z-index workaround the way the old
+          viewport-fixed version did. Shown only at rest, on the hero
+          (pullEnabled && !scrolled — reusing the navbar's own scroll
+          state): it hides the instant any scroll begins and reappears only
+          once back at the very top, since its job (cueing the pull that's
+          about to happen) is only relevant there. Clicking it completes
+          the whole pull in one motion via completePull, rather than the
+          shorter hop a plain scrollIntoView on #how would produce. */}
+      {pullEnabled && !scrolled && (
+        <a
+          href="#how"
+          onClick={completePull}
+          aria-label="이용 방법 보기"
+          className="absolute inset-x-0 top-1.5 z-10 mx-auto flex w-fit items-center justify-center text-(--muted) transition-colors hover:text-(--royal-deep) sm:top-3.5"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <path d="m6 15 6-6 6 6" />
+          </svg>
+        </a>
+      )}
+
       {/* how it works — centered header while the puzzle stacks vertically
           (below lg), left-aligned once it becomes a horizontal row (lg+) */}
       <section id="how" className="scroll-mt-24 px-4 py-16 sm:py-[102px]">
