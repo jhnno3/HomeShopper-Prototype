@@ -430,12 +430,15 @@ body:has(.v3) .ink-bg {
     0 50px 80px -24px rgba(0, 0, 0, 0.32);
 }
 
-/* Solid white surface for the hero sample report — unlike .g-panel this
-   skips the glass tint/blur/gloss so the report details read crisp against
-   the ambient blobs behind it instead of picking up their color. */
+/* Glass surface for the hero sample report — translucent + blurred so the
+   ambient blobs behind it show through and tint the card, matching the
+   .g-panel glass treatment used elsewhere; .g-window (applied alongside)
+   still supplies the radius/shadow. */
 .g-window-solid {
-  background: #fff;
-  border: 1px solid rgba(15, 23, 42, 0.06);
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-edge);
 }
 
 /* ---------- banner ---------- */
