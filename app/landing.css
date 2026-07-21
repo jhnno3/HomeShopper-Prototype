@@ -177,6 +177,34 @@ body:has(.v3) .ink-bg {
   }
 }
 
+/* ---------- page-bottom glow ----------
+   A wide, low horizon glow anchored to the very bottom of the page — unlike
+   the round ambient blooms above, this one is a flat ellipse, much wider
+   than it is tall, so it reads as light gathering along the bottom edge
+   rather than another floating orb. Static (no drift/parallax): it's a
+   fixed backdrop for the footer, not part of the interactive blob system.
+   Sits in .sheet-canvas (z-index 0, already clipped to the sheet's full
+   height), --royal is the site's own accent blue rather than the hero's
+   --ink-* ramp, tying it to the page's actual buttons/icons/links. */
+.bottom-glow {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 160%;
+  height: 40vh;
+  min-height: 280px;
+  max-height: 480px;
+  transform: translateX(-50%);
+  background: radial-gradient(
+    ellipse 50% 100% at 50% 100%,
+    rgba(10, 92, 255, 0.24) 0%,
+    rgba(10, 92, 255, 0.12) 45%,
+    rgba(10, 92, 255, 0) 78%
+  );
+  filter: blur(50px);
+  pointer-events: none;
+}
+
 /* ---------- glass primitives ---------- */
 .g-panel {
   position: relative;
