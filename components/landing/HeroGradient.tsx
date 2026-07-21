@@ -3,35 +3,36 @@
 import { motion, useReducedMotion } from "motion/react";
 
 /* Floating gradient backdrop for the hero — three blurred blobs drifting
-   on transform-only loops (x/y/scale). Colors restore the original
-   commit's shadcn palette (22eaf7d: Tailwind's blue-500→slate-500,
-   pink-500→red-500, green-500→cyan-500) rather than the brand blue/
-   violet ramp tried after it. Each blob holds its color pair at full
-   strength out to 40% before fading to transparent — a wider solid core
-   than a plain center-to-edge fade — so the blobs read as vivid rather
-   than washed out. Rendered inside the hero-scoped .ambient-canvas,
-   clipped to the hero's own bounds so it scrolls away with the hero
-   instead of sitting on a page-wide fixed layer. Respects
+   on transform-only loops (x/y/scale). Colors match the brand blue/
+   violet ramp from the connect-analyze-report-api branch's HeroGradient
+   (blue #73bbff→#0083ff, purple #2658f0→#4c2ce2, soft violet bridging
+   the two #8b76ec→#73bbff) — the same linear-gradient(135deg, #0083FF,
+   #4C2CE2) ramp <InkBackground /> uses elsewhere. Each blob holds its
+   color pair at full strength out to 40% before fading to transparent —
+   a wider solid core than a plain center-to-edge fade — so the blobs
+   read as vivid rather than washed out. Rendered inside the hero-scoped
+   .ambient-canvas, clipped to the hero's own bounds so it scrolls away
+   with the hero instead of sitting on a page-wide fixed layer. Respects
    prefers-reduced-motion (renders static blobs). */
 const BLOBS = [
   {
-    gradient: "radial-gradient(circle, #3b82f6 0%, #64748b 40%, transparent 85%)",
-    style: { top: "18%", left: "6%" },
+    gradient: "radial-gradient(circle, #8b76ec 10%, #73bbff 40%, transparent 100%)",
+    style: { top: "0%", left: "0%" },
     size: "36rem",
     animate: { x: [0, 90, 0], y: [0, 45, 0], scale: [1, 1.18, 1] },
     duration: 6,
   },
   {
-    gradient: "radial-gradient(circle, #ec4899 0%, #ef4444 40%, transparent 85%)",
-    style: { top: "34%", left: "40%" },
-    size: "32rem",
+    gradient: "radial-gradient(circle, #73bbff 0%, #0083ff 20%, transparent 100%)",
+    style: { top: "20%", left: "32%" },
+    size: "45rem",
     animate: { x: [0, -75, 0], y: [0, -45, 0], scale: [1, 1.25, 1] },
     duration: 7.5,
   },
   {
-    gradient: "radial-gradient(circle, #22c55e 0%, #06b6d4 40%, transparent 85%)",
-    style: { top: "10%", left: "66%" },
-    size: "32rem",
+    gradient: "radial-gradient(circle, #2658f0 0%, #4c2ce2 5%, transparent 250%)",
+    style: { top: "45%", left: "75%" },
+    size: "45rem",
     animate: { x: [0, 60, 0], y: [0, 45, 0], scale: [1, 1.15, 1] },
     duration: 9,
   },
