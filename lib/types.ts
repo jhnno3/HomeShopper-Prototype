@@ -117,3 +117,13 @@ export interface PremiumRequestApiResponse {
   requestedAt: string;
   sentAt: string | null;
 }
+
+// Admin list endpoints (PROTOTYPE_API.md §8) wrap their rows in this envelope:
+// `{ items, total }`. AGENT-only — an unauthenticated call returns 401. The
+// row shapes below are inferred from the documented reservation/premium
+// response bodies (the spec shows `items: []` empty), so they're unverified
+// against a real AGENT session — see API_INTEGRATION_STATUS.md problem 9.
+export interface AdminListResponse<T> {
+  items: T[];
+  total: number;
+}
