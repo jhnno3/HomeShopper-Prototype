@@ -30,6 +30,46 @@ API base URL은 `.env.local`의 `NEXT_PUBLIC_API_BASE_URL`로 주입한다.
 
 ---
 
+## 🚨 최우선 문제 — 백엔드가 잘못된 프론트 주소를 신뢰하고 있음
+
+`FRONTEND_INTEGRATION.md`에 적힌 프론트 주소와 백엔드 CORS·카카오 설정이
+**실제로 배포되고 있는 주소와 다르다.**
+
+- 문서/백엔드 CORS가 허용하는 주소: `https://home-shopper-pretotype.vercel.app`
+  ("pretotype")
+- 이 GitHub 저장소(`jhnno3/HomeShopper-Prototype`)가 실제로 배포되는 주소:
+  `https://home-shopper-prototype.vercel.app` ("prototype") — GitHub 저장소의
+  공식 homepage 필드에도 이 주소로 등록되어 있음
+
+두 주소는 스펠링 한 글자(`e` vs `o`) 차이의 **서로 다른 Vercel 프로젝트**다.
+`pretotype` 쪽은 이 저장소와 무관한, 이전 버전(또는 완전히 다른 프로젝트)의
+스냅샷을 그대로 서빙하고 있다 — `/admin`에 예전 데모 폼(`demo-1`,
+`작성하기` 등)이, `/report/[id]`에는 이 저장소 히스토리 전체에 단 한 번도
+등장한 적 없는 마케팅 문구("진행 단계", "3단계...")가 떠 있는 것으로 확인함
+(`git log --all -S"진행 단계"` → 0건).
+
+실제로 최신 코드가 배포된 `home-shopper-prototype.vercel.app`에서 CORS
+preflight를 보내면 `403`이 뜬다 — 백엔드가 이 주소를 모르기 때문이다.
+
+```text
+POST /api/v1/analyses  Origin: https://home-shopper-prototype.vercel.app (실제 배포 주소)
+→ 403 (백엔드가 허용하지 않음)
+
+POST /api/v1/analyses  Origin: https://home-shopper-pretotype.vercel.app (백엔드가 허용하는 주소)
+→ 200 (하지만 이 주소엔 최신 코드가 없음)
+```
+
+**해야 할 일**: 백엔드 담당자에게 실제 프론트 주소가
+`https://home-shopper-prototype.vercel.app`("prototype", o)임을 알리고
+CORS 허용 origin과 카카오 로그인 리다이렉트 설정을 이 주소로 갱신 요청.
+(또는 반대로, Vercel 쪽에서 커스텀 도메인 `pretotype`을 이 프로젝트에
+재연결하는 방법도 있음 — 어느 쪽이 "진짜" 의도된 주소인지 팀에서 확인 필요.)
+
+이 문제가 해결되기 전까지는 배포된 프론트에서 실제 API 성공 경로를 검증할
+방법이 없다(로컬 CORS 문제와는 별개의, 더 근본적인 원인).
+
+---
+
 ## ⚠️ 문제 / 확인 필요 (Problems / To Confirm)
 
 1. **없는 리포트가 `400`을 반환** (문서는 `404`라고 명시)
