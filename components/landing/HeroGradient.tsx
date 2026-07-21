@@ -16,21 +16,21 @@ import { motion, useReducedMotion } from "motion/react";
    prefers-reduced-motion (renders static blobs). */
 const BLOBS = [
   {
-    gradient: "radial-gradient(circle, #8b76ec 10%, #73bbff 40%, transparent 100%)",
+    gradient: "radial-gradient(circle, #95c0f0 0%, #73bbff 40%, transparent 100%)",
     style: { top: "0%", left: "0%" },
     size: "36rem",
     animate: { x: [0, 90, 0], y: [0, 45, 0], scale: [1, 1.18, 1] },
     duration: 6,
   },
   {
-    gradient: "radial-gradient(circle, #73bbff 0%, #0083ff 20%, transparent 100%)",
+    gradient: "radial-gradient(circle, #73bbff 10%, #0083ff 20%, transparent 100%)",
     style: { top: "20%", left: "32%" },
     size: "45rem",
     animate: { x: [0, -75, 0], y: [0, -45, 0], scale: [1, 1.25, 1] },
     duration: 7.5,
   },
   {
-    gradient: "radial-gradient(circle, #2658f0 0%, #4c2ce2 5%, transparent 250%)",
+    gradient: "radial-gradient(circle, #2658f0 0%, #6f49d8 20%, transparent 100%)",
     style: { top: "45%", left: "75%" },
     size: "45rem",
     animate: { x: [0, 60, 0], y: [0, 45, 0], scale: [1, 1.15, 1] },
