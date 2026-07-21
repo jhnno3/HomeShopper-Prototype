@@ -12,13 +12,21 @@ import { useEffect, useRef, type CSSProperties } from "react";
    Each blob drifts slowly on its own (sheet-drift keyframes) and, on
    pointer devices, nudges toward the cursor with a proximity glow — the
    same cursor parallax the page-wide <InkBackground /> uses, brought back
-   here at a lighter touch. Respects prefers-reduced-motion (static). */
+   here at a lighter touch. Respects prefers-reduced-motion (static).
+
+   The bottom-of-page horizon glow (BOTTOM_GLOW/.bottom-glow) lives in this
+   same component so it shares the one mousemove listener, but it's treated
+   differently from the round blobs above: no drift keyframes and no
+   positional parallax (translating a full-bleed rectangle would open a gap
+   at whichever edge it slid away from) — only its opacity responds to
+   cursor proximity, same math as the round blobs' proximity glow. */
 const BLOBS = [
   { top: "1%", side: "left", offset: "-6%", color: "var(--ink-blue)", opacity: 0.3, depth: 0.6, drift: "sheet-drift-a" },
   { top: "28%", side: "right", offset: "-8%", color: "var(--ink-violet-soft)", opacity: 0.26, depth: 1.1, drift: "sheet-drift-b" },
   { top: "54%", side: "left", offset: "-8%", color: "var(--ink-mid)", opacity: 0.27, depth: 0.8, drift: "sheet-drift-a" },
-  { top: "80%", side: "right", offset: "-6%", color: "var(--ink-violet)", opacity: 0.3, depth: 1.0, drift: "sheet-drift-b" },
 ] as const;
+
+const BOTTOM_GLOW = { opacity: 0.48, boost: 0.22 };
 
 const MAX_PARALLAX_PX = 22;
 const PROXIMITY_RADIUS_PX = 460;
@@ -26,6 +34,7 @@ const OPACITY_BOOST = 0.1;
 
 export function SheetGradient() {
   const wrapRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const bottomGlowRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -36,6 +45,7 @@ export function SheetGradient() {
         const inner = el?.firstElementChild as HTMLElement | null;
         if (inner) inner.style.opacity = String(BLOBS[i].opacity);
       });
+      if (bottomGlowRef.current) bottomGlowRef.current.style.opacity = String(BOTTOM_GLOW.opacity);
     };
 
     const handleMove = (e: MouseEvent) => {
@@ -58,6 +68,16 @@ export function SheetGradient() {
           const inner = el.firstElementChild as HTMLElement | null;
           if (inner) inner.style.opacity = String(blob.opacity + OPACITY_BOOST * proximity);
         });
+
+        const glow = bottomGlowRef.current;
+        if (glow) {
+          const rect = glow.getBoundingClientRect();
+          const cx = rect.left + rect.width / 2;
+          const cy = rect.top + rect.height / 2;
+          const dist = Math.hypot(e.clientX - cx, e.clientY - cy);
+          const proximity = Math.max(0, 1 - dist / PROXIMITY_RADIUS_PX);
+          glow.style.opacity = String(BOTTOM_GLOW.opacity + BOTTOM_GLOW.boost * proximity);
+        }
       });
     };
 
@@ -95,6 +115,7 @@ export function SheetGradient() {
           />
         </div>
       ))}
+      <div ref={bottomGlowRef} className="bottom-glow" style={{ opacity: BOTTOM_GLOW.opacity }} />
     </>
   );
 }

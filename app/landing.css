@@ -178,31 +178,59 @@ body:has(.v3) .ink-bg {
 }
 
 /* ---------- page-bottom glow ----------
-   A wide, low horizon glow anchored to the very bottom of the page — unlike
-   the round ambient blooms above, this one is a flat ellipse, much wider
-   than it is tall, so it reads as light gathering along the bottom edge
-   rather than another floating orb. Static (no drift/parallax): it's a
-   fixed backdrop for the footer, not part of the interactive blob system.
-   Sits in .sheet-canvas (z-index 0, already clipped to the sheet's full
-   height), --royal is the site's own accent blue rather than the hero's
-   --ink-* ramp, tying it to the page's actual buttons/icons/links. */
+   A wide, low horizon glow anchored to the very bottom of the page. The box
+   itself is already short and wide (50vh tall, 176% of the page's width);
+   border-radius: 50% inscribes a true ellipse matching that aspect ratio,
+   so it reads as one long, flattened oval hugging the bottom edge rather
+   than a floating round orb — width/position stay the same as the earlier
+   rectangle version, only the shape changed. The elliptical radial-gradient
+   fill fades from solid at its own center out to transparent (matching the
+   same technique the round blobs above use — border-radius + radial-
+   gradient + blur — just stretched), so the fade is smooth in every
+   direction rather than only vertical.
+
+   No drift keyframes and no positional parallax — translating a wide,
+   nearly edge-to-edge shape would open a gap at whichever side it slid
+   away from — but its opacity does respond to cursor proximity (see
+   SheetGradient), same as the round blobs' hover glow; the base/JS opacity
+   is set inline, this rule only supplies the shape/color/fade. Sits in
+   .sheet-canvas (z-index 0, already clipped to the sheet's full height);
+   the color matches the site's own --royal accent blue (#0a5cff) rather
+   than the hero's --ink-* ramp, tying it to the page's actual
+   buttons/icons/links.
+
+   bottom is negative (~41% of the ellipse's own height) so the lower part
+   of the oval sinks below the page's actual bottom edge and gets clipped
+   by .sheet-canvas's overflow: hidden — the ellipse reads as partly
+   submerged past the edge of the page rather than sitting fully on top of
+   it. The clamp() mirrors height's own min/max-height so the submersion
+   stays proportional at both ends of the viewport range. */
 .bottom-glow {
   position: absolute;
   left: 50%;
-  bottom: 0;
-  width: 160%;
-  height: 40vh;
-  min-height: 280px;
-  max-height: 480px;
+  bottom: clamp(-250px, -21vh, -144px);
+  width: 176%;
+  height: 50vh;
+  min-height: 350px;
+  max-height: 610px;
   transform: translateX(-50%);
+  border-radius: 50%;
   background: radial-gradient(
-    ellipse 50% 100% at 50% 100%,
-    rgba(10, 92, 255, 0.24) 0%,
-    rgba(10, 92, 255, 0.12) 45%,
-    rgba(10, 92, 255, 0) 78%
+    ellipse at 50% 60%,
+    rgba(10, 92, 255, 1) 0%,
+    rgba(10, 92, 255, 0.62) 40%,
+    rgba(10, 92, 255, 0.24) 70%,
+    rgba(10, 92, 255, 0) 100%
   );
-  filter: blur(50px);
+  filter: blur(64px);
+  transition: opacity 0.5s ease-out;
   pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bottom-glow {
+    transition: none;
+  }
 }
 
 /* ---------- glass primitives ---------- */
@@ -413,13 +441,7 @@ body:has(.v3) .ink-bg {
 /* ---------- banner ---------- */
 .g-banner {
   border-radius: 24px;
-  background:
-    radial-gradient(
-      120% 160% at 85% -20%,
-      rgba(125, 180, 255, 0.55),
-      transparent 55%
-    ),
-    linear-gradient(135deg, #0b3ba7 0%, #0a5cff 100%);
+  background: linear-gradient(135deg, #2563ff 0%, #6657ff 100%);
   color: #fff;
   overflow: hidden;
   position: relative;

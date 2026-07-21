@@ -555,7 +555,6 @@ export default function LandingPage() {
       <div ref={sheetRef} className="main-sheet -mt-8 sm:-mt-12">
       <div className="sheet-canvas" aria-hidden>
         <SheetGradient />
-        <div className="bottom-glow" />
       </div>
 
       {/* pull-up cue — a plain, static icon (no motion/animation) sitting on
