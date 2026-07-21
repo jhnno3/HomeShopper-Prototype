@@ -23,7 +23,6 @@ import { useEffect, useRef, type CSSProperties } from "react";
 const BLOBS = [
   { top: "-6%", side: "left", offset: "-12%", color: "var(--ink-blue)", opacity: 0.3, depth: 0.6, drift: "sheet-drift-a" },
   { top: "-90%", side: "right", offset: "-80%", color: "var(--ink-violet-soft)", opacity: 0.26, depth: 0.7, drift: "sheet-drift-b" },
-  { top: "70%", side: "left", offset: "-14%", color: "var(--ink-mid)", opacity: 0.27, depth: 0.8, drift: "sheet-drift-a" },
 ] as const;
 
 const BOTTOM_GLOW = { opacity: 0.48, boost: 0.22 };

@@ -7,30 +7,27 @@ import { motion, useReducedMotion } from "motion/react";
    violet ramp from the connect-analyze-report-api branch's HeroGradient
    (blue #73bbff→#0083ff, purple #2658f0→#4c2ce2, soft violet bridging
    the two #8b76ec→#73bbff) — the same linear-gradient(135deg, #0083FF,
-   #4C2CE2) ramp <InkBackground /> uses elsewhere. Each blob holds its
-   color pair at full strength out to 40% before fading to transparent —
-   a wider solid core than a plain center-to-edge fade — so the blobs
-   read as vivid rather than washed out. Rendered inside the hero-scoped
-   .ambient-canvas, clipped to the hero's own bounds so it scrolls away
-   with the hero instead of sitting on a page-wide fixed layer. Respects
-   prefers-reduced-motion (renders static blobs). */
+   #4C2CE2) ramp <InkBackground /> uses elsewhere. Rendered inside the
+   hero-scoped .ambient-canvas, clipped to the hero's own bounds so it
+   scrolls away with the hero instead of sitting on a page-wide fixed
+   layer. Respects prefers-reduced-motion (renders static blobs). */
 const BLOBS = [
   {
-    gradient: "radial-gradient(circle, #95c0f0 0%, #73bbff 40%, transparent 100%)",
+    gradient: "radial-gradient(circle, #8b76ec 10%, #73bbff 40%, transparent 100%)",
     style: { top: "0%", left: "0%" },
     size: "36rem",
     animate: { x: [0, 90, 0], y: [0, 45, 0], scale: [1, 1.18, 1] },
     duration: 6,
   },
   {
-    gradient: "radial-gradient(circle, #73bbff 10%, #0083ff 20%, transparent 100%)",
+    gradient: "radial-gradient(circle, #73bbff 0%, #0083ff 20%, transparent 100%)",
     style: { top: "20%", left: "32%" },
     size: "45rem",
     animate: { x: [0, -75, 0], y: [0, -45, 0], scale: [1, 1.25, 1] },
     duration: 7.5,
   },
   {
-    gradient: "radial-gradient(circle, #2658f0 0%, #6f49d8 20%, transparent 100%)",
+    gradient: "radial-gradient(circle, #2658f0 0%, #4c2ce2 5%, transparent 250%)",
     style: { top: "45%", left: "75%" },
     size: "45rem",
     animate: { x: [0, 60, 0], y: [0, 45, 0], scale: [1, 1.15, 1] },

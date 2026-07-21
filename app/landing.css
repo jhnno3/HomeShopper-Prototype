@@ -433,9 +433,12 @@ body:has(.v3) .ink-bg {
 /* Glass surface for the hero sample report — translucent + blurred so the
    ambient blobs behind it show through and tint the card, matching the
    .g-panel glass treatment used elsewhere; .g-window (applied alongside)
-   still supplies the radius/shadow. */
+   still supplies the radius/shadow. More opaque than --glass (0.58) so
+   the outer card reads clearly over the busier hero background — a
+   literal value instead of the shared token so the inner report cards
+   (still on --glass via .g-panel) aren't affected. */
 .g-window-solid {
-  background: var(--glass);
+  background: rgba(255, 255, 255, 0.78);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid var(--glass-edge);
