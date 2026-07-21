@@ -3,7 +3,12 @@ import { useEffect } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 
 interface ProgressAnimationProps {
-  onComplete: () => void;
+  /**
+   * Optional fixed-timer completion. When omitted, the loader animates
+   * indefinitely — used while a real request is in flight and the caller
+   * navigates away once it resolves (analyze flow, PROTOTYPE_API.md §3).
+   */
+  onComplete?: () => void;
   durationMs?: number;
 }
 
@@ -11,6 +16,7 @@ export function ProgressAnimation({ onComplete, durationMs = 3000 }: ProgressAni
   const reducedMotion = useReducedMotion();
 
   useEffect(() => {
+    if (!onComplete) return;
     const timer = setTimeout(onComplete, durationMs);
     return () => clearTimeout(timer);
   }, [onComplete, durationMs]);

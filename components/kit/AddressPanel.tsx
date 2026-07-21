@@ -97,6 +97,9 @@ export function AddressPanel({
                 value={dong}
                 onChange={(e) => onDongChange(e.target.value)}
                 placeholder="101동"
+                // Backend caps 동/호수 at 30 chars each (FRONTEND_INTEGRATION.md
+                // §정밀 리포트 신청); enforce here so a long entry can't 400.
+                maxLength={30}
                 tabIndex={open ? 0 : -1}
                 className={fieldInputBase}
               />
@@ -112,6 +115,7 @@ export function AddressPanel({
                 value={ho}
                 onChange={(e) => onHoChange(e.target.value)}
                 placeholder="1502호"
+                maxLength={30}
                 tabIndex={open ? 0 : -1}
                 className={fieldInputBase}
               />

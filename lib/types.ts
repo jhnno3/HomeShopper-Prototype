@@ -89,6 +89,16 @@ export interface Reservation {
   src: ReservationSource;
 }
 
+// Response of `POST /api/v1/analyses` (PROTOTYPE_API.md §3). `completed` means
+// every section resolved; `partial` means some did — both are 201, and both
+// yield a viewable report at `reportId`. Analysis failure comes back as an
+// error status code instead, not one of these values.
+export interface AnalysisApiResponse {
+  submissionId: string;
+  reportId: string;
+  status: 'completed' | 'partial';
+}
+
 // Response shapes for the OAuth-gated submission calls (PROTOTYPE_API.md §5, §6).
 
 export interface ReservationApiResponse extends Reservation {

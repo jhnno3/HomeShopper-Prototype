@@ -1,12 +1,13 @@
 'use client';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ProgressAnimation } from '@/components/analyze/ProgressAnimation';
 import { Button } from '@/components/kit/Button';
 import { GlassCard } from '@/components/kit/GlassCard';
 import { trackEvent } from '@/lib/analytics';
-import { demoReportId } from '@/lib/report-data';
+import { apiFetch, ApiError } from '@/lib/api';
 import { classifyListingInput } from '@/lib/listing-input';
+import type { AnalysisApiResponse } from '@/lib/types';
 
 type Step = 'input' | 'progress';
 
@@ -25,10 +26,44 @@ function AnalyzeFlow() {
     initialInput?.kind === 'invalid' ? initialInput.message : null
   );
 
+  // Guards the analysis request against a double fire — the effect re-runs on
+  // dev strict-mode remounts, and `step` can re-enter 'progress' on retry.
+  const analyzingRef = useRef(false);
+
+  // Runs the real analysis whenever we enter the progress step. The request
+  // takes ~15–60s (PROTOTYPE_API.md §3), so the loader animates until it
+  // resolves rather than on a fixed timer. On failure we drop back to the
+  // form with the server's message so the user can retry.
   useEffect(() => {
-    if (startsInProgress) trackEvent('analyze_start', { inputMode: 'link' });
+    if (step !== 'progress' || analyzingRef.current) return;
+
+    const input = classifyListingInput(sourceValue);
+    if (input.kind !== 'link') {
+      setError(input.kind === 'invalid' ? input.message : '다방 링크를 다시 확인해주세요.');
+      setStep('input');
+      return;
+    }
+
+    analyzingRef.current = true;
+    trackEvent('analyze_start', { inputMode: 'link' });
+
+    apiFetch<AnalysisApiResponse>('/analyses', {
+      method: 'POST',
+      body: JSON.stringify({ inputMode: 'link', source: input.source }),
+    })
+      .then((res) => {
+        trackEvent('analyze_complete', { reportId: res.reportId, status: res.status });
+        router.push(`/report/${res.reportId}`);
+      })
+      .catch((err) => {
+        analyzingRef.current = false;
+        setError(
+          err instanceof ApiError ? err.message : '분석에 실패했어요. 잠시 후 다시 시도해주세요.'
+        );
+        setStep('input');
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [step]);
 
   function handleStep1Submit(e: React.FormEvent) {
     e.preventDefault();
@@ -37,13 +72,8 @@ function AnalyzeFlow() {
       setError(input.message);
       return;
     }
-    trackEvent('analyze_start', { inputMode: 'link' });
+    setError(null);
     setStep('progress');
-  }
-
-  function handleProgressComplete() {
-    trackEvent('analyze_complete', { reportId: demoReportId });
-    router.push(`/report/${demoReportId}`);
   }
 
   return (
@@ -85,7 +115,7 @@ function AnalyzeFlow() {
         // No card here — the loader sits directly on the ambient background,
         // centered so it reads as a full-screen loading state.
         <div className="flex min-h-[60vh] flex-col justify-center space-y-3 px-2">
-          <ProgressAnimation onComplete={handleProgressComplete} />
+          <ProgressAnimation />
           {/* Placeholder copy — replace with real benefit messaging */}
           <p className="mx-auto max-w-sm text-center text-base leading-relaxed text-[var(--color-slate)]">
             등기부등본부터 실거래가까지, 계약 전 꼭 확인해야 할 서류를 홈쇼퍼가 대신 확인하고 있어요.
