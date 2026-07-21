@@ -6,13 +6,13 @@ import { ReserveBackdrop } from '@/components/reserve/ReserveBackdrop';
 type SuccessCardProps =
   | {
       variant: 'reservation';
-      /** API's `queueNumber`; falls back to the prototype's fixed placeholder. */
+      /** The real `queueNumber` from the reservation API response. */
       queueNumber?: string;
       region?: string;
     }
   | {
       variant: 'premium';
-      /** Premium-request response's `id`. */
+      /** The real `id` from the premium-request API response. */
       requestId?: string;
       reportId: string;
     };
@@ -50,10 +50,14 @@ export function SuccessCard(props: SuccessCardProps) {
       <>작성이 끝나면 카카오톡으로 정밀 리포트를 보내드릴게요.</>
     );
 
+  // The real submission flow always supplies this (it comes straight from
+  // the API response); a missing value only happens if this screen is
+  // reached some other way (e.g. a bare `?done=1` link), so show an honest
+  // "확인 중" rather than inventing a number that would look real.
   const pillLabel =
     props.variant === 'reservation'
-      ? `예약 순번 #${props.queueNumber ?? '128'}`
-      : `접수번호 #${props.requestId ?? 'HS-0041'}`;
+      ? `예약 순번 #${props.queueNumber ?? '확인 중'}`
+      : `접수번호 #${props.requestId ?? '확인 중'}`;
 
   const ctaHref = props.variant === 'reservation' ? '/' : `/report/${props.reportId}`;
   const ctaLabel = props.variant === 'reservation' ? '홈으로 돌아가기' : '리포트로 돌아가기';
