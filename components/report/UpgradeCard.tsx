@@ -76,7 +76,10 @@ export function UpgradeCard({
     setAddressOpen(true);
     trackEvent('login_complete', { reportId, provider: 'kakao', dong: pending.dong, ho: pending.ho });
     setIsSubmitting(true);
-    apiFetch<PremiumRequestApiResponse>(`/reports/${reportId}/premium-requests`, {
+    // encodeURIComponent guards against reportId containing path separators
+    // that would collapse this into a request to a different endpoint —
+    // see SECURITY_NOTES.md.
+    apiFetch<PremiumRequestApiResponse>(`/reports/${encodeURIComponent(reportId)}/premium-requests`, {
       method: 'POST',
       body: JSON.stringify({ dong: pending.dong, ho: pending.ho }),
     })

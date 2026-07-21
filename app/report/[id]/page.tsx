@@ -64,7 +64,11 @@ function ReportContent({ params }: { params: Promise<{ id: string }> }) {
   useEffect(() => {
     let active = true;
     setState('loading');
-    apiFetch<ApiReport>(`/reports/${id}`)
+    // encodeURIComponent guards against the id containing path separators
+    // (e.g. a crafted `/report/7%2F..%2Fadmin%2F...` route param) that would
+    // otherwise collapse this into a request to a completely different
+    // endpoint — see SECURITY_NOTES.md.
+    apiFetch<ApiReport>(`/reports/${encodeURIComponent(id)}`)
       .then((data) => {
         if (!active) return;
         setReport(data);
