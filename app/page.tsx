@@ -180,10 +180,18 @@ const SERVICES = [
   },
 ];
 
+/* Manual scroll-offset (not scrollIntoView) — the hero is position:sticky
+   while pinned, and scrollIntoView has to walk the containing-block chain
+   to compute its target, which sticky ancestors are a known source of
+   miscalculating across browsers. window.scrollTo against a measured
+   document-relative offset sidesteps that entirely, same reasoning as
+   measureLock below. */
 function focusHeroSearch() {
   const el = document.getElementById("hero-search") as HTMLInputElement | null;
   if (!el) return;
-  el.scrollIntoView({ behavior: "smooth", block: "center" });
+  const rect = el.getBoundingClientRect();
+  const target = rect.top + window.scrollY - Math.max(0, (window.innerHeight - rect.height) / 2);
+  window.scrollTo({ top: Math.max(0, target), behavior: "smooth" });
   el.focus({ preventScroll: true });
 }
 

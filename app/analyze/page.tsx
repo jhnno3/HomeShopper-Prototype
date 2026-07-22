@@ -3,7 +3,7 @@ import { Suspense, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ProgressAnimation } from '@/components/analyze/ProgressAnimation';
 import { Button } from '@/components/kit/Button';
-import { GlassCard } from '@/components/kit/GlassCard';
+import { CardStack } from '@/components/reserve/CardStack';
 import { trackEvent } from '@/lib/analytics';
 import { apiFetch, ApiError } from '@/lib/api';
 import { classifyListingInput } from '@/lib/listing-input';
@@ -106,7 +106,7 @@ function AnalyzeFlow() {
   return (
     <main className="mx-auto max-w-lg px-6 py-16 md:py-24">
       {step === 'input' && (
-        <GlassCard className="p-8">
+        <CardStack>
           <form onSubmit={handleStep1Submit} className="space-y-6">
             <h1 className="text-2xl font-bold text-[var(--color-ink)]">매물 정보를 알려주세요</h1>
             <input
@@ -117,7 +117,7 @@ function AnalyzeFlow() {
                 if (error) setError(null);
               }}
               placeholder="다방 링크를 붙여넣으세요"
-              className="w-full rounded-xl border-glass bg-white/50 px-4 py-3 text-[var(--color-ink)] placeholder:text-[var(--color-slate)] focus:outline-none"
+              className="w-full rounded-xl border border-[rgba(0,131,255,0.22)] bg-[rgba(0,131,255,0.05)] px-4 py-3 text-[var(--color-ink)] placeholder:text-[var(--color-slate)] transition-colors focus:border-[var(--color-blue)] focus:bg-[rgba(0,131,255,0.09)] focus:outline-none"
               aria-label="다방 매물 링크"
               aria-invalid={Boolean(error)}
               aria-describedby={error ? 'analyze-source-error' : undefined}
@@ -149,7 +149,7 @@ function AnalyzeFlow() {
                   }}
                   maxLength={300}
                   placeholder="예: 서울특별시 서초구 서초대로 301"
-                  className="w-full rounded-xl border-glass bg-white/50 px-4 py-3 text-[var(--color-ink)] placeholder:text-[var(--color-slate)] focus:outline-none"
+                  className="w-full rounded-xl border border-[rgba(0,131,255,0.22)] bg-[rgba(0,131,255,0.05)] px-4 py-3 text-[var(--color-ink)] placeholder:text-[var(--color-slate)] transition-colors focus:border-[var(--color-blue)] focus:bg-[rgba(0,131,255,0.09)] focus:outline-none"
                   aria-label="도로명주소"
                 />
               </div>
@@ -158,7 +158,7 @@ function AnalyzeFlow() {
               분석 시작
             </Button>
           </form>
-        </GlassCard>
+        </CardStack>
       )}
 
       {step === 'progress' && (
