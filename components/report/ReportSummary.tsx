@@ -80,6 +80,14 @@ function StatusBadge({
   );
 }
 
+function placeholderBadge() {
+  return (
+    <StatusBadge tone="neutral" icon={<HelpCircle size={13} aria-hidden />}>
+      —
+    </StatusBadge>
+  );
+}
+
 function agencyBadge(isValid: boolean | undefined) {
   if (isValid === true) {
     return (
@@ -133,9 +141,14 @@ function violationBadge(hasViolation: boolean | null) {
 export function ReportSummary({
   report,
   compact = false,
+  placeholder = false,
 }: {
   report: ApiReport;
   compact?: boolean;
+  /** Renders every criterion's value as "—" instead of the report's actual
+   *  data — used for the landing page's sample card, which mirrors the real
+   *  report's layout but must never present made-up figures as real. */
+  placeholder?: boolean;
 }) {
   const { facts, apiStatus } = report;
   const iconSize = compact ? 17 : 20;
@@ -143,6 +156,7 @@ export function ReportSummary({
   const building = facts.buildingRegistry;
   const agency = facts.agencyValidity;
   const buildingAge = building ? new Date().getFullYear() - building.approvalYear : null;
+  const dash = '—';
 
   return (
     // Container query, not a viewport breakpoint: this renders both full
@@ -153,8 +167,12 @@ export function ReportSummary({
         <CardHeader icon={<BarChart3 size={iconSize} aria-hidden />} title="시세 정보" compact={compact} />
         {tx && apiStatus.transactions === 'ok' ? (
           <dl className="divide-y divide-[var(--glass-border)]">
-            <Row label="인근 거래 요약" value={tx.summary} compact={compact} />
-            <Row label="비교 거래 수" value={`${tx.count.toLocaleString()}건`} compact={compact} />
+            <Row label="인근 거래 요약" value={placeholder ? dash : tx.summary} compact={compact} />
+            <Row
+              label="비교 거래 수"
+              value={placeholder ? dash : `${tx.count.toLocaleString()}건`}
+              compact={compact}
+            />
           </dl>
         ) : (
           <UnavailableNote status={apiStatus.transactions} />
@@ -171,10 +189,22 @@ export function ReportSummary({
           <CardHeader icon={<Building2 size={iconSize} aria-hidden />} title="건물 정보" compact={compact} />
           {building && apiStatus.registry === 'ok' ? (
             <dl className="divide-y divide-[var(--glass-border)]">
-              <Row label="주용도" value={building.mainUse} compact={compact} />
-              <Row label="사용승인" value={`${building.approvalYear}년`} compact={compact} />
-              <Row label="건물 연식" value={`${buildingAge}년차`} compact={compact} />
-              <Row label="위반건축물" value={violationBadge(building.hasViolation)} compact={compact} />
+              <Row label="주용도" value={placeholder ? dash : building.mainUse} compact={compact} />
+              <Row
+                label="사용승인"
+                value={placeholder ? dash : `${building.approvalYear}년`}
+                compact={compact}
+              />
+              <Row
+                label="건물 연식"
+                value={placeholder ? dash : `${buildingAge}년차`}
+                compact={compact}
+              />
+              <Row
+                label="위반건축물"
+                value={placeholder ? placeholderBadge() : violationBadge(building.hasViolation)}
+                compact={compact}
+              />
             </dl>
           ) : (
             <UnavailableNote status={apiStatus.registry} />
@@ -185,8 +215,16 @@ export function ReportSummary({
           <CardHeader icon={<BadgeCheck size={iconSize} aria-hidden />} title="중개업소" compact={compact} />
           {agency && apiStatus.agency === 'ok' ? (
             <dl className="divide-y divide-[var(--glass-border)]">
-              <Row label="등록번호" value={agencyBadge(agency.isValid)} compact={compact} />
-              <Row label="확인 기준" value="공인중개사 표준데이터" compact={compact} />
+              <Row
+                label="등록번호"
+                value={placeholder ? placeholderBadge() : agencyBadge(agency.isValid)}
+                compact={compact}
+              />
+              <Row
+                label="확인 기준"
+                value={placeholder ? dash : '공인중개사 표준데이터'}
+                compact={compact}
+              />
             </dl>
           ) : (
             <UnavailableNote status={apiStatus.agency} />

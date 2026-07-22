@@ -17,7 +17,7 @@ import { motion, useReducedMotion } from "motion/react";
    Durations are long and blur is trimmed from 96px for the same reason. */
 const BLOBS = [
   {
-    gradient: "radial-gradient(circle, #8b76ec 10%, #73bbff 40%, transparent 100%)",
+    gradient: "radial-gradient(circle, #92c7f8 0%, #73bbff 40%, transparent 100%)",
     style: { top: "0%", left: "0%" },
     size: "36rem",
     animate: { x: [0, 70, 0], y: [0, 40, 0] },
@@ -31,7 +31,7 @@ const BLOBS = [
     duration: 15,
   },
   {
-    gradient: "radial-gradient(circle, #2658f0 0%, #4c2ce2 5%, transparent 250%)",
+    gradient: "radial-gradient(circle, #2658f0 0%, #4c2ce2 5%, transparent 80%)",
     style: { top: "45%", left: "75%" },
     size: "45rem",
     animate: { x: [0, 50, 0], y: [0, 40, 0] },
