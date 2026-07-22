@@ -40,11 +40,11 @@ function Row({
     <div
       className={
         compact
-          ? 'flex items-center justify-between gap-3 py-2 text-[13px]'
-          : 'flex items-center justify-between gap-4 py-2 text-sm'
+          ? 'flex items-start justify-between gap-3 py-2 text-[13px]'
+          : 'flex items-start justify-between gap-4 py-2 text-sm'
       }
     >
-      <dt className="text-[var(--color-slate)]">{label}</dt>
+      <dt className="shrink-0 whitespace-nowrap text-[var(--color-slate)]">{label}</dt>
       <dd className="text-right font-medium text-[var(--color-ink)]">{value}</dd>
     </div>
   );
@@ -56,6 +56,23 @@ function Row({
 function UnavailableNote({ status }: { status: ApiStatus }) {
   const message = status === 'pending' ? '확인하는 중이에요' : '공개 데이터에서 확인하지 못했어요';
   return <p className="py-2 text-sm text-[var(--color-slate)]">{message}</p>;
+}
+
+/** `tx.summary` packs two clauses into one API string (거래 건수, 보정 평균가) —
+ *  split on ", " rather than every comma, since the price itself has a
+ *  thousands-separator comma with no trailing space ("5,670만원"). Each
+ *  clause gets its own line instead of wrapping wherever the column happens
+ *  to run out of width. */
+function SummaryLines({ summary }: { summary: string }) {
+  return (
+    <>
+      {summary.split(', ').map((line) => (
+        <span key={line} className="block">
+          {line}
+        </span>
+      ))}
+    </>
+  );
 }
 
 function StatusBadge({
@@ -157,9 +174,9 @@ export function ReportSummary({
   const agency = facts.agencyValidity;
   const buildingAge = building ? new Date().getFullYear() - building.approvalYear : null;
   const dash = '—';
-  // 근린생활시설은 국토부 실거래가 공개 데이터의 집계 대상이 아니라 시세 비교
-  // 자체가 불가능한 매물 — 이 경우 흔한 "확인하지 못했어요" 문구를 그대로 쓰면
-  // 조회 실패로 오해할 수 있어 별도 안내를 보여준다.
+  // 근린생활시설은 주로 상업용으로 거래돼 주거용 시세와 비교할 실거래 기준이
+  // 없는 매물 — 이 경우 흔한 "확인하지 못했어요" 문구를 그대로 쓰면 조회
+  // 실패로 오해할 수 있어 별도 안내를 보여준다.
   const isNeighborhoodFacility = Boolean(building?.mainUse.includes('근린생활시설'));
 
   return (
@@ -171,7 +188,11 @@ export function ReportSummary({
         <CardHeader icon={<BarChart3 size={iconSize} aria-hidden />} title="시세 정보" compact={compact} />
         {tx && apiStatus.transactions === 'ok' ? (
           <dl className="divide-y divide-[var(--glass-border)]">
-            <Row label="인근 거래 요약" value={placeholder ? dash : tx.summary} compact={compact} />
+            <Row
+              label="인근 거래 요약"
+              value={placeholder ? dash : <SummaryLines summary={tx.summary} />}
+              compact={compact}
+            />
             <Row
               label="비교 거래 수"
               value={placeholder ? dash : `${tx.count.toLocaleString()}건`}
@@ -180,7 +201,7 @@ export function ReportSummary({
           </dl>
         ) : isNeighborhoodFacility ? (
           <p className="py-2 text-sm text-[var(--color-slate)]">
-            근린생활시설은 국토부 실거래가 공개 데이터에 집계되지 않아 시세 정보를 제공하지 않아요.
+            근린생활시설은 주로 상업용으로 거래되기 때문에, 정확한 주거용 시세 파악을 위해 실거래가 정보를 제공하지 않아요.
           </p>
         ) : (
           <UnavailableNote status={apiStatus.transactions} />

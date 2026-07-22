@@ -289,14 +289,17 @@ function CommandBar() {
    payload the report page uses, so the design, icons, and fields can never
    drift from what the user actually receives. Wrapped in one outer panel
    here so the report reads as a single grouped card in the hero, instead of
-   its inner cards floating loose against the page background. `placeholder`
-   swaps every criterion's value for "—" — this card sells the layout, not
-   fabricated numbers, so nothing here should read as a real result. */
+   its inner cards floating loose against the page background. */
 function SampleReport() {
   return (
-    <div className="g-window-solid g-window mx-auto w-full max-w-md p-5 text-left">
-      <p className="mb-3 text-[15px] font-extrabold tracking-tight">매물 확인 리포트</p>
-      <ReportSummary report={demoReport} compact placeholder />
+    <div>
+      <div className="g-window-solid g-window mx-auto w-full max-w-md p-5 text-left">
+        <p className="mb-3 text-[15px] font-extrabold tracking-tight">매물 확인 리포트</p>
+        <ReportSummary report={demoReport} compact />
+      </div>
+      <p className="mt-4 text-center text-[12.5px] text-(--faint)">
+        예시 화면입니다. 실제 매물 정보가 아닙니다.
+      </p>
     </div>
   );
 }
