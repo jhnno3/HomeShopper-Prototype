@@ -10,7 +10,7 @@ import { ReportBackdrop } from '@/components/report/ReportBackdrop';
 import { SurveyCard } from '@/components/report/SurveyCard';
 import { Disclaimer } from '@/components/report/Disclaimer';
 import { ProgressAnimation } from '@/components/analyze/ProgressAnimation';
-import { GlassCard } from '@/components/kit/GlassCard';
+import { ErrorCard } from '@/components/kit/ErrorCard';
 import { trackEvent } from '@/lib/analytics';
 import { apiFetch, ApiError } from '@/lib/api';
 import type { ApiReport } from '@/lib/types';
@@ -32,7 +32,7 @@ function ReportShell({ children }: { children: React.ReactNode }) {
 
 function ReportMessage({ title, body }: { title: string; body: string }) {
   return (
-    <GlassCard className="w-full max-w-md p-8 text-center">
+    <ErrorCard className="w-full max-w-md p-8 text-center">
       <h1 className="text-lg font-bold text-[var(--color-ink)]">{title}</h1>
       <p className="mt-2 text-sm leading-relaxed text-[var(--color-slate)]">{body}</p>
       <Link
@@ -41,7 +41,7 @@ function ReportMessage({ title, body }: { title: string; body: string }) {
       >
         홈으로 돌아가기
       </Link>
-    </GlassCard>
+    </ErrorCard>
   );
 }
 

@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { ProgressAnimation } from '@/components/analyze/ProgressAnimation';
 import { Button } from '@/components/kit/Button';
 import { CardStack } from '@/components/reserve/CardStack';
+import { ErrorCard } from '@/components/kit/ErrorCard';
 import { trackEvent } from '@/lib/analytics';
 import { apiFetch, ApiError } from '@/lib/api';
 import { classifyListingInput } from '@/lib/listing-input';
@@ -103,10 +104,15 @@ function AnalyzeFlow() {
     setStep('progress');
   }
 
+  // A real search/analysis failure gets the plain, undecorated error surface
+  // instead of the fanned success-card look — a failure shouldn't read as
+  // the same polished moment as a clean form.
+  const Step1Card = error ? ErrorCard : CardStack;
+
   return (
     <main className="mx-auto max-w-lg px-6 py-16 md:py-24">
       {step === 'input' && (
-        <CardStack>
+        <Step1Card>
           <form onSubmit={handleStep1Submit} className="space-y-6">
             <h1 className="text-2xl font-bold text-[var(--color-ink)]">매물 정보를 알려주세요</h1>
             <input
@@ -158,7 +164,7 @@ function AnalyzeFlow() {
               분석 시작
             </Button>
           </form>
-        </CardStack>
+        </Step1Card>
       )}
 
       {step === 'progress' && (

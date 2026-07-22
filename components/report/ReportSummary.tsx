@@ -157,6 +157,10 @@ export function ReportSummary({
   const agency = facts.agencyValidity;
   const buildingAge = building ? new Date().getFullYear() - building.approvalYear : null;
   const dash = '—';
+  // 근린생활시설은 국토부 실거래가 공개 데이터의 집계 대상이 아니라 시세 비교
+  // 자체가 불가능한 매물 — 이 경우 흔한 "확인하지 못했어요" 문구를 그대로 쓰면
+  // 조회 실패로 오해할 수 있어 별도 안내를 보여준다.
+  const isNeighborhoodFacility = Boolean(building?.mainUse.includes('근린생활시설'));
 
   return (
     // Container query, not a viewport breakpoint: this renders both full
@@ -174,6 +178,10 @@ export function ReportSummary({
               compact={compact}
             />
           </dl>
+        ) : isNeighborhoodFacility ? (
+          <p className="py-2 text-sm text-[var(--color-slate)]">
+            근린생활시설은 국토부 실거래가 공개 데이터에 집계되지 않아 시세 정보를 제공하지 않아요.
+          </p>
         ) : (
           <UnavailableNote status={apiStatus.transactions} />
         )}
@@ -228,6 +236,11 @@ export function ReportSummary({
             </dl>
           ) : (
             <UnavailableNote status={apiStatus.agency} />
+          )}
+          {!compact && agency && apiStatus.agency === 'ok' && (
+            <p className="mt-3 text-xs text-[var(--color-slate)]">
+              최근 개업한 중개사무소는 정부 데이터 갱신이 늦어 아직 반영되지 않았을 수 있어요.
+            </p>
           )}
         </GlassCard>
       </div>
