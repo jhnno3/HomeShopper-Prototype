@@ -297,7 +297,7 @@ function Reveal({ children, delay = 0 }: { children: React.ReactNode; delay?: nu
     <motion.div
       initial={reduce ? false : { opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: false, margin: "-60px" }}
+      viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] }}
     >
       {children}
@@ -379,40 +379,6 @@ export default function LandingPage() {
   const heroScale = useTransform(scrollY, [0, range], [1, 0.92], { ease: pullEase });
   const heroOpacity = useTransform(scrollY, [0, range * 0.72], [1, 0.08], { ease: pullEase });
   const heroBgOpacity = useTransform(scrollY, [0, range * 0.6], [1, 0]);
-
-  /* Two-state snap across the pull: when scrolling settles anywhere between
-     the hero (0) and the locked position, ease the rest of the way — up to
-     the hero if the last move was upward, down to the locked "how it works"
-     position if it was downward. Debounced on scroll-stop so it never
-     fights an in-progress gesture, and skipped once past the lock so it
-     can't yank the visitor back out of the content below. The lock is
-     measured live, so both ends of the snap account for the navbar. */
-  useEffect(() => {
-    if (!pullEnabled) return;
-    let lastY = window.scrollY;
-    let goingUp = false;
-    let timer: ReturnType<typeof setTimeout> | null = null;
-
-    const onScroll = () => {
-      const y = window.scrollY;
-      if (y !== lastY) goingUp = y < lastY;
-      lastY = y;
-      if (timer) clearTimeout(timer);
-      timer = setTimeout(() => {
-        const current = window.scrollY;
-        const lock = measureLock();
-        if (current > 0 && current < lock) {
-          window.scrollTo({ top: goingUp ? 0 : lock, behavior: "smooth" });
-        }
-      }, 120);
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (timer) clearTimeout(timer);
-    };
-  }, [pullEnabled, measureLock]);
 
   /* Clicking the pull-up cue completes the whole reveal in one motion —
      straight to the locked position where .main-sheet fully covers the hero
@@ -618,7 +584,7 @@ export default function LandingPage() {
                   className="jigsaw-shadow relative"
                   initial={reduce ? false : "hide"}
                   whileInView="show"
-                  viewport={{ once: false, margin: "-60px" }}
+                  viewport={{ once: true, margin: "-60px" }}
                   variants={{
                     hide: { opacity: 0, y: 24 },
                     show: {

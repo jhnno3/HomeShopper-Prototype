@@ -24,21 +24,6 @@
   background: rgba(10, 92, 255, 0.18);
 }
 
-/* Mobile: snap each full-bleed section to the top when scrolling, instead
-   of free scrolling. Scoped to landing via :has() so other routes are
-   unaffected. Sections taller than the viewport still scroll freely inside. */
-@media (max-width: 767px) {
-  html:has(.v3) {
-    scroll-snap-type: y proximity;
-    scroll-padding-top: 61px;
-  }
-
-  .v3 > section,
-  .v3 .main-sheet > section {
-    scroll-snap-align: start;
-  }
-}
-
 /* ---------- ambient canvas backdrop ----------
    Holds the hero's floating-gradient blobs (see HeroGradient), scoped to
    the hero section itself — absolutely positioned and clipped to its
