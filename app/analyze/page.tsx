@@ -1,6 +1,7 @@
 'use client';
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Info } from 'lucide-react';
 import { ProgressAnimation } from '@/components/analyze/ProgressAnimation';
 import { Button } from '@/components/kit/Button';
 import { ErrorCard } from '@/components/kit/ErrorCard';
@@ -117,63 +118,82 @@ function AnalyzeFlow() {
   if (!startsInProgress) return null;
 
   return (
-    <main className="mx-auto max-w-lg px-6 py-16 md:py-24">
+    <main className="mx-auto w-full max-w-2xl px-6 py-16 md:py-24">
       {step === 'input' && (
         // The input step is only ever reached as a retry after a failed
         // analysis, so it always shows the plain error card — sizing comes
         // from ErrorCard itself, shared with the report error card.
         <ErrorCard>
-          <form onSubmit={handleStep1Submit} className="space-y-6">
-            <h1 className="text-2xl font-bold text-[var(--color-ink)]">매물 정보를 알려주세요</h1>
-            <input
-              type="text"
-              value={sourceValue}
-              onChange={(e) => {
-                setSourceValue(e.target.value);
-                if (error) setError(null);
-              }}
-              placeholder="다방 링크를 붙여넣으세요"
-              className="w-full rounded-xl border border-[rgba(0,131,255,0.22)] bg-[rgba(0,131,255,0.05)] px-4 py-3 text-[var(--color-ink)] placeholder:text-[var(--color-slate)] transition-colors focus:border-[var(--color-blue)] focus:bg-[rgba(0,131,255,0.09)] focus:outline-none"
-              aria-label="다방 매물 링크"
-              aria-invalid={Boolean(error)}
-              aria-describedby={error ? 'analyze-source-error' : undefined}
-            />
-            {error && (
-              <p
-                id="analyze-source-error"
-                role="alert"
-                className="text-[13px] font-semibold text-[var(--color-danger)]"
-              >
-                {error}
-              </p>
-            )}
-            {needsRoadAddress && (
-              <div className="space-y-2">
-                <label
-                  htmlFor="analyze-road-address"
-                  className="block text-sm font-semibold text-[var(--color-ink)]"
-                >
-                  도로명주소
-                </label>
+          <form onSubmit={handleStep1Submit}>
+            <h1 className="text-center text-[30px] font-bold text-[var(--color-ink)]">
+              매물 정보를 알려주세요
+            </h1>
+            {/* Separate from the heading's own rhythm (mt-10, not folded into
+                the space-y-6 below) — the heading should read as a title
+                sitting above the form, not just the first item in its list. */}
+            <div className="mt-10 space-y-6">
+              <div>
                 <input
-                  id="analyze-road-address"
                   type="text"
-                  value={roadAddress}
+                  value={sourceValue}
                   onChange={(e) => {
-                    setRoadAddress(e.target.value);
+                    setSourceValue(e.target.value);
                     if (error) setError(null);
                   }}
-                  maxLength={300}
-                  placeholder="예: 서울특별시 서초구 서초대로 301"
-                  className="w-full rounded-xl border border-[rgba(0,131,255,0.22)] bg-[rgba(0,131,255,0.05)] px-4 py-3 text-[var(--color-ink)] placeholder:text-[var(--color-slate)] transition-colors focus:border-[var(--color-blue)] focus:bg-[rgba(0,131,255,0.09)] focus:outline-none"
-                  aria-label="도로명주소"
+                  placeholder="다방 링크를 붙여넣으세요"
+                  className="w-full rounded-full border border-[rgba(0,131,255,0.22)] bg-[rgba(0,131,255,0.05)] px-5 py-2.5 text-[var(--color-ink)] placeholder:text-[var(--color-slate)] transition-colors focus:border-[var(--color-blue)] focus:bg-[rgba(0,131,255,0.09)] focus:outline-none"
+                  aria-label="다방 매물 링크"
+                  aria-invalid={Boolean(error)}
+                  aria-describedby={error ? 'analyze-source-error' : undefined}
                 />
+                {/* Tight to the field it describes (mt-2, not the form's
+                    space-y-6 rhythm) — a caption hugs its input, it doesn't
+                    float evenly between the input and whatever's next. */}
+                {error && (
+                  <p
+                    id="analyze-source-error"
+                    role="alert"
+                    className="mt-2 px-1 text-[13px] font-semibold text-[var(--color-danger)]"
+                  >
+                    {error}
+                  </p>
+                )}
               </div>
-            )}
-            <Button type="submit" size="lg" className="w-full">
-              분석 시작
-            </Button>
+              {needsRoadAddress && (
+                <div className="space-y-2">
+                  <label
+                    htmlFor="analyze-road-address"
+                    className="block text-sm font-semibold text-[var(--color-ink)]"
+                  >
+                    도로명주소
+                  </label>
+                  <input
+                    id="analyze-road-address"
+                    type="text"
+                    value={roadAddress}
+                    onChange={(e) => {
+                      setRoadAddress(e.target.value);
+                      if (error) setError(null);
+                    }}
+                    maxLength={300}
+                    placeholder="예: 서울특별시 서초구 서초대로 301"
+                    className="w-full rounded-full border border-[rgba(0,131,255,0.22)] bg-[rgba(0,131,255,0.05)] px-5 py-2.5 text-[var(--color-ink)] placeholder:text-[var(--color-slate)] transition-colors focus:border-[var(--color-blue)] focus:bg-[rgba(0,131,255,0.09)] focus:outline-none"
+                    aria-label="도로명주소"
+                  />
+                </div>
+              )}
+              <Button type="submit" size="lg" className="h-11 w-full rounded-full text-sm">
+                분석 시작
+              </Button>
+            </div>
           </form>
+          {/* Persistent format hint, not another error — stays visible
+              regardless of which validation message fired above, so the
+              card never feels like it's just a single bare error line. */}
+          <p className="mt-6 flex items-center justify-center gap-1.5 text-center text-[13px] text-[var(--color-slate)]">
+            <Info size={14} aria-hidden />
+            다방 앱에서 매물 상세 페이지 링크를 복사해 붙여넣어 주세요.
+          </p>
         </ErrorCard>
       )}
 

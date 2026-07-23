@@ -8,7 +8,12 @@
   --color-bg: #f4f6fb;
   --color-success: #1fb57a;
   --color-caution: #e8a13a;
-  --color-danger: #e5484d;
+  --color-danger: #ed4449;
+  /* Row dividers inside light/glass cards (e.g. report category rows) —
+     dark ink at low alpha reads as a visible hairline on a white/frosted
+     surface; --glass-border (white-on-white, made for glass-panel edges)
+     was nearly invisible there. */
+  --color-divider: rgba(26, 26, 46, 0.12);
 
   /* ambient ink-bloom palette — interpolated along the brand gradient
      linear-gradient(135deg, #0083FF, #4C2CE2). Used by <InkBackground />. */
@@ -45,6 +50,7 @@
   --color-success: var(--color-success);
   --color-caution: var(--color-caution);
   --color-danger: var(--color-danger);
+  --color-divider: var(--color-divider);
 
   --font-sans:
     var(--font-pretendard), ui-sans-serif, system-ui, sans-serif;

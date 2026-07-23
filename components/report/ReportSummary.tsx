@@ -187,7 +187,7 @@ export function ReportSummary({
       <GlassCard className={compact ? 'p-4' : undefined}>
         <CardHeader icon={<BarChart3 size={iconSize} aria-hidden />} title="시세 정보" compact={compact} />
         {tx && apiStatus.transactions === 'ok' ? (
-          <dl className="divide-y divide-[var(--glass-border)]">
+          <dl className="divide-y divide-[var(--color-divider)]">
             <Row
               label="인근 거래 요약"
               value={placeholder ? dash : <SummaryLines summary={tx.summary} />}
@@ -217,7 +217,7 @@ export function ReportSummary({
         <GlassCard className={compact ? 'p-4' : undefined}>
           <CardHeader icon={<Building2 size={iconSize} aria-hidden />} title="건물 정보" compact={compact} />
           {building && apiStatus.registry === 'ok' ? (
-            <dl className="divide-y divide-[var(--glass-border)]">
+            <dl className="divide-y divide-[var(--color-divider)]">
               <Row label="주용도" value={placeholder ? dash : building.mainUse} compact={compact} />
               <Row
                 label="사용승인"
@@ -243,7 +243,7 @@ export function ReportSummary({
         <GlassCard className={compact ? 'p-4' : undefined}>
           <CardHeader icon={<BadgeCheck size={iconSize} aria-hidden />} title="중개업소" compact={compact} />
           {agency && apiStatus.agency === 'ok' ? (
-            <dl className="divide-y divide-[var(--glass-border)]">
+            <dl className="divide-y divide-[var(--color-divider)]">
               <Row
                 label="등록번호"
                 value={placeholder ? placeholderBadge() : agencyBadge(agency.isValid)}

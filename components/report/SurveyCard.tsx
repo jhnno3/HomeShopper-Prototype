@@ -1,7 +1,6 @@
 import { GlassCard } from '@/components/kit/GlassCard';
 
-const SURVEY_URL =
-  'https://docs.google.com/forms/d/e/1FAIpQLSf5UtGytbVSgCag87VfoFR2eT4kG4fObbJia6C_Y9A95gmGSA/viewform';
+const SURVEY_URL = 'https://docs.google.com/forms/d/1KmXCs34vgo7nYW-BfsXKn_kc1HhFzV-mCvmsOrZWF1I/viewform';
 
 export function SurveyCard() {
   return (

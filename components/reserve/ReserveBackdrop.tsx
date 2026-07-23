@@ -1,4 +1,6 @@
-import type { CSSProperties } from "react";
+"use client";
+
+import { motion, useReducedMotion } from "motion/react";
 
 /**
  * The reserve page's backdrop, in two parts.
@@ -15,38 +17,71 @@ export function ReserveBackdrop() {
 }
 
 /**
- * The gradient bloom. Sized off its positioned parent with a generous negative
- * inset so it spills past every edge of the card no matter how tall the card
- * grows — the color must be visible around the card, never trapped under it.
- *
- * Several overlapping radial pools rather than one wash, so the halo has some
- * color variation around the card instead of a flat diagonal — but each pool
- * is wide and blurred with a long, gradual fade (mid-stop pushed to ~55%,
- * transparent past ~90%) and heavily overlapped with its neighbors, so they
- * melt into each other instead of reading as separate blobs with visible seams.
+ * The gradient bloom, as five discrete drifting blobs — same transform-only
+ * x/y loop technique as <HeroGradient />, so the reserve card's halo moves
+ * with the same rhythm as the hero's ambient blobs instead of sitting inert.
+ * Each blob keeps its original color/alpha/position from the old single-
+ * layer version (so the halo's shape and balance around the card don't
+ * change), just split into its own positioned, independently-drifting div.
+ * Long, offset durations keep the drift from ever reading as synchronized.
  */
+const BLOBS = [
+  // cool blue on the left, sunk down into the card's body rather than its header
+  {
+    gradient: "radial-gradient(circle, rgba(96,175,255,0.62) 0%, rgba(96,175,255,0.26) 55%, transparent 90%)",
+    style: { top: "26%", left: "-4%" },
+    size: "26rem",
+    animate: { x: [0, 26, 0], y: [0, 18, 0] },
+    duration: 16,
+  },
+  // violet down the right side
+  {
+    gradient: "radial-gradient(circle, rgba(132,109,236,0.5) 0%, rgba(132,109,236,0.19) 58%, transparent 90%)",
+    style: { top: "22%", left: "68%" },
+    size: "25rem",
+    animate: { x: [0, -22, 0], y: [0, 20, 0] },
+    duration: 19,
+  },
+  // warm blush low and centered, the quiet counterweight
+  {
+    gradient: "radial-gradient(circle, rgba(232,160,208,0.56) 0%, rgba(232,160,208,0.22) 56%, transparent 90%)",
+    style: { top: "74%", left: "32%" },
+    size: "27rem",
+    animate: { x: [0, 24, 0], y: [0, -16, 0] },
+    duration: 21,
+  },
+  // second blue, a subtle top accent so the header isn't left toneless
+  {
+    gradient: "radial-gradient(circle, rgba(120,196,255,0.28) 0%, transparent 85%)",
+    style: { top: "6%", left: "60%" },
+    size: "16rem",
+    animate: { x: [0, 18, 0], y: [0, 14, 0] },
+    duration: 14,
+  },
+  // violet pooling bottom-left so the blush isn't isolated
+  {
+    gradient: "radial-gradient(circle, rgba(150,130,240,0.32) 0%, transparent 85%)",
+    style: { top: "62%", left: "0%" },
+    size: "17rem",
+    animate: { x: [0, -16, 0], y: [0, -14, 0] },
+    duration: 17,
+  },
+];
+
 export function CardBloom() {
+  const reduce = useReducedMotion();
+
   return (
-    <div
-      aria-hidden
-      className="pointer-events-none absolute -inset-x-[22%] -top-[14%] -bottom-[10%]"
-      style={
-        {
-          filter: "blur(84px)",
-          background: [
-            // cool blue on the left, sunk down into the card's body rather than its header
-            "radial-gradient(46% 32% at 20% 42%, rgba(96,175,255,0.62) 0%, rgba(96,175,255,0.26) 62%, transparent 95%)",
-            // violet down the right side
-            "radial-gradient(44% 36% at 88% 38%, rgba(132,109,236,0.5) 0%, rgba(132,109,236,0.19) 64%, transparent 95%)",
-            // warm blush low and centered, the quiet counterweight
-            "radial-gradient(50% 30% at 54% 92%, rgba(232,160,208,0.56) 0%, rgba(232,160,208,0.22) 62%, transparent 95%)",
-            // second blue, a subtle top accent so the header isn't left toneless
-            "radial-gradient(36% 18% at 76% 22%, rgba(120,196,255,0.28) 0%, transparent 93%)",
-            // violet pooling bottom-left so the blush isn't isolated
-            "radial-gradient(36% 26% at 14% 80%, rgba(150,130,240,0.32) 0%, transparent 93%)",
-          ].join(","),
-        } as CSSProperties
-      }
-    />
+    <div aria-hidden className="pointer-events-none absolute -inset-x-[22%] -top-[14%] -bottom-[10%]">
+      {BLOBS.map((blob, i) => (
+        <motion.div
+          key={i}
+          className="absolute rounded-full blur-[84px] will-change-transform"
+          style={{ ...blob.style, height: blob.size, width: blob.size, backgroundImage: blob.gradient }}
+          animate={reduce ? undefined : blob.animate}
+          transition={{ duration: blob.duration, repeat: Infinity, ease: "easeInOut" }}
+        />
+      ))}
+    </div>
   );
 }
