@@ -116,13 +116,23 @@ function ReportContent({ params }: { params: Promise<{ id: string }> }) {
   }
 
   const sections = [
-    <header key="header">
-      <h1 className="text-xl font-bold text-[var(--color-ink)]">매물 확인 리포트</h1>
-      <p className="mt-1 text-sm text-[var(--color-slate)]">
-        공개 데이터로 확인한 결과를 정리했어요
-      </p>
-    </header>,
-    <ReportSummary key="summary" report={report} />,
+    // Title + summary share one outer panel so the report reads as a single
+    // grouped document card (same pattern as the landing hero's sample), with
+    // the section cards nested inside it.
+    <div
+      key="summary"
+      className="glass-edge border-glass shadow-glass rounded-3xl bg-[rgba(255,255,255,0.55)] p-6 backdrop-blur-xl sm:p-8"
+    >
+      <header>
+        <h1 className="text-xl font-bold text-[var(--color-ink)]">매물 확인 리포트</h1>
+        <p className="mt-1 text-sm text-[var(--color-slate)]">
+          공개 데이터로 확인한 결과를 정리했어요
+        </p>
+      </header>
+      <div className="mt-7">
+        <ReportSummary report={report} />
+      </div>
+    </div>,
     <UpgradeCard key="upgrade" reportId={id} oauthResult={oauthResult} />,
     <VisitCta key="visit" reportId={id} src="basic_report" />,
     <SurveyCard key="survey" />,

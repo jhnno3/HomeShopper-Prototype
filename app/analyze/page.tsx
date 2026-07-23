@@ -68,7 +68,13 @@ function AnalyzeFlow() {
     })
       .then((res) => {
         trackEvent('analyze_complete', { reportId: res.reportId, status: res.status });
-        router.push(`/report/${res.reportId}`);
+        // replace, not push: /analyze is a one-shot transition, not a page a
+        // user should land back on — pushing it would leave it in history, so
+        // back-navigating from the report re-enters 'progress' with the same
+        // ?source= link and silently re-runs the analysis (see report page's
+        // back/forward question). Swapping it out means back goes straight to
+        // wherever the user was before starting the analysis.
+        router.replace(`/report/${res.reportId}`);
       })
       .catch((err) => {
         analyzingRef.current = false;

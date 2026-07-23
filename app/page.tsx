@@ -297,7 +297,7 @@ function SampleReport() {
         <ReportSummary report={demoReport} compact />
       </div>
       <p className="mt-4 text-center text-[12.5px] text-(--faint)">
-        예시 화면입니다. 실제 매물 정보가 아닙니다.
+        ※ 예시 화면입니다. 실제 매물 정보가 아닙니다.
       </p>
     </div>
   );

@@ -1,29 +1,43 @@
 import { BarChart3, Building2, BadgeCheck, HelpCircle, AlertTriangle } from 'lucide-react';
-import { GlassCard } from '@/components/kit/GlassCard';
 import type { ApiReport, ApiStatus } from '@/lib/types';
 
-function CardHeader({
+/** Section = heading row sitting above its own card, so the icon+title reads
+ *  as a label for the card rather than content inside it. */
+function Section({
   icon,
   title,
   compact,
+  children,
 }: {
   icon: React.ReactNode;
   title: string;
   compact?: boolean;
+  children: React.ReactNode;
 }) {
   return (
-    <div className={compact ? 'mb-3 flex items-center gap-2.5' : 'mb-4 flex items-center gap-3'}>
+    <section>
+      <div className={compact ? 'mb-2.5 flex items-center gap-2.5' : 'mb-3 flex items-center gap-3'}>
+        <div
+          className={
+            compact
+              ? 'flex h-8 w-8 items-center justify-center rounded-lg bg-[rgba(0,131,255,0.1)] text-[var(--color-blue)]'
+              : 'flex h-10 w-10 items-center justify-center rounded-xl bg-[rgba(0,131,255,0.1)] text-[var(--color-blue)]'
+          }
+        >
+          {icon}
+        </div>
+        <h2 className="font-semibold text-[var(--color-ink)]">{title}</h2>
+      </div>
       <div
         className={
           compact
-            ? 'flex h-8 w-8 items-center justify-center rounded-lg bg-[rgba(0,131,255,0.1)] text-[var(--color-blue)]'
-            : 'flex h-10 w-10 items-center justify-center rounded-xl bg-[rgba(0,131,255,0.1)] text-[var(--color-blue)]'
+            ? 'rounded-2xl border border-white/70 bg-white/70 p-4 shadow-[0_1px_2px_rgba(26,26,46,0.05)]'
+            : 'rounded-2xl border border-white/70 bg-white/70 p-5 shadow-[0_1px_2px_rgba(26,26,46,0.05)]'
         }
       >
-        {icon}
+        {children}
       </div>
-      <h2 className="font-semibold text-[var(--color-ink)]">{title}</h2>
-    </div>
+    </section>
   );
 }
 
@@ -31,27 +45,24 @@ function Row({
   label,
   value,
   compact,
-  align = 'right',
 }: {
   label: string;
   value: React.ReactNode;
   compact?: boolean;
-  /** Long, multi-line values (e.g. SummaryLines) read better ragged-right
-   *  than right-justified, where every wrapped line's start jumps around. */
-  align?: 'left' | 'right';
 }) {
   return (
+    // flex-wrap: a short value sits right-aligned on the label's line; a
+    // value too long to fit drops below the label on its own full-width
+    // line (still right-aligned), instead of squeezing into a narrow column.
     <div
       className={
         compact
-          ? 'flex items-start justify-between gap-3 py-2 text-[13px]'
-          : 'flex items-start justify-between gap-4 py-2 text-sm'
+          ? 'flex flex-wrap items-start justify-between gap-x-3 gap-y-1 py-2 text-[13px]'
+          : 'flex flex-wrap items-start justify-between gap-x-4 gap-y-1 py-2 text-sm'
       }
     >
       <dt className="shrink-0 whitespace-nowrap text-[var(--color-slate)]">{label}</dt>
-      <dd className={`${align === 'left' ? 'text-left' : 'text-right'} font-medium text-[var(--color-ink)]`}>
-        {value}
-      </dd>
+      <dd className="ml-auto text-right font-medium text-[var(--color-ink)]">{value}</dd>
     </div>
   );
 }
@@ -73,7 +84,7 @@ function SummaryLines({ summary }: { summary: string }) {
   return (
     <>
       {summary.split(', ').map((line) => (
-        <span key={line} className="block text-justify [text-align-last:justify]">
+        <span key={line} className="block">
           {line}
         </span>
       ))}
@@ -158,19 +169,14 @@ export function ReportSummary({
   const isNeighborhoodFacility = Boolean(building?.mainUse.includes('근린생활시설'));
 
   return (
-    // Container query, not a viewport breakpoint: this renders both full
-    // width on the report page and inside the landing hero's narrow column,
-    // so the two-up row must key off its own width.
-    <div className={compact ? '@container space-y-3' : '@container space-y-4'}>
-      <GlassCard className={compact ? 'p-4' : undefined}>
-        <CardHeader icon={<BarChart3 size={iconSize} aria-hidden />} title="시세 정보" compact={compact} />
+    <div className={compact ? 'space-y-5' : 'space-y-7'}>
+      <Section icon={<BarChart3 size={iconSize} aria-hidden />} title="시세 정보" compact={compact}>
         {tx && apiStatus.transactions === 'ok' ? (
           <dl>
             <Row
               label="인근 거래 요약"
               value={placeholder ? dash : <SummaryLines summary={tx.summary} />}
               compact={compact}
-              align="left"
             />
             <Row
               label="비교 거래 수"
@@ -187,58 +193,54 @@ export function ReportSummary({
         )}
         {!compact && tx && apiStatus.transactions === 'ok' && (
           <p className="mt-3 text-xs text-[var(--color-slate)]">
-            인근 동일 유형 실거래, 국토부 실거래가 공개 데이터 기준
+            ※ 인근 동일 유형 실거래, 국토부 실거래가 공개 데이터 기준
           </p>
         )}
-      </GlassCard>
+      </Section>
 
-      <div className={compact ? 'grid gap-3 @lg:grid-cols-2' : 'grid gap-4 @lg:grid-cols-2'}>
-        <GlassCard className={compact ? 'p-4' : undefined}>
-          <CardHeader icon={<Building2 size={iconSize} aria-hidden />} title="건물 정보" compact={compact} />
-          {building && apiStatus.registry === 'ok' ? (
-            <dl>
-              <Row label="주용도" value={placeholder ? dash : building.mainUse} compact={compact} />
-              <Row
-                label="사용승인"
-                value={placeholder ? dash : `${building.approvalYear}년`}
-                compact={compact}
-              />
-              <Row
-                label="건물 연식"
-                value={placeholder ? dash : `${buildingAge}년차`}
-                compact={compact}
-              />
-            </dl>
-          ) : (
-            <UnavailableNote status={apiStatus.registry} />
-          )}
-        </GlassCard>
+      <Section icon={<Building2 size={iconSize} aria-hidden />} title="건물 정보" compact={compact}>
+        {building && apiStatus.registry === 'ok' ? (
+          <dl>
+            <Row label="주용도" value={placeholder ? dash : building.mainUse} compact={compact} />
+            <Row
+              label="사용승인"
+              value={placeholder ? dash : `${building.approvalYear}년`}
+              compact={compact}
+            />
+            <Row
+              label="건물 연식"
+              value={placeholder ? dash : `${buildingAge}년차`}
+              compact={compact}
+            />
+          </dl>
+        ) : (
+          <UnavailableNote status={apiStatus.registry} />
+        )}
+      </Section>
 
-        <GlassCard className={compact ? 'p-4' : undefined}>
-          <CardHeader icon={<BadgeCheck size={iconSize} aria-hidden />} title="중개업소" compact={compact} />
-          {agency && apiStatus.agency === 'ok' ? (
-            <dl>
-              <Row
-                label="등록번호"
-                value={placeholder ? placeholderBadge() : agencyBadge(agency.isValid)}
-                compact={compact}
-              />
-              <Row
-                label="확인 기준"
-                value={placeholder ? dash : '공인중개사 표준데이터'}
-                compact={compact}
-              />
-            </dl>
-          ) : (
-            <UnavailableNote status={apiStatus.agency} />
-          )}
-          {!compact && agency && apiStatus.agency === 'ok' && (
-            <p className="mt-3 text-xs text-[var(--color-slate)]">
-              최근 개업한 중개사무소는 정부 데이터 갱신이 늦어 아직 반영되지 않았을 수 있어요.
-            </p>
-          )}
-        </GlassCard>
-      </div>
+      <Section icon={<BadgeCheck size={iconSize} aria-hidden />} title="중개업소" compact={compact}>
+        {agency && apiStatus.agency === 'ok' ? (
+          <dl>
+            <Row
+              label="등록번호"
+              value={placeholder ? placeholderBadge() : agencyBadge(agency.isValid)}
+              compact={compact}
+            />
+            <Row
+              label="확인 기준"
+              value={placeholder ? dash : '공인중개사 표준데이터'}
+              compact={compact}
+            />
+          </dl>
+        ) : (
+          <UnavailableNote status={apiStatus.agency} />
+        )}
+        {!compact && agency && apiStatus.agency === 'ok' && (
+          <p className="mt-3 text-xs text-[var(--color-slate)]">
+            ※ 최근 개업한 중개사무소는 정부 데이터 갱신이 늦어 아직 반영되지 않았을 수 있어요.
+          </p>
+        )}
+      </Section>
     </div>
   );
 }

@@ -155,7 +155,7 @@ export function UpgradeCard({
         </button>
         {!addressComplete ? (
           <p className="mt-1.5 text-center text-[12px] text-[var(--color-slate)]">
-            동·호수를 입력하면 카카오 로그인을 이용할 수 있어요.
+            ※ 동·호수를 입력하면 카카오 로그인을 이용할 수 있어요.
           </p>
         ) : null}
       </div>
