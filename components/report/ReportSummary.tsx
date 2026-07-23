@@ -31,10 +31,14 @@ function Row({
   label,
   value,
   compact,
+  align = 'right',
 }: {
   label: string;
   value: React.ReactNode;
   compact?: boolean;
+  /** Long, multi-line values (e.g. SummaryLines) read better ragged-right
+   *  than right-justified, where every wrapped line's start jumps around. */
+  align?: 'left' | 'right';
 }) {
   return (
     <div
@@ -45,7 +49,9 @@ function Row({
       }
     >
       <dt className="shrink-0 whitespace-nowrap text-[var(--color-slate)]">{label}</dt>
-      <dd className="text-right font-medium text-[var(--color-ink)]">{value}</dd>
+      <dd className={`${align === 'left' ? 'text-left' : 'text-right'} font-medium text-[var(--color-ink)]`}>
+        {value}
+      </dd>
     </div>
   );
 }
@@ -67,7 +73,7 @@ function SummaryLines({ summary }: { summary: string }) {
   return (
     <>
       {summary.split(', ').map((line) => (
-        <span key={line} className="block">
+        <span key={line} className="block text-justify [text-align-last:justify]">
           {line}
         </span>
       ))}
@@ -127,34 +133,6 @@ function agencyBadge(isValid: boolean | undefined) {
   );
 }
 
-/**
- * `hasViolation` is frequently `null` (the analysis server doesn't always
- * provide it) — that must never be shown as a safe "위반 없음" result, so
- * `null` gets its own neutral badge rather than falling through to `false`'s
- * styling.
- */
-function violationBadge(hasViolation: boolean | null) {
-  if (hasViolation === true) {
-    return (
-      <StatusBadge tone="danger" icon={<AlertTriangle size={13} aria-hidden />}>
-        위반건축물
-      </StatusBadge>
-    );
-  }
-  if (hasViolation === false) {
-    return (
-      <StatusBadge tone="success" icon={<BadgeCheck size={13} aria-hidden />}>
-        위반건축물 아님
-      </StatusBadge>
-    );
-  }
-  return (
-    <StatusBadge tone="neutral" icon={<HelpCircle size={13} aria-hidden />}>
-      확인 불가
-    </StatusBadge>
-  );
-}
-
 export function ReportSummary({
   report,
   compact = false,
@@ -187,11 +165,12 @@ export function ReportSummary({
       <GlassCard className={compact ? 'p-4' : undefined}>
         <CardHeader icon={<BarChart3 size={iconSize} aria-hidden />} title="시세 정보" compact={compact} />
         {tx && apiStatus.transactions === 'ok' ? (
-          <dl className="divide-y divide-[var(--color-divider)]">
+          <dl>
             <Row
               label="인근 거래 요약"
               value={placeholder ? dash : <SummaryLines summary={tx.summary} />}
               compact={compact}
+              align="left"
             />
             <Row
               label="비교 거래 수"
@@ -217,7 +196,7 @@ export function ReportSummary({
         <GlassCard className={compact ? 'p-4' : undefined}>
           <CardHeader icon={<Building2 size={iconSize} aria-hidden />} title="건물 정보" compact={compact} />
           {building && apiStatus.registry === 'ok' ? (
-            <dl className="divide-y divide-[var(--color-divider)]">
+            <dl>
               <Row label="주용도" value={placeholder ? dash : building.mainUse} compact={compact} />
               <Row
                 label="사용승인"
@@ -229,11 +208,6 @@ export function ReportSummary({
                 value={placeholder ? dash : `${buildingAge}년차`}
                 compact={compact}
               />
-              <Row
-                label="위반건축물"
-                value={placeholder ? placeholderBadge() : violationBadge(building.hasViolation)}
-                compact={compact}
-              />
             </dl>
           ) : (
             <UnavailableNote status={apiStatus.registry} />
@@ -243,7 +217,7 @@ export function ReportSummary({
         <GlassCard className={compact ? 'p-4' : undefined}>
           <CardHeader icon={<BadgeCheck size={iconSize} aria-hidden />} title="중개업소" compact={compact} />
           {agency && apiStatus.agency === 'ok' ? (
-            <dl className="divide-y divide-[var(--color-divider)]">
+            <dl>
               <Row
                 label="등록번호"
                 value={placeholder ? placeholderBadge() : agencyBadge(agency.isValid)}

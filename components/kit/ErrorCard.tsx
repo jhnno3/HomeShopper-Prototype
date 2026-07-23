@@ -25,7 +25,7 @@ export function ErrorCard({
   return (
     <div
       className={cn(
-        'mx-auto w-full max-w-md rounded-[32px] bg-white px-8 pt-8 pb-14 shadow-2xl sm:px-10 sm:pt-10 sm:pb-16',
+        'mx-auto w-full max-w-md rounded-[32px] bg-white px-8 pt-8 pb-12 shadow-2xl sm:px-10 sm:pt-10 sm:pb-14',
         className
       )}
     >
