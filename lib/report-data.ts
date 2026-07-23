@@ -8,7 +8,7 @@ export const demoReport: ApiReport = {
   id: demoReportId,
   submissionId: demoReportId,
   tier: 'basic',
-  addressMasked: '서울 마포구 연남동 OO번지 인근',
+  addressMasked: '서울 마포구 연남동 21번지 인근',
   dealType: '전세',
   deposit: 75670,
   price: { deposit: 75670, monthly_rent: null },
@@ -17,8 +17,8 @@ export const demoReport: ApiReport = {
   regId: '가3691-공2001',
   facts: {
     recentTransactions: {
-      summary: '인근 전세 실거래 403건, 보정 평균 7억 5,670만원',
-      count: 403,
+      summary: '인근 전세 실거래 8건, 보정 평균 1억 2,000만원',
+      count: 8,
       priceRangeLow: 70000,
       priceRangeHigh: 80000,
     },

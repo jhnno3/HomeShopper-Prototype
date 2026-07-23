@@ -160,8 +160,21 @@ function ReportContent({ params }: { params: Promise<{ id: string }> }) {
 
 export default function ReportPage({ params }: { params: Promise<{ id: string }> }) {
   // useSearchParams requires a Suspense boundary for prerendering (Next docs).
+  // The fallback renders the same backdrop + loader as ReportContent's own
+  // 'loading' state, so the server paints the background and spinner
+  // immediately on navigation — otherwise the fallback is empty and the page
+  // stays blank until the client bundle hydrates, which reads as the
+  // background and content "lagging in" one after another. Because the
+  // fallback and the hydrated loading state are identical, the handoff is
+  // seamless; only the real report content then waits on the API fetch.
   return (
-    <Suspense fallback={null}>
+    <Suspense
+      fallback={
+        <ReportShell>
+          <ProgressAnimation />
+        </ReportShell>
+      }
+    >
       <ReportContent params={params} />
     </Suspense>
   );

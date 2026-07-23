@@ -45,24 +45,34 @@ function Row({
   label,
   value,
   compact,
+  stacked,
 }: {
   label: string;
   value: React.ReactNode;
   compact?: boolean;
+  /** Drop the value onto its own full-width line below the label, left-aligned.
+   *  Used for long, multi-line values (the 시세 summary) that would otherwise
+   *  cram into a narrow right-hand column; short values stay inline-right. */
+  stacked?: boolean;
 }) {
+  if (stacked) {
+    return (
+      <div className={compact ? 'py-2 text-[13px]' : 'py-2 text-sm'}>
+        <dt className="text-[var(--color-slate)]">{label}</dt>
+        <dd className="mt-1 text-left font-medium text-[var(--color-ink)]">{value}</dd>
+      </div>
+    );
+  }
   return (
-    // flex-wrap: a short value sits right-aligned on the label's line; a
-    // value too long to fit drops below the label on its own full-width
-    // line (still right-aligned), instead of squeezing into a narrow column.
     <div
       className={
         compact
-          ? 'flex flex-wrap items-start justify-between gap-x-3 gap-y-1 py-2 text-[13px]'
-          : 'flex flex-wrap items-start justify-between gap-x-4 gap-y-1 py-2 text-sm'
+          ? 'flex items-start justify-between gap-3 py-2 text-[13px]'
+          : 'flex items-start justify-between gap-4 py-2 text-sm'
       }
     >
       <dt className="shrink-0 whitespace-nowrap text-[var(--color-slate)]">{label}</dt>
-      <dd className="ml-auto text-right font-medium text-[var(--color-ink)]">{value}</dd>
+      <dd className="text-right font-medium text-[var(--color-ink)]">{value}</dd>
     </div>
   );
 }
@@ -75,20 +85,43 @@ function UnavailableNote({ status }: { status: ApiStatus }) {
   return <p className="py-2 text-sm text-[var(--color-slate)]">{message}</p>;
 }
 
-/** `tx.summary` packs two clauses into one API string (거래 건수, 보정 평균가) —
+/** `tx.summary` packs its clauses into one API string (거래 건수, 보정 평균가, …) —
  *  split on ", " rather than every comma, since the price itself has a
- *  thousands-separator comma with no trailing space ("5,670만원"). Each
- *  clause gets its own line instead of wrapping wherever the column happens
- *  to run out of width. */
-function SummaryLines({ summary }: { summary: string }) {
+ *  thousands-separator comma with no trailing space ("5,670만원"). */
+function summaryLines(summary: string): string[] {
+  return summary.split(', ');
+}
+
+/** Inline form (≤2 lines): each clause on its own line, right-aligned
+ *  alongside the label — used when the summary is short enough to sit
+ *  comfortably in the row's right-hand column. */
+function SummaryLines({ lines }: { lines: string[] }) {
   return (
     <>
-      {summary.split(', ').map((line) => (
+      {lines.map((line) => (
         <span key={line} className="block">
           {line}
         </span>
       ))}
     </>
+  );
+}
+
+/** Stacked form (3+ lines): rendered as a left-aligned bullet list below the
+ *  label, since a right-hand column reads poorly once a value runs past two
+ *  lines. */
+function SummaryBullets({ lines }: { lines: string[] }) {
+  return (
+    <ul className="space-y-0.5">
+      {lines.map((line) => (
+        <li key={line} className="flex gap-1.5">
+          <span aria-hidden className="text-[var(--color-slate)]">
+            &bull;
+          </span>
+          <span>{line}</span>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -167,6 +200,8 @@ export function ReportSummary({
   // 없는 매물 — 이 경우 흔한 "확인하지 못했어요" 문구를 그대로 쓰면 조회
   // 실패로 오해할 수 있어 별도 안내를 보여준다.
   const isNeighborhoodFacility = Boolean(building?.mainUse.includes('근린생활시설'));
+  const summaryLineList = tx ? summaryLines(tx.summary) : [];
+  const summaryStacked = summaryLineList.length > 2;
 
   return (
     <div className={compact ? 'space-y-5' : 'space-y-7'}>
@@ -175,8 +210,20 @@ export function ReportSummary({
           <dl>
             <Row
               label="인근 거래 요약"
-              value={placeholder ? dash : <SummaryLines summary={tx.summary} />}
+              value={
+                placeholder ? (
+                  dash
+                ) : summaryStacked ? (
+                  <SummaryBullets lines={summaryLineList} />
+                ) : (
+                  <SummaryLines lines={summaryLineList} />
+                )
+              }
               compact={compact}
+              // Up to 2 lines fits comfortably beside the label, right-aligned.
+              // Past that, a right-hand column reads poorly — stack the value
+              // below the label as a left-aligned bullet list instead.
+              stacked={!placeholder && summaryStacked}
             />
             <Row
               label="비교 거래 수"
