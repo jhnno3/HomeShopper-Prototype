@@ -182,41 +182,16 @@ const SERVICES = [
   },
 ];
 
-/* Manual scroll-offset (not scrollIntoView) — the hero is position:sticky
-   while pinned, and scrollIntoView has to walk the containing-block chain
-   to compute its target, which sticky ancestors are a known source of
-   miscalculating across browsers. window.scrollTo against a measured
-   document-relative offset sidesteps that entirely, same reasoning as
-   measureLock below.
-
-   That offset has to come from the offsetTop chain, not
-   getBoundingClientRect(): the pull-reveal wraps hero-search in an
-   ancestor whose `transform: translateY/scale` is itself driven by
-   scrollY (see heroY/heroScale above), so the rect is a moving target —
-   its value keeps shifting as the very scroll this computes is still
-   animating, and the button lands short of (or past) the search bar
-   depending on where in the pull range the click happened.
-   offsetTop/offsetParent reflect the element's untransformed layout
-   position, which transform never touches, so the target stays fixed
-   for the whole scroll animation.
-
-   Landing just under the navbar (not vertically centered) — centering
-   left the full heading still on screen above the field, which read as
-   "back at the hero" rather than "at the search box". Pinning the field's
-   top edge right below the sticky nav crops the heading out instead. */
+/* Every offset-based target (getBoundingClientRect, offsetTop chain) kept
+   drifting because the pull-reveal wraps hero-search in an ancestor whose
+   `transform: translateY/scale` is itself driven by scrollY — a moving
+   target on big screens where the pull is active. The hero is the very
+   first thing on the page, so scrolling to the literal top sidesteps the
+   whole measurement problem: it's always correct, transform or not. */
 function focusHeroSearch() {
+  window.scrollTo({ top: 0, behavior: "smooth" });
   const el = document.getElementById("hero-search") as HTMLInputElement | null;
-  if (!el) return;
-  let docTop = 0;
-  let node: HTMLElement | null = el;
-  while (node) {
-    docTop += node.offsetTop;
-    node = node.offsetParent as HTMLElement | null;
-  }
-  const navH = document.querySelector("header")?.getBoundingClientRect().height ?? 61;
-  const target = docTop - navH - 24;
-  window.scrollTo({ top: Math.max(0, target), behavior: "smooth" });
-  el.focus({ preventScroll: true });
+  el?.focus({ preventScroll: true });
 }
 
 function CommandBar() {
