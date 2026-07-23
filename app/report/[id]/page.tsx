@@ -32,12 +32,12 @@ function ReportShell({ children }: { children: React.ReactNode }) {
 
 function ReportMessage({ title, body }: { title: string; body: string }) {
   return (
-    <ErrorCard className="w-full max-w-md p-8 text-center">
-      <h1 className="text-lg font-bold text-[var(--color-ink)]">{title}</h1>
-      <p className="mt-2 text-sm leading-relaxed text-[var(--color-slate)]">{body}</p>
+    <ErrorCard className="text-center">
+      <h1 className="text-xl font-bold text-[var(--color-ink)]">{title}</h1>
+      <p className="mt-3 text-sm leading-relaxed text-[var(--color-slate)]">{body}</p>
       <Link
         href="/"
-        className="mt-5 inline-flex h-11 items-center justify-center rounded-xl bg-[var(--color-blue)] px-5 text-[14px] font-semibold text-white transition-colors duration-150 hover:brightness-95"
+        className="mt-7 inline-flex h-12 items-center justify-center rounded-xl bg-[var(--color-blue)] px-6 text-[14px] font-semibold text-white transition-colors duration-150 hover:brightness-95"
       >
         홈으로 돌아가기
       </Link>

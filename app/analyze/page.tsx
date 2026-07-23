@@ -3,7 +3,6 @@ import { Suspense, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ProgressAnimation } from '@/components/analyze/ProgressAnimation';
 import { Button } from '@/components/kit/Button';
-import { CardStack } from '@/components/reserve/CardStack';
 import { ErrorCard } from '@/components/kit/ErrorCard';
 import { trackEvent } from '@/lib/analytics';
 import { apiFetch, ApiError } from '@/lib/api';
@@ -87,6 +86,15 @@ function AnalyzeFlow() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
 
+  // Bare or hand-typed /analyze (no validated ?source= link) is not a real
+  // entry point — only the search box, which always passes a validated link,
+  // should start the analyzer. Anything else bounces home. The valid-source
+  // flow and the road-address retry both keep the original ?source= in the
+  // URL, so they never trigger this.
+  useEffect(() => {
+    if (!startsInProgress) router.replace('/');
+  }, [startsInProgress, router]);
+
   function handleStep1Submit(e: React.FormEvent) {
     e.preventDefault();
     const input = classifyListingInput(sourceValue);
@@ -104,15 +112,17 @@ function AnalyzeFlow() {
     setStep('progress');
   }
 
-  // A real search/analysis failure gets the plain, undecorated error surface
-  // instead of the fanned success-card look — a failure shouldn't read as
-  // the same polished moment as a clean form.
-  const Step1Card = error ? ErrorCard : CardStack;
+  // Render nothing while the redirect effect above bounces a non-entry-point
+  // visit back home (runs after all hooks, so hook order stays stable).
+  if (!startsInProgress) return null;
 
   return (
     <main className="mx-auto max-w-lg px-6 py-16 md:py-24">
       {step === 'input' && (
-        <Step1Card>
+        // The input step is only ever reached as a retry after a failed
+        // analysis, so it always shows the plain error card — sizing comes
+        // from ErrorCard itself, shared with the report error card.
+        <ErrorCard>
           <form onSubmit={handleStep1Submit} className="space-y-6">
             <h1 className="text-2xl font-bold text-[var(--color-ink)]">매물 정보를 알려주세요</h1>
             <input
@@ -164,7 +174,7 @@ function AnalyzeFlow() {
               분석 시작
             </Button>
           </form>
-        </Step1Card>
+        </ErrorCard>
       )}
 
       {step === 'progress' && (
