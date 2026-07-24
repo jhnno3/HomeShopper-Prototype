@@ -135,7 +135,9 @@ function ReportContent({ params }: { params: Promise<{ id: string }> }) {
       className="glass-edge border-glass shadow-glass rounded-3xl bg-[rgba(255,255,255,0.55)] p-6 backdrop-blur-xl sm:p-8"
     >
       <header>
-        <h1 className="text-xl font-bold text-[var(--color-ink)]">매물 확인 리포트</h1>
+        <h1 className="text-xl font-bold text-[var(--color-ink)]">
+          매물 확인 리포트: {report.addressMasked}
+        </h1>
         <p className="mt-1 text-sm text-[var(--color-slate)]">
           공개 데이터로 확인한 결과를 정리했어요
         </p>

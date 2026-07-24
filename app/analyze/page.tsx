@@ -224,7 +224,7 @@ function AnalyzeFlow() {
           <p className="mx-auto max-w-sm text-center text-base leading-relaxed text-[var(--color-slate)]">
             등기부등본부터 실거래가까지, 계약 전 꼭 확인해야 할 서류를 홈쇼퍼가 대신 확인하고 있어요.
           </p>
-          <div className="mx-auto h-px w-24" style={{ backgroundColor: 'rgba(91,100,114,0.25)' }} />
+          <div className="mx-auto mt-3 h-px w-24" style={{ backgroundColor: 'rgba(91,100,114,0.25)' }} />
         </div>
       )}
     </main>
