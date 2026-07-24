@@ -13,6 +13,7 @@ import { ProgressAnimation } from '@/components/analyze/ProgressAnimation';
 import { ErrorCard } from '@/components/kit/ErrorCard';
 import { trackEvent } from '@/lib/analytics';
 import { apiFetch, ApiError } from '@/lib/api';
+import { clearStashedReport, peekStashedReport } from '@/lib/report-cache';
 import type { ApiReport } from '@/lib/types';
 
 type LoadState = 'loading' | 'ready' | 'notFound' | 'error';
@@ -52,8 +53,11 @@ function ReportContent({ params }: { params: Promise<{ id: string }> }) {
   const oauthResult = useSearchParams().get('oauth');
   const reduceMotion = useReducedMotion();
 
-  const [report, setReport] = useState<ApiReport | null>(null);
-  const [state, setState] = useState<LoadState>('loading');
+  // Lazy init reads the stash left by the analyze flow (see report-cache.ts)
+  // so a report arriving that way renders immediately, with no loading state
+  // of its own to flash after the analyze progress screen.
+  const [report, setReport] = useState<ApiReport | null>(() => peekStashedReport(id));
+  const [state, setState] = useState<LoadState>(() => (peekStashedReport(id) ? 'ready' : 'loading'));
 
   // Fetches the report (FRONTEND_INTEGRATION.md §정밀 리포트 / 오류 처리).
   // The backend returns 400 ("리포트를 찾을 수 없습니다") for a missing report,
@@ -62,6 +66,12 @@ function ReportContent({ params }: { params: Promise<{ id: string }> }) {
   // `active` guards against a resolved fetch calling setState after the id
   // changed or the component unmounted.
   useEffect(() => {
+    if (report) {
+      clearStashedReport(id);
+      trackEvent('report_view', { reportId: id });
+      return;
+    }
+
     let active = true;
     setState('loading');
     // encodeURIComponent guards against the id containing path separators
@@ -83,6 +93,7 @@ function ReportContent({ params }: { params: Promise<{ id: string }> }) {
     return () => {
       active = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   if (state === 'loading') {

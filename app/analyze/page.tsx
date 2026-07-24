@@ -8,7 +8,8 @@ import { ErrorCard } from '@/components/kit/ErrorCard';
 import { trackEvent } from '@/lib/analytics';
 import { apiFetch, ApiError } from '@/lib/api';
 import { classifyListingInput } from '@/lib/listing-input';
-import type { AnalysisApiResponse } from '@/lib/types';
+import { stashReport } from '@/lib/report-cache';
+import type { AnalysisApiResponse, ApiReport } from '@/lib/types';
 
 type Step = 'input' | 'progress';
 
@@ -68,13 +69,24 @@ function AnalyzeFlow() {
     })
       .then((res) => {
         trackEvent('analyze_complete', { reportId: res.reportId, status: res.status });
-        // replace, not push: /analyze is a one-shot transition, not a page a
-        // user should land back on — pushing it would leave it in history, so
-        // back-navigating from the report re-enters 'progress' with the same
-        // ?source= link and silently re-runs the analysis (see report page's
-        // back/forward question). Swapping it out means back goes straight to
-        // wherever the user was before starting the analysis.
-        router.replace(`/report/${res.reportId}`);
+        // Fetch the report here, under the same progress screen, and hand it
+        // to the report page via the stash — otherwise /report/[id] runs its
+        // own GET right after this and flashes its own loading state for a
+        // moment before the content is ready. Best-effort: if this fails,
+        // just navigate anyway and let the report page fetch it normally.
+        return apiFetch<ApiReport>(`/reports/${res.reportId}`)
+          .then((report) => stashReport(report))
+          .catch(() => {})
+          .then(() => {
+            // replace, not push: /analyze is a one-shot transition, not a page
+            // a user should land back on — pushing it would leave it in
+            // history, so back-navigating from the report re-enters
+            // 'progress' with the same ?source= link and silently re-runs the
+            // analysis (see report page's back/forward question). Swapping
+            // it out means back goes straight to wherever the user was
+            // before starting the analysis.
+            router.replace(`/report/${res.reportId}`);
+          });
       })
       .catch((err) => {
         analyzingRef.current = false;

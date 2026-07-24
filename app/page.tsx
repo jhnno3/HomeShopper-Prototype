@@ -9,8 +9,6 @@ import { HeroGradient } from "@/components/landing/HeroGradient";
 import { SheetGradient } from "@/components/landing/SheetGradient";
 import { Logo } from "@/components/kit/Logo";
 import { ReportSummary } from "@/components/report/ReportSummary";
-import { SURVEY_URL } from "@/components/report/SurveyCard";
-import { Coffee } from "lucide-react";
 import { demoReport } from "@/lib/report-data";
 import { classifyListingInput } from "@/lib/listing-input";
 import "./landing.css";
@@ -699,36 +697,6 @@ export default function LandingPage() {
             </div>
           </Reveal>
         </div>
-      </section>
-
-      {/* survey */}
-      <section className="px-4 py-16 sm:py-[88px]">
-        <Reveal>
-          <div className="g-panel mx-auto flex max-w-2xl flex-col items-center gap-5 rounded-[32px] px-8 py-12 text-center sm:px-14 sm:py-14">
-            <span
-              className="flex h-12 w-12 items-center justify-center rounded-2xl"
-              style={{ background: "rgba(10,92,255,0.1)", color: "var(--royal)" }}
-              aria-hidden
-            >
-              <Coffee size={22} strokeWidth={2.2} />
-            </span>
-            <h2 className="break-keep text-[22px] font-extrabold tracking-[-0.02em] sm:text-[26px]">
-              참여만 하면 커피 기프티콘 주는 2분 설문조사 참여하기
-            </h2>
-            <p className="break-keep max-w-md text-[15px] leading-relaxed text-(--muted)">
-              지금 쓰는 부동산 앱에서 불편했던 점을 알려주시면, 감사의 의미로 커피
-              기프티콘을 보내드려요.
-            </p>
-            <a
-              href={SURVEY_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="g-cta inline-flex items-center px-7 py-3.5 text-[15px]"
-            >
-              설문하기
-            </a>
-          </div>
-        </Reveal>
       </section>
 
       {/* trust + faq */}
