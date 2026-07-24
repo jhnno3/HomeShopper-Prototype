@@ -1,3 +1,5 @@
+'use client';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { BarChart3, Building2, BadgeCheck, HelpCircle, AlertTriangle } from 'lucide-react';
 import type { ApiReport, ApiStatus } from '@/lib/types';
 
@@ -45,24 +47,11 @@ function Row({
   label,
   value,
   compact,
-  stacked,
 }: {
   label: string;
   value: React.ReactNode;
   compact?: boolean;
-  /** Drop the value onto its own full-width line below the label, left-aligned.
-   *  Used for long, multi-line values (the 시세 summary) that would otherwise
-   *  cram into a narrow right-hand column; short values stay inline-right. */
-  stacked?: boolean;
 }) {
-  if (stacked) {
-    return (
-      <div className={compact ? 'py-2 text-[13px]' : 'py-2 text-sm'}>
-        <dt className="text-[var(--color-slate)]">{label}</dt>
-        <dd className="mt-1 text-left font-medium text-[var(--color-ink)]">{value}</dd>
-      </div>
-    );
-  }
   return (
     <div
       className={
@@ -92,9 +81,9 @@ function summaryLines(summary: string): string[] {
   return summary.split(', ');
 }
 
-/** Inline form (≤2 lines): each clause on its own line, right-aligned
- *  alongside the label — used when the summary is short enough to sit
- *  comfortably in the row's right-hand column. */
+/** Inline form: each clause on its own line, right-aligned alongside the
+ *  label — used while the value is short enough to sit in the row's
+ *  right-hand column. */
 function SummaryLines({ lines }: { lines: string[] }) {
   return (
     <>
@@ -107,9 +96,9 @@ function SummaryLines({ lines }: { lines: string[] }) {
   );
 }
 
-/** Stacked form (3+ lines): rendered as a left-aligned bullet list below the
- *  label, since a right-hand column reads poorly once a value runs past two
- *  lines. */
+/** Stacked form: rendered as a left-aligned bullet list below the label —
+ *  used once the value actually renders past two lines, since a right-hand
+ *  column reads poorly at that point. */
 function SummaryBullets({ lines }: { lines: string[] }) {
   return (
     <ul className="space-y-0.5">
@@ -122,6 +111,54 @@ function SummaryBullets({ lines }: { lines: string[] }) {
         </li>
       ))}
     </ul>
+  );
+}
+
+/** The 인근 거래 요약 row: layout depends on *rendered* line count, not clause
+ *  count — a single long clause can wrap to 3+ lines in the narrow right
+ *  column just as easily as three short clauses can, so counting commas is
+ *  not a reliable proxy for "did this overflow two lines". Instead this
+ *  renders the inline (right-aligned) form first, measures it, and — if its
+ *  height exceeds two lines — swaps to the stacked/bulleted form. The swap
+ *  happens in useLayoutEffect, before the browser paints, so there's no
+ *  visible flash of the wrong layout. */
+function SummaryRow({ label, lines, compact }: { label: string; lines: string[]; compact?: boolean }) {
+  const measureRef = useRef<HTMLElement>(null);
+  const [stacked, setStacked] = useState(false);
+
+  useLayoutEffect(() => {
+    const el = measureRef.current;
+    if (!el) return;
+    const lineHeight = parseFloat(getComputedStyle(el).lineHeight);
+    // +1px slack for subpixel rounding in the two-line height comparison.
+    const twoLineHeight = lineHeight * 2 + 1;
+    setStacked(el.scrollHeight > twoLineHeight);
+  }, [lines, compact]);
+
+  if (stacked) {
+    return (
+      <div className={compact ? 'py-2 text-[13px]' : 'py-2 text-sm'}>
+        <dt className="text-[var(--color-slate)]">{label}</dt>
+        <dd className="mt-1 text-left font-medium text-[var(--color-ink)]">
+          <SummaryBullets lines={lines} />
+        </dd>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={
+        compact
+          ? 'flex items-start justify-between gap-3 py-2 text-[13px]'
+          : 'flex items-start justify-between gap-4 py-2 text-sm'
+      }
+    >
+      <dt className="shrink-0 whitespace-nowrap text-[var(--color-slate)]">{label}</dt>
+      <dd ref={measureRef} className="text-right font-medium text-[var(--color-ink)]">
+        <SummaryLines lines={lines} />
+      </dd>
+    </div>
   );
 }
 
@@ -200,31 +237,17 @@ export function ReportSummary({
   // 없는 매물 — 이 경우 흔한 "확인하지 못했어요" 문구를 그대로 쓰면 조회
   // 실패로 오해할 수 있어 별도 안내를 보여준다.
   const isNeighborhoodFacility = Boolean(building?.mainUse.includes('근린생활시설'));
-  const summaryLineList = tx ? summaryLines(tx.summary) : [];
-  const summaryStacked = summaryLineList.length > 2;
 
   return (
     <div className={compact ? 'space-y-5' : 'space-y-7'}>
       <Section icon={<BarChart3 size={iconSize} aria-hidden />} title="시세 정보" compact={compact}>
         {tx && apiStatus.transactions === 'ok' ? (
           <dl>
-            <Row
-              label="인근 거래 요약"
-              value={
-                placeholder ? (
-                  dash
-                ) : summaryStacked ? (
-                  <SummaryBullets lines={summaryLineList} />
-                ) : (
-                  <SummaryLines lines={summaryLineList} />
-                )
-              }
-              compact={compact}
-              // Up to 2 lines fits comfortably beside the label, right-aligned.
-              // Past that, a right-hand column reads poorly — stack the value
-              // below the label as a left-aligned bullet list instead.
-              stacked={!placeholder && summaryStacked}
-            />
+            {placeholder ? (
+              <Row label="인근 거래 요약" value={dash} compact={compact} />
+            ) : (
+              <SummaryRow label="인근 거래 요약" lines={summaryLines(tx.summary)} compact={compact} />
+            )}
             <Row
               label="비교 거래 수"
               value={placeholder ? dash : `${tx.count.toLocaleString()}건`}
