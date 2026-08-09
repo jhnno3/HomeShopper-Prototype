@@ -1,4 +1,4 @@
- 'use client';
+ 'use client';
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Info } from 'lucide-react';
@@ -7,7 +7,6 @@ import { Button } from '@/components/kit/Button';
 import { ErrorCard } from '@/components/kit/ErrorCard';
 import { trackEvent } from '@/lib/analytics';
 import { apiFetch, ApiError } from '@/lib/api';
-import { classifyListingInput } from '@/lib/listing-input';
 import { stashReport } from '@/lib/report-cache';
 import type { AnalysisApiResponse, ApiReport } from '@/lib/types';
 
@@ -16,25 +15,14 @@ type Step = 'input' | 'progress';
 function AnalyzeFlow() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  // A valid source passed from the landing search box skips the 매물 정보
-  // step; an invalid one falls back to the input step with the error shown.
+  // An address passed from the landing search box skips the 매물 정보 step;
+  // arriving with nothing falls back to the input step.
   const initialSource = (searchParams.get('source') ?? '').trim();
-  const initialInput = initialSource ? classifyListingInput(initialSource) : null;
-  const startsInProgress = initialInput !== null && initialInput.kind === 'link';
+  const startsInProgress = initialSource.length > 0;
 
   const [step, setStep] = useState<Step>(startsInProgress ? 'progress' : 'input');
   const [sourceValue, setSourceValue] = useState(initialSource);
-  const [error, setError] = useState<string | null>(
-    initialInput?.kind === 'invalid' ? initialInput.message : null
-  );
-  // 도로명주소 fallback: some 다방 detail responses don't carry a road address,
-  // and the backend then rejects the analysis with a "도로명 주소를 찾지 못했습니다"
-  // error. When that happens we reveal an extra field so the user can supply it
-  // directly; it's sent as the optional camelCase `roadAddress` (≤300 chars,
-  // FRONTEND_INTEGRATION.md §매물 분석), which the backend prefers over the
-  // listing's own address.
-  const [roadAddress, setRoadAddress] = useState('');
-  const [needsRoadAddress, setNeedsRoadAddress] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Guards the analysis request against a double fire — the effect re-runs on
   // dev strict-mode remounts, and `step` can re-enter 'progress' on retry.
@@ -47,25 +35,19 @@ function AnalyzeFlow() {
   useEffect(() => {
     if (step !== 'progress' || analyzingRef.current) return;
 
-    const input = classifyListingInput(sourceValue);
-    if (input.kind !== 'link') {
-      setError(input.kind === 'invalid' ? input.message : '다방 링크를 다시 확인해주세요.');
+    const source = sourceValue.trim();
+    if (!source) {
+      setError('주소를 입력해주세요.');
       setStep('input');
       return;
     }
 
     analyzingRef.current = true;
-    trackEvent('analyze_start', { inputMode: 'link' });
-
-    const trimmedRoad = roadAddress.trim();
+    trackEvent('analyze_start', { inputMode: 'address' });
 
     apiFetch<AnalysisApiResponse>('/analyses', {
       method: 'POST',
-      body: JSON.stringify({
-        inputMode: 'link',
-        source: input.source,
-        ...(trimmedRoad ? { roadAddress: trimmedRoad } : {}),
-      }),
+      body: JSON.stringify({ inputMode: 'address', source }),
     })
       .then((res) => {
         trackEvent('analyze_complete', { reportId: res.reportId, status: res.status });
@@ -81,7 +63,7 @@ function AnalyzeFlow() {
             // replace, not push: /analyze is a one-shot transition, not a page
             // a user should land back on — pushing it would leave it in
             // history, so back-navigating from the report re-enters
-            // 'progress' with the same ?source= link and silently re-runs the
+            // 'progress' with the same ?source= and silently re-runs the
             // analysis (see report page's back/forward question). Swapping
             // it out means back goes straight to wherever the user was
             // before starting the analysis.
@@ -90,41 +72,26 @@ function AnalyzeFlow() {
       })
       .catch((err) => {
         analyzingRef.current = false;
-        const message =
-          err instanceof ApiError ? err.message : '분석에 실패했어요. 잠시 후 다시 시도해주세요.';
-        // The backend couldn't extract a road address from the listing —
-        // reveal the manual 도로명주소 field and prompt a retry with it.
-        if (/도로명\s*주소/.test(message)) {
-          setNeedsRoadAddress(true);
-          setError('매물 링크에서 도로명주소를 찾지 못했어요. 아래에 도로명주소를 입력한 뒤 다시 시도해주세요.');
-        } else {
-          setError(message);
-        }
+        setError(
+          err instanceof ApiError ? err.message : '분석에 실패했어요. 잠시 후 다시 시도해주세요.'
+        );
         setStep('input');
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
 
-  // Bare or hand-typed /analyze (no validated ?source= link) is not a real
-  // entry point — only the search box, which always passes a validated link,
-  // should start the analyzer. Anything else bounces home. The valid-source
-  // flow and the road-address retry both keep the original ?source= in the
-  // URL, so they never trigger this.
+  // Bare or hand-typed /analyze (no ?source=) is not a real entry point —
+  // only the search box, which always passes an address, should start the
+  // analyzer. Anything else bounces home. The retry flow keeps the original
+  // ?source= in the URL, so it never triggers this.
   useEffect(() => {
     if (!startsInProgress) router.replace('/');
   }, [startsInProgress, router]);
 
   function handleStep1Submit(e: React.FormEvent) {
     e.preventDefault();
-    const input = classifyListingInput(sourceValue);
-    if (input.kind === 'invalid') {
-      setError(input.message);
-      return;
-    }
-    // Once the road-address field is showing, a retry without it would just
-    // fail the same way — require it before re-running.
-    if (needsRoadAddress && !roadAddress.trim()) {
-      setError('도로명주소를 입력해주세요.');
+    if (!sourceValue.trim()) {
+      setError('주소를 입력해주세요.');
       return;
     }
     setError(null);
@@ -158,9 +125,9 @@ function AnalyzeFlow() {
                     setSourceValue(e.target.value);
                     if (error) setError(null);
                   }}
-                  placeholder="다방 링크를 붙여넣으세요"
+                  placeholder="매물 주소를 입력하세요"
                   className="w-full rounded-full border border-[rgba(0,131,255,0.22)] bg-[rgba(0,131,255,0.05)] px-5 py-2.5 text-[var(--color-ink)] placeholder:text-[var(--color-slate)] transition-colors focus:border-[var(--color-blue)] focus:bg-[rgba(0,131,255,0.09)] focus:outline-none"
-                  aria-label="다방 매물 링크"
+                  aria-label="매물 주소"
                   aria-invalid={Boolean(error)}
                   aria-describedby={error ? 'analyze-source-error' : undefined}
                 />
@@ -177,29 +144,6 @@ function AnalyzeFlow() {
                   </p>
                 )}
               </div>
-              {needsRoadAddress && (
-                <div className="space-y-2">
-                  <label
-                    htmlFor="analyze-road-address"
-                    className="block text-sm font-semibold text-[var(--color-ink)]"
-                  >
-                    도로명주소
-                  </label>
-                  <input
-                    id="analyze-road-address"
-                    type="text"
-                    value={roadAddress}
-                    onChange={(e) => {
-                      setRoadAddress(e.target.value);
-                      if (error) setError(null);
-                    }}
-                    maxLength={300}
-                    placeholder="예: 서울특별시 서초구 서초대로 301"
-                    className="w-full rounded-full border border-[rgba(0,131,255,0.22)] bg-[rgba(0,131,255,0.05)] px-5 py-2.5 text-[var(--color-ink)] placeholder:text-[var(--color-slate)] transition-colors focus:border-[var(--color-blue)] focus:bg-[rgba(0,131,255,0.09)] focus:outline-none"
-                    aria-label="도로명주소"
-                  />
-                </div>
-              )}
               <Button type="submit" size="lg" className="h-11 w-full rounded-full text-sm">
                 분석 시작
               </Button>
@@ -210,7 +154,7 @@ function AnalyzeFlow() {
               card never feels like it's just a single bare error line. */}
           <p className="mt-6 flex items-center justify-center gap-1.5 text-center text-[13px] text-[var(--color-slate)]">
             <Info size={14} aria-hidden />
-            다방 앱에서 매물 상세 페이지 링크를 복사해 붙여넣어 주세요.
+            도로명 또는 지번 주소를 입력해주세요. 예: 서울특별시 서초구 서초대로 301
           </p>
         </ErrorCard>
       )}

@@ -10,7 +10,6 @@ import { SheetGradient } from "@/components/landing/SheetGradient";
 import { Logo } from "@/components/kit/Logo";
 import { ReportSummary } from "@/components/report/ReportSummary";
 import { demoReport } from "@/lib/report-data";
-import { classifyListingInput } from "@/lib/listing-input";
 import "./landing.css";
 
 const DOCS = ["허위매물 검증", "전문가 동행 임장", "협상·특약 대행", "수수료 반값"];
@@ -18,8 +17,8 @@ const DOCS = ["허위매물 검증", "전문가 동행 임장", "협상·특약 
 const STEPS = [
   {
     n: "1",
-    title: "링크 붙여넣기",
-    body: "보고 있는 다방 매물 링크를 그대로 붙여넣으세요. 가입도, 앱 설치도 없습니다.",
+    title: "주소 입력하기",
+    body: "보고 있는 매물의 주소를 입력하세요. 가입도, 앱 설치도 없습니다.",
     grad: "linear-gradient(135deg, #4f93ff 0%, #0a5cff 100%)",
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -98,7 +97,7 @@ const PUZZLE_PIECES = [
 const SERVICES = [
   {
     title: "매물 검증 · 시세 조사",
-    body: "다방 매물 링크 하나로 허위매물 여부와 적정 시세를 확인해요. 원하는 조건을 입력하면 계약 만료 예정 매물까지 포함해 추천하고, 과거 중개 계약서와 공공데이터로 거래가·계약기간·특약의 기준을 알려드립니다.",
+    body: "매물 주소 하나로 허위매물 여부와 적정 시세를 확인해요. 원하는 조건을 입력하면 계약 만료 예정 매물까지 포함해 추천하고, 과거 중개 계약서와 공공데이터로 거래가·계약기간·특약의 기준을 알려드립니다.",
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <circle cx="11" cy="11" r="7" />
@@ -205,12 +204,12 @@ function CommandBar() {
       className="g-panel g-bar flex w-full items-center gap-2.5 py-1.5 pl-4 pr-2"
       onSubmit={(e) => {
         e.preventDefault();
-        const input = classifyListingInput(value);
-        if (input.kind === "invalid") {
-          setError(input.message);
+        const source = value.trim();
+        if (!source) {
+          setError("주소를 입력해주세요.");
           return;
         }
-        router.push(`/analyze?source=${encodeURIComponent(input.source)}`);
+        router.push(`/analyze?source=${encodeURIComponent(source)}`);
       }}
     >
       <svg
@@ -230,8 +229,8 @@ function CommandBar() {
         id="hero-search"
         type="text"
         inputMode="text"
-        aria-label="다방 매물 링크"
-        placeholder="다방 매물 링크를 붙여넣으세요"
+        aria-label="매물 주소"
+        placeholder="매물 주소를 입력하세요"
         value={value}
         onChange={(e) => {
           setValue(e.target.value);
@@ -470,7 +469,7 @@ export default function LandingPage() {
             >
               {[
                 <h1 key="h1" className="text-[34px] leading-[1.25] font-extrabold tracking-[-0.035em] text-balance break-keep sm:text-[60px]">
-                  다방 링크만 입력하세요
+                  주소만 입력하세요
                   <br />
                   <span className="text-grad">반값 수수료</span>로,
                   <br />
@@ -685,7 +684,7 @@ export default function LandingPage() {
             <div className="mx-auto mt-16 flex max-w-lg flex-col items-center gap-5 text-center sm:mt-20">
               <p className="break-keep text-[16px] leading-relaxed text-(--muted)">
                 이 모든 과정을 홈쇼퍼가 대신 처리하는데, 수수료는 절반이에요.
-                다방 링크만 입력하고 안내하는 대로만 따라오시면 됩니다.
+                주소만 입력하고 안내하는 대로만 따라오시면 됩니다.
               </p>
               <button type="button" onClick={focusHeroSearch} className="g-cta inline-flex items-center gap-2 px-7 py-3.5 text-[15px]">
                 무료로 상세 분석 받기

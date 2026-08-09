@@ -109,7 +109,7 @@ function ReportContent({ params }: { params: Promise<{ id: string }> }) {
       <ReportShell>
         <ReportMessage
           title="리포트를 찾을 수 없어요"
-          body="주소가 잘못됐거나 만료된 리포트일 수 있어요. 다방 링크로 다시 분석해보세요."
+          body="주소가 잘못됐거나 만료된 리포트일 수 있어요. 매물 주소로 다시 분석해보세요."
         />
       </ReportShell>
     );
