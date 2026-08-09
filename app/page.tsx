@@ -206,7 +206,7 @@ function CommandBar() {
   return (
     <>
     <form
-      className="g-panel g-bar flex w-full items-center gap-2 py-1.5 pl-4 pr-2"
+      className="g-panel g-bar flex w-full items-center py-1.5 pl-4 pr-4"
       onSubmit={(e) => {
         e.preventDefault();
         const source = value.trim();
@@ -218,93 +218,99 @@ function CommandBar() {
         router.push(`/analyze?${params.toString()}`);
       }}
     >
-      <svg
-        className="size-[18px] shrink-0 text-(--faint)"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden
-      >
-        <circle cx="11" cy="11" r="7" />
-        <path d="m21 21-4.3-4.3" />
-      </svg>
-      <input
-        id="hero-search"
-        type="text"
-        inputMode="text"
-        aria-label="매물 주소"
-        placeholder="매물 주소를 입력하세요"
-        value={value}
-        onChange={(e) => {
-          setValue(e.target.value);
-          if (error) setError(null);
-        }}
-        aria-invalid={Boolean(error)}
-        aria-describedby={error ? "hero-search-error" : undefined}
-        className="min-h-10 flex-1 px-0"
-      />
-
-      {/* Divider between the address field and the action cluster — inset
-          from the pill's top/bottom edges (not full-height) so it reads as
-          a soft separator rather than a hard column border. */}
-      <div aria-hidden className="mx-0.5 h-6 w-px shrink-0 self-center bg-[rgba(14,27,51,0.1)]" />
-
-      <DropdownMenu
-        ariaLabel="거래 유형"
-        className="shrink-0"
-        options={DEAL_TYPES.map((type) => ({
-          label: type,
-          active: type === dealType,
-          onClick: () => setDealType(type),
-        }))}
-      >
-        {dealType}
-      </DropdownMenu>
-
-      {/* Map-ping entry point — opens a map picker to drop a pin instead of
-          typing an address (reverse-geocode wiring lands separately). No
-          button chrome — just the glyph, sized up now that it isn't sitting
-          inside a circle. */}
-      <button
-        type="button"
-        aria-label="지도에서 위치 선택"
-        className="grid shrink-0 place-items-center p-1 text-(--royal) transition-transform active:scale-95"
-      >
-        {/* NotchNook tray-icon pin — swapped in for the design's own asset.
-            No background rect (transparent), body recolored to the site's
-            royal blue via currentColor so it matches the rest of the icon
-            set instead of the source's #0088FF. */}
-        <svg className="h-[30px] w-auto" viewBox="0 0 573 815" fill="none" aria-hidden>
-          <path
-            d="M572.976 286.488C572.976 550.502 286.488 814.804 286.488 814.804C286.488 814.804 0 550.502 0 286.488C0 128.266 128.266 0 286.488 0C444.71 0 572.976 128.266 572.976 286.488Z"
-            fill="currentColor"
-          />
-          <path
-            d="M286.488 447.774C375.564 447.774 447.774 375.564 447.774 286.488C447.774 197.412 375.564 125.202 286.488 125.202C197.412 125.202 125.202 197.412 125.202 286.488C125.202 375.564 197.412 447.774 286.488 447.774Z"
-            fill="white"
-          />
+      {/* Everything except the submit button lives in its own flex-1 row so
+          its spacing (gap-2) stays fixed regardless of the button. The
+          button controls its own leading margin instead of sharing this
+          gap — see the note by its animation below. */}
+      <div className="flex min-w-0 flex-1 items-center gap-2">
+        <svg
+          className="size-[18px] shrink-0 text-(--faint)"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+        >
+          <circle cx="11" cy="11" r="7" />
+          <path d="m21 21-4.3-4.3" />
         </svg>
-      </button>
+        <input
+          id="hero-search"
+          type="text"
+          inputMode="text"
+          aria-label="매물 주소"
+          placeholder="매물 주소를 입력하세요"
+          value={value}
+          onChange={(e) => {
+            setValue(e.target.value);
+            if (error) setError(null);
+          }}
+          aria-invalid={Boolean(error)}
+          aria-describedby={error ? "hero-search-error" : undefined}
+          className="min-h-10 flex-1 px-0"
+        />
+
+        {/* Divider between the address field and the action cluster — inset
+            from the pill's top/bottom edges (not full-height) so it reads as
+            a soft separator rather than a hard column border. */}
+        <div aria-hidden className="mx-0.5 h-6 w-px shrink-0 self-center bg-[rgba(14,27,51,0.1)]" />
+
+        <DropdownMenu
+          ariaLabel="거래 유형"
+          className="shrink-0"
+          options={DEAL_TYPES.map((type) => ({
+            label: type,
+            active: type === dealType,
+            onClick: () => setDealType(type),
+          }))}
+        >
+          {dealType}
+        </DropdownMenu>
+
+        {/* Map-ping entry point — opens a map picker to drop a pin instead of
+            typing an address (reverse-geocode wiring lands separately). No
+            button chrome — just the glyph. The arrow button's own
+            marginLeft (below) keeps it clear of this one, so this button
+            can use balanced padding instead of trimming its right side. */}
+        <button
+          type="button"
+          aria-label="지도에서 위치 선택"
+          className="grid shrink-0 place-items-center p-1 text-(--royal) transition-transform active:scale-95"
+        >
+          {/* Provided map-pin.svg asset — recolored from its hardcoded
+              #0a5cff to currentColor so it picks up the button's
+              text-(--royal) like the rest of the icon set. */}
+          <svg className="h-[24px] w-auto" viewBox="0 0 256 256" fill="none" aria-hidden>
+            <path
+              d="M127.99414,15.9971a88.1046,88.1046,0,0,0-88,88c0,75.29688,80,132.17188,83.40625,134.55469a8.023,8.023,0,0,0,9.1875,0c3.40625-2.38281,83.40625-59.25781,83.40625-134.55469A88.10459,88.10459,0,0,0,127.99414,15.9971Z"
+              fill="currentColor"
+            />
+            <path d="M128,72a32,32,0,1,1-32,32A31.99909,31.99909,0,0,1,128,72Z" fill="#ffffff" />
+          </svg>
+        </button>
+      </div>
 
       {/* The button used to pop in via opacity/scale alone while its 40px
-          box was already fully reserved the instant it mounted — the row
-          reflowed (input shrinking) in one frame, then the button faded in
-          over the next few, which read as a lag. Animating `width` itself
-          (0 → 40px) makes the reflow and the button's own appearance the
-          same motion, so surrounding icons ease over instead of snapping. */}
+          box (plus the parent's flat gap-2) was already fully reserved the
+          instant it mounted — the row reflowed in one frame, then the
+          button faded in over the next few, which read as a lag. It also
+          used to unmount with a leftover gap still reserved, so the space
+          snapped shut a beat after the fade finished (the "two step"
+          collapse). Animating both `width` and its own `marginLeft`
+          together (rather than relying on the parent's gap) makes the
+          reflow, the fade, and the final unmount all read as one motion. */}
       <AnimatePresence>
         {hasText && (
           <motion.button
             type="submit"
             aria-label="분석하기"
             className="g-cta grid h-10 shrink-0 place-items-center overflow-hidden"
-            initial={reduce ? false : { width: 0, opacity: 0 }}
-            animate={{ width: 40, opacity: 1 }}
-            exit={reduce ? { opacity: 0 } : { width: 0, opacity: 0 }}
-            transition={reduce ? { duration: 0.12 } : { duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+            initial={reduce ? false : { width: 0, marginLeft: 0, opacity: 0 }}
+            animate={{ width: 40, marginLeft: 8, opacity: 1 }}
+            exit={reduce ? { opacity: 0 } : { width: 0, marginLeft: 0, opacity: 0 }}
+            transition={reduce ? { duration: 0.12 } : { duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
           >
             <svg
               className="size-[18px] shrink-0"

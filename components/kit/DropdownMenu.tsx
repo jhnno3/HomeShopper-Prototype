@@ -47,7 +47,11 @@ export function DropdownMenu({ options, children, ariaLabel, className, menuClas
         onClick={() => setIsOpen((v) => !v)}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
-        className="flex items-center gap-1 rounded-full py-1.5 pl-2 pr-1.5 text-[15px] font-medium text-(--ink) transition-colors hover:bg-[rgba(14,27,51,0.05)]"
+        // Smaller and lighter than the plain --ink/font-medium used
+        // elsewhere in the bar — at that weight this label read heavier
+        // and larger than the placeholder text next to it instead of
+        // blending in as a secondary control.
+        className="flex items-center gap-1 rounded-full py-1.5 pl-2 pr-1.5 text-[14px] font-normal text-(--muted) transition-colors hover:bg-[rgba(14,27,51,0.05)]"
       >
         {children}
         <motion.span
@@ -74,7 +78,7 @@ export function DropdownMenu({ options, children, ariaLabel, className, menuClas
             // the element itself never unmounts).
             transition={{ duration: 0.22, ease: "easeOut" }}
             className={cn(
-              "absolute right-0 top-[calc(100%+8px)] z-10 flex w-28 flex-col gap-0.5 rounded-2xl border border-[rgba(255,255,255,0.6)] bg-white/90 p-1 text-[15px] shadow-[0_18px_40px_-14px_rgba(11,59,167,0.32)] backdrop-blur-xl",
+              "absolute left-0 top-[calc(100%+8px)] z-10 flex w-28 flex-col gap-0.5 rounded-2xl border border-[rgba(255,255,255,0.6)] bg-white/90 p-1 text-[15px] shadow-[0_18px_40px_-14px_rgba(11,59,167,0.32)] backdrop-blur-xl",
               menuClassName
             )}
           >
