@@ -19,6 +19,11 @@ function AnalyzeFlow() {
   // arriving with nothing falls back to the input step.
   const initialSource = (searchParams.get('source') ?? '').trim();
   const startsInProgress = initialSource.length > 0;
+  // 전세/월세 is chosen on the landing search bar's dropdown; carried here as
+  // a query param rather than re-asked. Falls back to 전세 for the case this
+  // page is reached without it (e.g. hand-typed URL during dev).
+  const dealTypeParam = searchParams.get('dealType');
+  const dealType = dealTypeParam === '월세' ? '월세' : '전세';
 
   const [step, setStep] = useState<Step>(startsInProgress ? 'progress' : 'input');
   const [sourceValue, setSourceValue] = useState(initialSource);
@@ -47,7 +52,7 @@ function AnalyzeFlow() {
 
     apiFetch<AnalysisApiResponse>('/analyses', {
       method: 'POST',
-      body: JSON.stringify({ inputMode: 'address', source }),
+      body: JSON.stringify({ inputMode: 'address', source, dealType }),
     })
       .then((res) => {
         trackEvent('analyze_complete', { reportId: res.reportId, status: res.status });

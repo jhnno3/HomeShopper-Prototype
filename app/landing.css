@@ -288,8 +288,15 @@ body:has(.v3) .ink-bg {
      which needs overflow:hidden and would clip that glow. */
   overflow: visible;
   border-radius: 999px;
+  /* .g-panel's inset top highlight (box-shadow: 0 1px 0 ... inset) stacks
+     on top of its own border, so the top edge reads brighter/thicker than
+     the bottom. Dropped here in favor of a single uniform border so the
+     pill's outline is the same weight all the way around. */
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 12px 40px -12px rgba(11, 59, 167, 0.2);
   transition:
     box-shadow 0.25s ease,
+    border-color 0.25s ease,
     transform 0.25s ease;
 }
 
@@ -298,10 +305,10 @@ body:has(.v3) .ink-bg {
 }
 
 .g-bar:focus-within {
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.9) inset,
-    0 0 0 4px rgba(10, 92, 255, 0.14),
-    0 18px 50px -12px rgba(11, 59, 167, 0.28);
+  /* No blue glow ring on focus — just a slightly firmer edge and a touch
+     more lift, so typing doesn't flash a colored highlight around the bar. */
+  border-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 18px 50px -12px rgba(11, 59, 167, 0.28);
   transform: translateY(-1px);
 }
 

@@ -7,6 +7,7 @@ import { AnimatePresence, cubicBezier, motion, useReducedMotion, useScroll, useT
 import { FaqAccordion } from "@/components/landing/FaqAccordion";
 import { HeroGradient } from "@/components/landing/HeroGradient";
 import { SheetGradient } from "@/components/landing/SheetGradient";
+import { DropdownMenu } from "@/components/kit/DropdownMenu";
 import { Logo } from "@/components/kit/Logo";
 import { ReportSummary } from "@/components/report/ReportSummary";
 import { demoReport } from "@/lib/report-data";
@@ -191,17 +192,21 @@ function focusHeroSearch() {
   el?.focus({ preventScroll: true });
 }
 
+const DEAL_TYPES = ["전세", "월세"] as const;
+type DealType = (typeof DEAL_TYPES)[number];
+
 function CommandBar() {
   const router = useRouter();
   const reduce = useReducedMotion();
   const [value, setValue] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [dealType, setDealType] = useState<DealType>("전세");
   const hasText = value.trim().length > 0;
 
   return (
     <>
     <form
-      className="g-panel g-bar flex w-full items-center gap-2.5 py-1.5 pl-4 pr-2"
+      className="g-panel g-bar flex w-full items-center gap-2 py-1.5 pl-4 pr-2"
       onSubmit={(e) => {
         e.preventDefault();
         const source = value.trim();
@@ -209,7 +214,8 @@ function CommandBar() {
           setError("주소를 입력해주세요.");
           return;
         }
-        router.push(`/analyze?source=${encodeURIComponent(source)}`);
+        const params = new URLSearchParams({ source, dealType });
+        router.push(`/analyze?${params.toString()}`);
       }}
     >
       <svg
@@ -240,19 +246,68 @@ function CommandBar() {
         aria-describedby={error ? "hero-search-error" : undefined}
         className="min-h-10 flex-1 px-0"
       />
+
+      {/* Divider between the address field and the action cluster — inset
+          from the pill's top/bottom edges (not full-height) so it reads as
+          a soft separator rather than a hard column border. */}
+      <div aria-hidden className="mx-0.5 h-6 w-px shrink-0 self-center bg-[rgba(14,27,51,0.1)]" />
+
+      <DropdownMenu
+        ariaLabel="거래 유형"
+        className="shrink-0"
+        options={DEAL_TYPES.map((type) => ({
+          label: type,
+          active: type === dealType,
+          onClick: () => setDealType(type),
+        }))}
+      >
+        {dealType}
+      </DropdownMenu>
+
+      {/* Map-ping entry point — opens a map picker to drop a pin instead of
+          typing an address (reverse-geocode wiring lands separately). No
+          button chrome — just the glyph, sized up now that it isn't sitting
+          inside a circle. */}
+      <button
+        type="button"
+        aria-label="지도에서 위치 선택"
+        className="grid shrink-0 place-items-center p-1 text-(--royal) transition-transform active:scale-95"
+      >
+        {/* NotchNook tray-icon pin — swapped in for the design's own asset.
+            No background rect (transparent), body recolored to the site's
+            royal blue via currentColor so it matches the rest of the icon
+            set instead of the source's #0088FF. */}
+        <svg className="h-[30px] w-auto" viewBox="0 0 573 815" fill="none" aria-hidden>
+          <path
+            d="M572.976 286.488C572.976 550.502 286.488 814.804 286.488 814.804C286.488 814.804 0 550.502 0 286.488C0 128.266 128.266 0 286.488 0C444.71 0 572.976 128.266 572.976 286.488Z"
+            fill="currentColor"
+          />
+          <path
+            d="M286.488 447.774C375.564 447.774 447.774 375.564 447.774 286.488C447.774 197.412 375.564 125.202 286.488 125.202C197.412 125.202 125.202 197.412 125.202 286.488C125.202 375.564 197.412 447.774 286.488 447.774Z"
+            fill="white"
+          />
+        </svg>
+      </button>
+
+      {/* The button used to pop in via opacity/scale alone while its 40px
+          box was already fully reserved the instant it mounted — the row
+          reflowed (input shrinking) in one frame, then the button faded in
+          over the next few, which read as a lag. Animating `width` itself
+          (0 → 40px) makes the reflow and the button's own appearance the
+          same motion, so surrounding icons ease over instead of snapping. */}
       <AnimatePresence>
         {hasText && (
           <motion.button
             type="submit"
             aria-label="분석하기"
-            className="g-cta grid size-10 shrink-0 place-items-center"
-            initial={reduce ? false : { opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.5 }}
-            transition={reduce ? { duration: 0.12 } : { type: "spring", stiffness: 520, damping: 26 }}
+            className="g-cta grid h-10 shrink-0 place-items-center overflow-hidden"
+            initial={reduce ? false : { width: 0, opacity: 0 }}
+            animate={{ width: 40, opacity: 1 }}
+            exit={reduce ? { opacity: 0 } : { width: 0, opacity: 0 }}
+            transition={reduce ? { duration: 0.12 } : { duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
           >
             <svg
-              className="size-[18px]"
+              className="size-[18px] shrink-0"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
