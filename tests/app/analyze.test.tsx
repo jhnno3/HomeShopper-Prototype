@@ -76,4 +76,32 @@ describe('AnalyzePage', () => {
       })
     );
   });
+
+  it('analyzes a link source with inputMode link and no dealType', async () => {
+    mockAnalysisSuccess('r2');
+    searchParamsValue = 'source=https://dabangapp.com/room/1&mode=link';
+    render(<AnalyzePage />);
+
+    expect(trackEvent).toHaveBeenCalledWith('analyze_start', { inputMode: 'link' });
+
+    await waitFor(() => expect(replaceMock).toHaveBeenCalledWith('/report/r2'));
+
+    expect(apiFetchMock).toHaveBeenCalledWith(
+      '/analyses',
+      expect.objectContaining({
+        body: JSON.stringify({ inputMode: 'link', source: 'https://dabangapp.com/room/1' }),
+      })
+    );
+  });
+
+  it('shows the input step with a message for an invalid link, without redirecting', () => {
+    searchParamsValue = 'source=https://zigbang.com/items/1&mode=link';
+    render(<AnalyzePage />);
+
+    expect(
+      screen.getByText('지금은 다방(dabangapp.com) 매물 링크만 분석할 수 있어요.')
+    ).toBeInTheDocument();
+    expect(replaceMock).not.toHaveBeenCalledWith('/');
+    expect(apiFetchMock).not.toHaveBeenCalled();
+  });
 });

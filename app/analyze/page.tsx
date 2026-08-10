@@ -7,6 +7,7 @@ import { Button } from '@/components/kit/Button';
 import { ErrorCard } from '@/components/kit/ErrorCard';
 import { trackEvent } from '@/lib/analytics';
 import { apiFetch, ApiError } from '@/lib/api';
+import { classifyListingInput } from '@/lib/listing-input';
 import { stashReport } from '@/lib/report-cache';
 import type { AnalysisApiResponse, ApiReport } from '@/lib/types';
 
@@ -15,10 +16,21 @@ type Step = 'input' | 'progress';
 function AnalyzeFlow() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  // An address passed from the landing search box skips the 매물 정보 step;
-  // arriving with nothing falls back to the input step.
+  // An address or 다방 link passed from the landing search box skips the
+  // 매물 정보 step; arriving with nothing falls back to the input step.
   const initialSource = (searchParams.get('source') ?? '').trim();
-  const startsInProgress = initialSource.length > 0;
+  const mode = searchParams.get('mode') === 'link' ? 'link' : 'address';
+  const isLink = mode === 'link';
+
+  // A link-mode source has to classify before we spend a request on it.
+  const initialLinkInput = isLink && initialSource ? classifyListingInput(initialSource) : null;
+
+  // Three distinct outcomes, deliberately not collapsed into one flag: the
+  // old code folded "invalid" into "redirect home", which meant the message
+  // it set for an invalid link could never render.
+  const hasSource = initialSource.length > 0;
+  const showsInvalidEntry = initialLinkInput?.kind === 'invalid';
+  const startsInProgress = hasSource && !showsInvalidEntry;
   // 전세/월세 is chosen on the landing search bar's dropdown; carried here as
   // a query param rather than re-asked. Falls back to 전세 for the case this
   // page is reached without it (e.g. hand-typed URL during dev).
@@ -27,7 +39,9 @@ function AnalyzeFlow() {
 
   const [step, setStep] = useState<Step>(startsInProgress ? 'progress' : 'input');
   const [sourceValue, setSourceValue] = useState(initialSource);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    initialLinkInput?.kind === 'invalid' ? initialLinkInput.message : null
+  );
 
   // Guards the analysis request against a double fire — the effect re-runs on
   // dev strict-mode remounts, and `step` can re-enter 'progress' on retry.
@@ -41,18 +55,29 @@ function AnalyzeFlow() {
     if (step !== 'progress' || analyzingRef.current) return;
 
     const source = sourceValue.trim();
-    if (!source) {
+    if (isLink) {
+      const input = classifyListingInput(source);
+      if (input.kind !== 'link') {
+        setError(input.message);
+        setStep('input');
+        return;
+      }
+    } else if (!source) {
       setError('주소를 입력해주세요.');
       setStep('input');
       return;
     }
 
     analyzingRef.current = true;
-    trackEvent('analyze_start', { inputMode: 'address' });
+    trackEvent('analyze_start', { inputMode: mode });
+
+    const body = isLink
+      ? { inputMode: 'link' as const, source }
+      : { inputMode: 'address' as const, source, dealType };
 
     apiFetch<AnalysisApiResponse>('/analyses', {
       method: 'POST',
-      body: JSON.stringify({ inputMode: 'address', source, dealType }),
+      body: JSON.stringify(body),
     })
       .then((res) => {
         trackEvent('analyze_complete', { reportId: res.reportId, status: res.status });
@@ -86,12 +111,12 @@ function AnalyzeFlow() {
   }, [step]);
 
   // Bare or hand-typed /analyze (no ?source=) is not a real entry point —
-  // only the search box, which always passes an address, should start the
-  // analyzer. Anything else bounces home. The retry flow keeps the original
-  // ?source= in the URL, so it never triggers this.
+  // only the search box should start the analyzer, and it always validates
+  // first. An invalid link is a different case: it renders the input step
+  // with the reason rather than silently bouncing the user home.
   useEffect(() => {
-    if (!startsInProgress) router.replace('/');
-  }, [startsInProgress, router]);
+    if (!hasSource) router.replace('/');
+  }, [hasSource, router]);
 
   function handleStep1Submit(e: React.FormEvent) {
     e.preventDefault();
@@ -105,7 +130,7 @@ function AnalyzeFlow() {
 
   // Render nothing while the redirect effect above bounces a non-entry-point
   // visit back home (runs after all hooks, so hook order stays stable).
-  if (!startsInProgress) return null;
+  if (!hasSource) return null;
 
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-16 md:py-24">
