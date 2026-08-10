@@ -43,6 +43,15 @@ function AnalyzeFlow() {
     initialLinkInput?.kind === 'invalid' ? initialLinkInput.message : null
   );
 
+  // 도로명주소 fallback: some 다방 detail responses don't carry a road address,
+  // and the backend then rejects the analysis. When that happens we reveal an
+  // extra field so the user can supply it directly; it's sent as the optional
+  // camelCase `roadAddress` (≤300 chars), which the backend prefers over the
+  // listing's own address. Link mode only — in address mode the user already
+  // typed the address, so a second field would just duplicate it.
+  const [roadAddress, setRoadAddress] = useState('');
+  const [needsRoadAddress, setNeedsRoadAddress] = useState(false);
+
   // Guards the analysis request against a double fire — the effect re-runs on
   // dev strict-mode remounts, and `step` can re-enter 'progress' on retry.
   const analyzingRef = useRef(false);
@@ -71,8 +80,13 @@ function AnalyzeFlow() {
     analyzingRef.current = true;
     trackEvent('analyze_start', { inputMode: mode });
 
+    const trimmedRoad = roadAddress.trim();
     const body = isLink
-      ? { inputMode: 'link' as const, source }
+      ? {
+          inputMode: 'link' as const,
+          source,
+          ...(trimmedRoad ? { roadAddress: trimmedRoad } : {}),
+        }
       : { inputMode: 'address' as const, source, dealType };
 
     apiFetch<AnalysisApiResponse>('/analyses', {
@@ -102,9 +116,18 @@ function AnalyzeFlow() {
       })
       .catch((err) => {
         analyzingRef.current = false;
-        setError(
-          err instanceof ApiError ? err.message : '분석에 실패했어요. 잠시 후 다시 시도해주세요.'
-        );
+        const message =
+          err instanceof ApiError ? err.message : '분석에 실패했어요. 잠시 후 다시 시도해주세요.';
+        // The backend couldn't extract a road address from the listing —
+        // reveal the manual 도로명주소 field and prompt a retry with it.
+        if (isLink && /도로명\s*주소/.test(message)) {
+          setNeedsRoadAddress(true);
+          setError(
+            '매물 링크에서 도로명주소를 찾지 못했어요. 아래에 도로명주소를 입력한 뒤 다시 시도해주세요.'
+          );
+        } else {
+          setError(message);
+        }
         setStep('input');
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -122,6 +145,12 @@ function AnalyzeFlow() {
     e.preventDefault();
     if (!sourceValue.trim()) {
       setError('주소를 입력해주세요.');
+      return;
+    }
+    // Once the road-address field is showing, a retry without it would just
+    // fail the same way — require it before re-running.
+    if (needsRoadAddress && !roadAddress.trim()) {
+      setError('도로명주소를 입력해주세요.');
       return;
     }
     setError(null);
@@ -174,6 +203,29 @@ function AnalyzeFlow() {
                   </p>
                 )}
               </div>
+              {needsRoadAddress && (
+                <div className="space-y-2">
+                  <label
+                    htmlFor="analyze-road-address"
+                    className="block text-sm font-semibold text-[var(--color-ink)]"
+                  >
+                    도로명주소
+                  </label>
+                  <input
+                    id="analyze-road-address"
+                    type="text"
+                    value={roadAddress}
+                    onChange={(e) => {
+                      setRoadAddress(e.target.value);
+                      if (error) setError(null);
+                    }}
+                    maxLength={300}
+                    placeholder="예: 서울특별시 서초구 서초대로 301"
+                    className="w-full rounded-full border border-[rgba(0,131,255,0.22)] bg-[rgba(0,131,255,0.05)] px-5 py-2.5 text-[var(--color-ink)] placeholder:text-[var(--color-slate)] transition-colors focus:border-[var(--color-blue)] focus:bg-[rgba(0,131,255,0.09)] focus:outline-none"
+                    aria-label="도로명주소"
+                  />
+                </div>
+              )}
               <Button type="submit" size="lg" className="h-11 w-full rounded-full text-sm">
                 분석 시작
               </Button>

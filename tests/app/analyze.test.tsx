@@ -104,4 +104,28 @@ describe('AnalyzePage', () => {
     expect(replaceMock).not.toHaveBeenCalledWith('/');
     expect(apiFetchMock).not.toHaveBeenCalled();
   });
+
+  it('reveals the 도로명주소 field when a link analysis cannot resolve one', async () => {
+    const { ApiError } = await import('@/lib/api');
+    apiFetchMock.mockRejectedValue(new ApiError('도로명 주소를 찾지 못했습니다.', 400));
+    searchParamsValue = 'source=https://dabangapp.com/room/1&mode=link';
+    render(<AnalyzePage />);
+
+    expect(await screen.findByLabelText('도로명주소')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        '매물 링크에서 도로명주소를 찾지 못했어요. 아래에 도로명주소를 입력한 뒤 다시 시도해주세요.'
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('does not reveal the 도로명주소 field in address mode', async () => {
+    const { ApiError } = await import('@/lib/api');
+    apiFetchMock.mockRejectedValue(new ApiError('도로명 주소를 찾지 못했습니다.', 400));
+    searchParamsValue = 'source=서울특별시 강남구 테헤란로 123&dealType=전세';
+    render(<AnalyzePage />);
+
+    expect(await screen.findByText('도로명 주소를 찾지 못했습니다.')).toBeInTheDocument();
+    expect(screen.queryByLabelText('도로명주소')).not.toBeInTheDocument();
+  });
 });
