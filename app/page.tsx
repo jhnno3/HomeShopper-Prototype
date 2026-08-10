@@ -207,7 +207,7 @@ function CommandBar() {
     <>
     <div className="flex w-full items-center gap-2">
     <form
-      className="g-panel g-bar flex h-[54px] min-w-0 flex-1 items-center py-1.5 pl-4 pr-4"
+      className="g-panel g-bar flex h-[46px] min-w-0 flex-1 items-center py-1 pl-4 pr-4"
       onSubmit={(e) => {
         e.preventDefault();
         const source = value.trim();
@@ -250,7 +250,7 @@ function CommandBar() {
           }}
           aria-invalid={Boolean(error)}
           aria-describedby={error ? "hero-search-error" : undefined}
-          className="min-h-10 flex-1 px-0"
+          className="h-full flex-1 px-0"
         />
 
         {/* Divider between the address field and the action cluster — inset
@@ -280,7 +280,7 @@ function CommandBar() {
           <motion.button
             type="submit"
             aria-label="분석하기"
-            className="g-cta grid h-10 shrink-0 place-items-center overflow-hidden"
+            className="g-cta grid h-full shrink-0 place-items-center overflow-hidden"
             initial={reduce ? false : { width: 0, marginLeft: 0, opacity: 0 }}
             animate={{ width: 40, marginLeft: 8, opacity: 1 }}
             exit={reduce ? { opacity: 0 } : { width: 0, marginLeft: 0, opacity: 0 }}
@@ -306,21 +306,23 @@ function CommandBar() {
 
     {/* Map-ping entry point — opens a map picker to drop a pin instead of
         typing an address (reverse-geocode wiring lands separately). Its own
-        circular pill outside the search bar, sized to the same 54px as the
+        circular pill outside the search bar, sized to the same 46px as the
         bar itself (an explicit match, not `self-stretch` — in a row flex
         container the width resolves before a stretched cross-size is known,
-        so `aspect-square` can't derive a width from it). */}
+        so `aspect-square` can't derive a width from it). Solid white rather
+        than the bar's own `g-panel` glass tint, so it reads as a distinct
+        flat button next to the pill instead of a matching second glass
+        surface — same elevation shadow as the bar keeps them feeling
+        grouped despite the different fill. */}
     <button
       type="button"
       aria-label="지도에서 위치 선택"
-      className="g-panel grid size-[54px] shrink-0 place-items-center rounded-full text-(--royal) transition-transform active:scale-95"
+      className="grid size-[46px] shrink-0 place-items-center rounded-full border border-[rgba(14,27,51,0.06)] bg-white text-(--royal) shadow-[0_12px_40px_-12px_rgba(11,59,167,0.2)] transition-transform active:scale-95"
     >
       {/* Provided map-pin.svg asset — recolored from its hardcoded
           #0a5cff to currentColor so it picks up the button's
-          text-(--royal) like the rest of the icon set. Sized down from the
-          asset's own bulk (22px) to ~18px so it reads at the same visual
-          weight as the 월세/전세 toggle's text instead of outsizing it. */}
-      <svg className="h-[18px] w-auto" viewBox="0 0 256 256" fill="none" aria-hidden>
+          text-(--royal) like the rest of the icon set. */}
+      <svg className="h-[22px] w-auto" viewBox="0 0 256 256" fill="none" aria-hidden>
         <path
           d="M127.99414,15.9971a88.1046,88.1046,0,0,0-88,88c0,75.29688,80,132.17188,83.40625,134.55469a8.023,8.023,0,0,0,9.1875,0c3.40625-2.38281,83.40625-59.25781,83.40625-134.55469A88.10459,88.10459,0,0,0,127.99414,15.9971Z"
           fill="currentColor"
