@@ -44,4 +44,11 @@ describe('classifyListingInput', () => {
   it('trims surrounding whitespace before classifying', () => {
     expect(classifyListingInput('  https://dabangapp.com/room/9  ').kind).toBe('link');
   });
+
+  it('strips userinfo credentials from the URL before returning it', () => {
+    expect(classifyListingInput('https://user:pw@dabangapp.com/room/1')).toEqual({
+      kind: 'link',
+      source: 'https://dabangapp.com/room/1',
+    });
+  });
 });

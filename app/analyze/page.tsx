@@ -64,6 +64,7 @@ function AnalyzeFlow() {
     if (step !== 'progress' || analyzingRef.current) return;
 
     const source = sourceValue.trim();
+    let payloadSource = source;
     if (isLink) {
       const input = classifyListingInput(source);
       if (input.kind !== 'link') {
@@ -71,6 +72,7 @@ function AnalyzeFlow() {
         setStep('input');
         return;
       }
+      payloadSource = input.source;
     } else if (!source) {
       setError('주소를 입력해주세요.');
       setStep('input');
@@ -84,10 +86,10 @@ function AnalyzeFlow() {
     const body = isLink
       ? {
           inputMode: 'link' as const,
-          source,
+          source: payloadSource,
           ...(trimmedRoad ? { roadAddress: trimmedRoad } : {}),
         }
-      : { inputMode: 'address' as const, source, dealType };
+      : { inputMode: 'address' as const, source: payloadSource, dealType };
 
     apiFetch<AnalysisApiResponse>('/analyses', {
       method: 'POST',
@@ -189,6 +191,7 @@ function AnalyzeFlow() {
                   onChange={(e) => {
                     setSourceValue(e.target.value);
                     if (error) setError(null);
+                    if (needsRoadAddress) setNeedsRoadAddress(false);
                   }}
                   placeholder={isLink ? '다방 링크를 붙여넣으세요' : '매물 주소를 입력하세요'}
                   className="w-full rounded-full border border-[rgba(0,131,255,0.22)] bg-[rgba(0,131,255,0.05)] px-5 py-2.5 text-[var(--color-ink)] placeholder:text-[var(--color-slate)] transition-colors focus:border-[var(--color-blue)] focus:bg-[rgba(0,131,255,0.09)] focus:outline-none"
@@ -199,7 +202,7 @@ function AnalyzeFlow() {
                 {/* Tight to the field it describes (mt-2, not the form's
                     space-y-6 rhythm) — a caption hugs its input, it doesn't
                     float evenly between the input and whatever's next. */}
-                {error && (
+                {error && !(needsRoadAddress && error === '도로명주소를 입력해주세요.') && (
                   <p
                     id="analyze-source-error"
                     role="alert"
@@ -229,7 +232,22 @@ function AnalyzeFlow() {
                     placeholder="예: 서울특별시 서초구 서초대로 301"
                     className="w-full rounded-full border border-[rgba(0,131,255,0.22)] bg-[rgba(0,131,255,0.05)] px-5 py-2.5 text-[var(--color-ink)] placeholder:text-[var(--color-slate)] transition-colors focus:border-[var(--color-blue)] focus:bg-[rgba(0,131,255,0.09)] focus:outline-none"
                     aria-label="도로명주소"
+                    aria-invalid={needsRoadAddress && error === '도로명주소를 입력해주세요.'}
+                    aria-describedby={
+                      needsRoadAddress && error === '도로명주소를 입력해주세요.'
+                        ? 'analyze-road-address-error'
+                        : undefined
+                    }
                   />
+                  {needsRoadAddress && error === '도로명주소를 입력해주세요.' && (
+                    <p
+                      id="analyze-road-address-error"
+                      role="alert"
+                      className="mt-2 px-1 text-[13px] font-semibold text-[var(--color-danger)]"
+                    >
+                      {error}
+                    </p>
+                  )}
                 </div>
               )}
               <Button type="submit" size="lg" className="h-11 w-full rounded-full text-sm">

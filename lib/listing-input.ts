@@ -55,6 +55,11 @@ export function classifyListingInput(raw: string): ListingInput {
     };
   }
 
+  // Credentials have no business in a listing URL, and forwarding them would
+  // leak them into the API request body and its logs.
+  url.username = '';
+  url.password = '';
+
   // Normalized (protocol always present) so the API receives a fetchable URL.
   return { kind: 'link', source: url.toString() };
 }

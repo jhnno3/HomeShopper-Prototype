@@ -148,4 +148,26 @@ describe('AnalyzePage', () => {
       screen.getByText('지금은 다방(dabangapp.com) 매물 링크만 분석할 수 있어요.')
     ).toBeInTheDocument();
   });
+
+  // Documents the hand-typed/retry path specifically: the landing page
+  // normalizes before navigating here, but a protocol-less source can still
+  // arrive via a hand-typed URL or a retry after a failed analysis. The POST
+  // body must carry the classified (normalized) source, not the raw one.
+  it('sends the normalized source for a protocol-less link arriving via retry/hand-typed entry', async () => {
+    mockAnalysisSuccess('r3');
+    searchParamsValue = 'source=www.dabangapp.com/room/123&mode=link';
+    render(<AnalyzePage />);
+
+    await waitFor(() => expect(replaceMock).toHaveBeenCalledWith('/report/r3'));
+
+    expect(apiFetchMock).toHaveBeenCalledWith(
+      '/analyses',
+      expect.objectContaining({
+        body: JSON.stringify({
+          inputMode: 'link',
+          source: 'https://www.dabangapp.com/room/123',
+        }),
+      })
+    );
+  });
 });
