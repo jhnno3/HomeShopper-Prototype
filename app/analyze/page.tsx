@@ -157,8 +157,8 @@ function AnalyzeFlow() {
           {/* Persistent format hint, not another error — stays visible
               regardless of which validation message fired above, so the
               card never feels like it's just a single bare error line. */}
-          <p className="mt-6 flex items-center justify-center gap-1.5 text-center text-[13px] text-[var(--color-slate)]">
-            <Info size={14} aria-hidden />
+          <p className="mt-6 flex items-start justify-start gap-1.5 text-left text-[13px] text-[var(--color-slate)]">
+            <Info size={14} className="mt-[3px] shrink-0" aria-hidden />
             도로명 또는 지번 주소를 입력해주세요. 예: 서울특별시 서초구 서초대로 301
           </p>
         </ErrorCard>
