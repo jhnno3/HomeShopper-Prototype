@@ -205,9 +205,14 @@ function CommandBar() {
 
   return (
     <>
-    <div className="flex w-full items-center gap-2">
+    {/* No gap-2 here — the arrow button below owns its own marginLeft so
+        the same animated property both reveals it and creates its spacing
+        from the pill, instead of a flex gap reserving that space the
+        instant the button mounts, ahead of the width/marginLeft tween. */}
+    <div className="flex w-full items-center">
     <form
-      className="g-panel g-bar flex h-[46px] min-w-0 flex-1 items-center py-1 pl-4 pr-4"
+      id="hero-search-form"
+      className="g-panel g-bar flex h-[46px] min-w-0 flex-1 items-center gap-2 py-1 pl-4 pr-3"
       onSubmit={(e) => {
         e.preventDefault();
         const source = value.trim();
@@ -219,117 +224,113 @@ function CommandBar() {
         router.push(`/analyze?${params.toString()}`);
       }}
     >
-      {/* Everything except the submit button lives in its own flex-1 row so
-          its spacing (gap-2) stays fixed regardless of the button. The
-          button controls its own leading margin instead of sharing this
-          gap — see the note by its animation below. */}
-      <div className="flex min-w-0 flex-1 items-center gap-2">
-        <svg
-          className="size-[18px] shrink-0 text-(--faint)"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden
-        >
-          <circle cx="11" cy="11" r="7" />
-          <path d="m21 21-4.3-4.3" />
+      <svg
+        className="size-[18px] shrink-0 text-(--faint)"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden
+      >
+        <circle cx="11" cy="11" r="7" />
+        <path d="m21 21-4.3-4.3" />
+      </svg>
+      <input
+        id="hero-search"
+        type="text"
+        inputMode="text"
+        aria-label="매물 주소"
+        placeholder="매물 주소를 입력하세요"
+        value={value}
+        onChange={(e) => {
+          setValue(e.target.value);
+          if (error) setError(null);
+        }}
+        aria-invalid={Boolean(error)}
+        aria-describedby={error ? "hero-search-error" : undefined}
+        className="h-full flex-1 px-0"
+      />
+
+      {/* Divider between the address field and the action cluster — inset
+          from the pill's top/bottom edges (not full-height) so it reads as
+          a soft separator rather than a hard column border. */}
+      <div aria-hidden className="mx-0.5 h-6 w-px shrink-0 self-center bg-[rgba(14,27,51,0.1)]" />
+
+      <SegmentedToggle
+        ariaLabel="거래 유형"
+        options={DEAL_TYPES}
+        value={dealType}
+        onChange={setDealType}
+      />
+
+      {/* Map-ping entry point — opens a map picker to drop a pin instead of
+          typing an address (reverse-geocode wiring lands separately). Back
+          inside the pill (moved out and in again across iterations), still
+          its own solid-white circular button rather than a glyph blending
+          into the pill's glass background. */}
+      <button
+        type="button"
+        aria-label="지도에서 위치 선택"
+        className="grid size-9 shrink-0 place-items-center rounded-full border border-[rgba(14,27,51,0.06)] bg-white text-(--royal) shadow-[0_2px_8px_rgba(14,27,51,0.14)] transition-transform active:scale-95"
+      >
+        {/* Provided map-pin.svg asset — recolored from its hardcoded
+            #0a5cff to currentColor so it picks up the button's
+            text-(--royal) like the rest of the icon set. Sized to read at
+            the same visual weight as the 월세/전세 toggle's text now that
+            it's back inside the pill next to it. */}
+        <svg className="h-[18px] w-auto" viewBox="0 0 256 256" fill="none" aria-hidden>
+          <path
+            d="M127.99414,15.9971a88.1046,88.1046,0,0,0-88,88c0,75.29688,80,132.17188,83.40625,134.55469a8.023,8.023,0,0,0,9.1875,0c3.40625-2.38281,83.40625-59.25781,83.40625-134.55469A88.10459,88.10459,0,0,0,127.99414,15.9971Z"
+            fill="currentColor"
+          />
+          <path d="M128,72a32,32,0,1,1-32,32A31.99909,31.99909,0,0,1,128,72Z" fill="#ffffff" />
         </svg>
-        <input
-          id="hero-search"
-          type="text"
-          inputMode="text"
-          aria-label="매물 주소"
-          placeholder="매물 주소를 입력하세요"
-          value={value}
-          onChange={(e) => {
-            setValue(e.target.value);
-            if (error) setError(null);
-          }}
-          aria-invalid={Boolean(error)}
-          aria-describedby={error ? "hero-search-error" : undefined}
-          className="h-full flex-1 px-0"
-        />
-
-        {/* Divider between the address field and the action cluster — inset
-            from the pill's top/bottom edges (not full-height) so it reads as
-            a soft separator rather than a hard column border. */}
-        <div aria-hidden className="mx-0.5 h-6 w-px shrink-0 self-center bg-[rgba(14,27,51,0.1)]" />
-
-        <SegmentedToggle
-          ariaLabel="거래 유형"
-          options={DEAL_TYPES}
-          value={dealType}
-          onChange={setDealType}
-        />
-      </div>
-
-      {/* The button used to pop in via opacity/scale alone while its 40px
-          box (plus the parent's flat gap-2) was already fully reserved the
-          instant it mounted — the row reflowed in one frame, then the
-          button faded in over the next few, which read as a lag. It also
-          used to unmount with a leftover gap still reserved, so the space
-          snapped shut a beat after the fade finished (the "two step"
-          collapse). Animating both `width` and its own `marginLeft`
-          together (rather than relying on the parent's gap) makes the
-          reflow, the fade, and the final unmount all read as one motion. */}
-      <AnimatePresence>
-        {hasText && (
-          <motion.button
-            type="submit"
-            aria-label="분석하기"
-            className="g-cta grid h-full shrink-0 place-items-center overflow-hidden"
-            initial={reduce ? false : { width: 0, marginLeft: 0, opacity: 0 }}
-            animate={{ width: 40, marginLeft: 8, opacity: 1 }}
-            exit={reduce ? { opacity: 0 } : { width: 0, marginLeft: 0, opacity: 0 }}
-            transition={reduce ? { duration: 0.12 } : { duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <svg
-              className="size-[18px] shrink-0"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden
-            >
-              <path d="M12 19V5" />
-              <path d="m5 12 7-7 7 7" />
-            </svg>
-          </motion.button>
-        )}
-      </AnimatePresence>
+      </button>
     </form>
 
-    {/* Map-ping entry point — opens a map picker to drop a pin instead of
-        typing an address (reverse-geocode wiring lands separately). Its own
-        circular pill outside the search bar, sized to the same 46px as the
-        bar itself (an explicit match, not `self-stretch` — in a row flex
-        container the width resolves before a stretched cross-size is known,
-        so `aspect-square` can't derive a width from it). Solid white rather
-        than the bar's own `g-panel` glass tint, so it reads as a distinct
-        flat button next to the pill instead of a matching second glass
-        surface — same elevation shadow as the bar keeps them feeling
-        grouped despite the different fill. */}
-    <button
-      type="button"
-      aria-label="지도에서 위치 선택"
-      className="grid size-[46px] shrink-0 place-items-center rounded-full border border-[rgba(14,27,51,0.06)] bg-white text-(--royal) shadow-[0_12px_40px_-12px_rgba(11,59,167,0.2)] transition-transform active:scale-95"
-    >
-      {/* Provided map-pin.svg asset — recolored from its hardcoded
-          #0a5cff to currentColor so it picks up the button's
-          text-(--royal) like the rest of the icon set. */}
-      <svg className="h-[22px] w-auto" viewBox="0 0 256 256" fill="none" aria-hidden>
-        <path
-          d="M127.99414,15.9971a88.1046,88.1046,0,0,0-88,88c0,75.29688,80,132.17188,83.40625,134.55469a8.023,8.023,0,0,0,9.1875,0c3.40625-2.38281,83.40625-59.25781,83.40625-134.55469A88.10459,88.10459,0,0,0,127.99414,15.9971Z"
-          fill="currentColor"
-        />
-        <path d="M128,72a32,32,0,1,1-32,32A31.99909,31.99909,0,0,1,128,72Z" fill="#ffffff" />
-      </svg>
-    </button>
+    {/* Submit arrow — pops in as its own circle outside the pill. `form`
+        associates it with the pill's <form> by id despite not being a DOM
+        descendant, so it still submits and Enter-to-submit inside the input
+        keeps working. One motion.button, one animate call — but `width` and
+        `height` tween together (not just `width` against a fixed height),
+        so the shape stays a true circle shrinking to/from a point instead
+        of a short capsule that only becomes circular right at the end. That
+        shape pop was reading as a second, separate-feeling motion even
+        though it's driven by a single transition. `marginLeft` rides along
+        the same tween to create its spacing from the pill as it grows,
+        instead of a flex gap snapping open the instant it mounts. */}
+    <AnimatePresence>
+      {hasText && (
+        <motion.button
+          type="submit"
+          form="hero-search-form"
+          aria-label="분석하기"
+          className="grid shrink-0 place-items-center overflow-hidden rounded-full border border-[rgba(14,27,51,0.06)] bg-white text-(--royal) shadow-[0_12px_40px_-12px_rgba(11,59,167,0.2)] transition-transform active:scale-95"
+          initial={reduce ? false : { width: 0, height: 0, marginLeft: 0, opacity: 0 }}
+          animate={{ width: 46, height: 46, marginLeft: 8, opacity: 1 }}
+          exit={
+            reduce ? { opacity: 0 } : { width: 0, height: 0, marginLeft: 0, opacity: 0 }
+          }
+          transition={reduce ? { duration: 0.12 } : { duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <svg
+            className="size-[21px] shrink-0"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden
+          >
+            <path d="M12 19V5" />
+            <path d="m5 12 7-7 7 7" />
+          </svg>
+        </motion.button>
+      )}
+    </AnimatePresence>
     </div>
     {error && (
       <p
