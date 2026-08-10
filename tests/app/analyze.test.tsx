@@ -1,57 +1,79 @@
-import { render, screen, fireEvent, act } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import AnalyzePage from '@/app/analyze/page';
 import { trackEvent } from '@/lib/analytics';
+import { apiFetch } from '@/lib/api';
 
 const pushMock = vi.fn();
+const replaceMock = vi.fn();
 let searchParamsValue = '';
 
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push: pushMock }),
+  useRouter: () => ({ push: pushMock, replace: replaceMock }),
   useSearchParams: () => new URLSearchParams(searchParamsValue),
 }));
 
-vi.mock('@/lib/analytics', () => ({
-  trackEvent: vi.fn(),
-}));
+vi.mock('@/lib/analytics', () => ({ trackEvent: vi.fn() }));
+
+vi.mock('@/lib/report-cache', () => ({ stashReport: vi.fn() }));
+
+// ApiError is used with `instanceof`, so the mock must export a real class.
+vi.mock('@/lib/api', () => {
+  class ApiError extends Error {
+    status: number;
+    constructor(message: string, status: number) {
+      super(message);
+      this.status = status;
+    }
+  }
+  return { apiFetch: vi.fn(), ApiError };
+});
+
+const apiFetchMock = vi.mocked(apiFetch);
+
+/** POST /analyses resolves, then GET /reports/:id resolves. */
+function mockAnalysisSuccess(reportId = 'r1') {
+  apiFetchMock.mockImplementation((path: string) => {
+    if (path === '/analyses') {
+      return Promise.resolve({ submissionId: reportId, reportId, status: 'completed' });
+    }
+    return Promise.resolve({ id: reportId });
+  });
+}
 
 describe('AnalyzePage', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
     pushMock.mockClear();
+    replaceMock.mockClear();
     vi.mocked(trackEvent).mockClear();
+    apiFetchMock.mockReset();
     searchParamsValue = '';
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
-  it('submits the address step and redirects to the report after progress completes', () => {
+  it('redirects home when no source is present', () => {
     render(<AnalyzePage />);
-
-    fireEvent.change(screen.getByLabelText('매물 주소'), {
-      target: { value: '서울특별시 강남구 테헤란로 123' },
-    });
-    fireEvent.click(screen.getByText('분석 시작'));
-
-    expect(screen.getByText('리포트를 준비하고 있어요')).toBeInTheDocument();
-    expect(trackEvent).toHaveBeenCalledWith('analyze_start', { inputMode: 'address' });
-    expect(trackEvent).toHaveBeenCalledTimes(1);
-
-    act(() => {
-      vi.advanceTimersByTime(4000);
-    });
-
-    expect(pushMock).toHaveBeenCalledWith('/report/demo-1');
+    expect(replaceMock).toHaveBeenCalledWith('/');
   });
 
-  it('skips straight to the progress step when a source is passed in the query string', () => {
-    searchParamsValue = 'source=서울특별시 강남구 테헤란로 123';
+  it('analyzes an address source and navigates to the report', async () => {
+    mockAnalysisSuccess('r1');
+    searchParamsValue = 'source=서울특별시 강남구 테헤란로 123&dealType=전세';
     render(<AnalyzePage />);
 
     expect(screen.getByText('리포트를 준비하고 있어요')).toBeInTheDocument();
     expect(trackEvent).toHaveBeenCalledWith('analyze_start', { inputMode: 'address' });
-    expect(trackEvent).toHaveBeenCalledTimes(1);
+
+    await waitFor(() => expect(replaceMock).toHaveBeenCalledWith('/report/r1'));
+
+    expect(apiFetchMock).toHaveBeenCalledWith(
+      '/analyses',
+      expect.objectContaining({
+        body: JSON.stringify({
+          inputMode: 'address',
+          source: '서울특별시 강남구 테헤란로 123',
+          dealType: '전세',
+        }),
+      })
+    );
   });
 });
