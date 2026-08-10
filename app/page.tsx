@@ -12,6 +12,7 @@ import { SegmentedToggle } from "@/components/kit/SegmentedToggle";
 import { Logo } from "@/components/kit/Logo";
 import { ReportSummary } from "@/components/report/ReportSummary";
 import { demoReport } from "@/lib/report-data";
+import { classifyListingInput } from "@/lib/listing-input";
 import "./landing.css";
 
 const DOCS = ["허위매물 검증", "전문가 동행 임장", "협상·특약 대행", "수수료 반값"];
@@ -204,6 +205,18 @@ function CommandBar() {
   const [dealType, setDealType] = useState<DealType>("전세");
   const [showMapPicker, setShowMapPicker] = useState(false);
   const hasText = value.trim().length > 0;
+  const [mode, setMode] = useState<"address" | "link">("address");
+  const isLink = mode === "link";
+
+  /* Address and link are mutually exclusive inputs, so switching drops the
+     text: an address is never a valid 다방 link and vice versa, and carrying
+     it across would only produce a confusing validation failure. */
+  function selectMode(next: "address" | "link") {
+    if (next === mode) return;
+    setMode(next);
+    setValue("");
+    setError(null);
+  }
 
   return (
     <>
@@ -217,6 +230,16 @@ function CommandBar() {
       className="g-panel g-bar flex h-[46px] min-w-0 flex-1 items-center gap-2 py-1 pl-4 pr-3"
       onSubmit={(e) => {
         e.preventDefault();
+        if (isLink) {
+          const input = classifyListingInput(value);
+          if (input.kind === "invalid") {
+            setError(input.message);
+            return;
+          }
+          const params = new URLSearchParams({ source: input.source, mode: "link" });
+          router.push(`/analyze?${params.toString()}`);
+          return;
+        }
         const source = value.trim();
         if (!source) {
           setError("주소를 입력해주세요.");
@@ -243,8 +266,8 @@ function CommandBar() {
         id="hero-search"
         type="text"
         inputMode="text"
-        aria-label="매물 주소"
-        placeholder="매물 주소를 입력하세요"
+        aria-label={isLink ? "다방 매물 링크" : "매물 주소"}
+        placeholder={isLink ? "다방 매물 링크를 붙여넣으세요" : "매물 주소를 입력하세요"}
         value={value}
         onChange={(e) => {
           setValue(e.target.value);
@@ -264,7 +287,11 @@ function CommandBar() {
         ariaLabel="거래 유형"
         options={DEAL_TYPES}
         value={dealType}
-        onChange={setDealType}
+        disabled={isLink}
+        onChange={(next) => {
+          setDealType(next);
+          selectMode("address");
+        }}
       />
 
       {/* Map-ping entry point — opens a map picker to drop a pin instead of
@@ -273,9 +300,14 @@ function CommandBar() {
           rather than a glyph blending into the pill's glass background. */}
       <button
         type="button"
+        disabled={isLink}
         aria-label="지도에서 위치 선택"
         onClick={() => setShowMapPicker(true)}
-        className="grid size-9 shrink-0 place-items-center rounded-full border border-[rgba(14,27,51,0.06)] bg-white text-(--royal) shadow-[0_2px_8px_rgba(14,27,51,0.14)]"
+        className={`grid size-9 shrink-0 place-items-center rounded-full border transition-opacity duration-200 ${
+          isLink
+            ? "pointer-events-none border-transparent bg-transparent text-(--faint) opacity-40"
+            : "border-[rgba(14,27,51,0.06)] bg-white text-(--royal) shadow-[0_2px_8px_rgba(14,27,51,0.14)]"
+        }`}
       >
         {/* Provided map-pin.svg asset — recolored from its hardcoded
             #0a5cff to currentColor so it picks up the button's
@@ -288,6 +320,39 @@ function CommandBar() {
             fill="currentColor"
           />
           <path d="M128,72a32,32,0,1,1-32,32A31.99909,31.99909,0,0,1,128,72Z" fill="#ffffff" />
+        </svg>
+      </button>
+
+      {/* Link-mode entry point. Together with the 전세/월세 toggle this forms
+          one mutually-exclusive mode selector: picking a deal type means
+          address input, picking this means 다방 link input. Paired with the
+          map pin as a matching circular button; only the active mode is
+          highlighted, so at rest in address mode both sit neutral. Icon is
+          the provided link.svg with its hardcoded #000 stroke swapped for
+          currentColor, same treatment as the map pin. */}
+      <button
+        type="button"
+        aria-label="다방 링크로 분석"
+        aria-pressed={isLink}
+        onClick={() => selectMode("link")}
+        className={`grid size-9 shrink-0 place-items-center rounded-full border transition-opacity duration-200 ${
+          isLink
+            ? "border-[rgba(14,27,51,0.06)] bg-(--royal) text-white shadow-[0_2px_8px_rgba(14,27,51,0.14)]"
+            : "border-transparent bg-transparent text-(--faint) opacity-40"
+        }`}
+      >
+        <svg
+          className="h-[18px] w-auto"
+          viewBox="0 0 256 256"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="24"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+        >
+          <path d="M130.49413,63.28047l11.648-11.648a44,44,0,1,1,62.22539,62.22539l-28.28427,28.28428a44,44,0,0,1-62.2254,0" />
+          <path d="M125.50407,192.72133l-11.64621,11.6462a44,44,0,1,1-62.22539-62.22539l28.28427-28.28428a44,44,0,0,1,62.2254,0" />
         </svg>
       </button>
     </form>
