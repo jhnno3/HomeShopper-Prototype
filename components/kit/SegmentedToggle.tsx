@@ -73,6 +73,13 @@ export function SegmentedToggle<T extends string>({
         return (
           <motion.button
             key={option}
+            // Only the position is layout-animated, not the size — width is
+            // already driven by the `animate` prop below, and a full
+            // `layout` would try to own that too and fight it. With this,
+            // reordering (selected moving to the left slot) slides the
+            // labels across on the same curve as everything else instead of
+            // swapping them between slots in a single frame.
+            layout="position"
             type="button"
             role="radio"
             aria-checked={selected}
