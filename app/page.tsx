@@ -7,7 +7,7 @@ import { AnimatePresence, cubicBezier, motion, useReducedMotion, useScroll, useT
 import { FaqAccordion } from "@/components/landing/FaqAccordion";
 import { HeroGradient } from "@/components/landing/HeroGradient";
 import { SheetGradient } from "@/components/landing/SheetGradient";
-import { DropdownMenu } from "@/components/kit/DropdownMenu";
+import { SegmentedToggle } from "@/components/kit/SegmentedToggle";
 import { Logo } from "@/components/kit/Logo";
 import { ReportSummary } from "@/components/report/ReportSummary";
 import { demoReport } from "@/lib/report-data";
@@ -257,17 +257,12 @@ function CommandBar() {
             a soft separator rather than a hard column border. */}
         <div aria-hidden className="mx-0.5 h-6 w-px shrink-0 self-center bg-[rgba(14,27,51,0.1)]" />
 
-        <DropdownMenu
+        <SegmentedToggle
           ariaLabel="거래 유형"
-          className="shrink-0"
-          options={DEAL_TYPES.map((type) => ({
-            label: type,
-            active: type === dealType,
-            onClick: () => setDealType(type),
-          }))}
-        >
-          {dealType}
-        </DropdownMenu>
+          options={DEAL_TYPES}
+          value={dealType}
+          onChange={setDealType}
+        />
 
         {/* Map-ping entry point — opens a map picker to drop a pin instead of
             typing an address (reverse-geocode wiring lands separately). No
