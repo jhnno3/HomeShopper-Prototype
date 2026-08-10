@@ -287,7 +287,7 @@ function CommandBar() {
         ariaLabel="거래 유형"
         options={DEAL_TYPES}
         value={dealType}
-        disabled={isLink}
+        dimmed={isLink}
         onChange={(next) => {
           setDealType(next);
           selectMode("address");
@@ -300,12 +300,14 @@ function CommandBar() {
           rather than a glyph blending into the pill's glass background. */}
       <button
         type="button"
-        disabled={isLink}
         aria-label="지도에서 위치 선택"
-        onClick={() => setShowMapPicker(true)}
+        onClick={() => {
+          selectMode("address");
+          setShowMapPicker(true);
+        }}
         className={`grid size-9 shrink-0 place-items-center rounded-full border transition-opacity duration-200 ${
           isLink
-            ? "pointer-events-none border-transparent bg-transparent text-(--faint) opacity-40"
+            ? "border-transparent bg-transparent text-(--faint) opacity-40"
             : "border-[rgba(14,27,51,0.06)] bg-white text-(--royal) shadow-[0_2px_8px_rgba(14,27,51,0.14)]"
         }`}
       >

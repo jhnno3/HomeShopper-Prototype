@@ -7,8 +7,11 @@ type Props<T extends string> = {
   value: T;
   onChange: (value: T) => void;
   ariaLabel: string;
-  /** Dimmed and non-interactive — used when link mode owns the search bar. */
-  disabled?: boolean;
+  /** Visual de-emphasis only — used when link mode owns the search bar. The
+   * control stays fully interactive: clicking still selects an option and
+   * fires onChange (the caller uses that as an exit path back out of
+   * whatever mode dimmed it). */
+  dimmed?: boolean;
   /** Width of a single option in px. Fixed rather than measured because the
    * options are absolutely positioned into slots at multiples of it. */
   optionWidth?: number;
@@ -32,7 +35,7 @@ export function SegmentedToggle<T extends string>({
   value,
   onChange,
   ariaLabel,
-  disabled = false,
+  dimmed = false,
   optionWidth = 48,
   className,
 }: Props<T>) {
@@ -51,15 +54,15 @@ export function SegmentedToggle<T extends string>({
       // Hover is the primary affordance on pointer devices; focus mirrors it
       // for keyboard, and the click handler below covers touch, where the
       // first tap on the collapsed chip expands instead of re-selecting.
-      onMouseEnter={() => !disabled && setExpanded(true)}
+      onMouseEnter={() => setExpanded(true)}
       onMouseLeave={() => setExpanded(false)}
-      onFocusCapture={() => !disabled && setExpanded(true)}
+      onFocusCapture={() => setExpanded(true)}
       onBlurCapture={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setExpanded(false);
       }}
       className={cn(
         "relative shrink-0 transition-all duration-[335ms] motion-reduce:transition-none",
-        disabled && "pointer-events-none opacity-40",
+        dimmed && "opacity-40",
         className
       )}
       style={{ width: expanded ? options.length * optionWidth : optionWidth }}
@@ -96,10 +99,9 @@ export function SegmentedToggle<T extends string>({
           <button
             key={option}
             type="button"
-            disabled={disabled}
             role="radio"
             aria-checked={selected}
-            tabIndex={disabled || !shown ? -1 : 0}
+            tabIndex={shown ? 0 : -1}
             onClick={() => {
               // A tap on the collapsed chip is a request to see the other
               // options, not to re-pick the one already selected.
