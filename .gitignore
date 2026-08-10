@@ -42,3 +42,22 @@ next-env.d.ts
 
 # playwright-cli
 .playwright-cli/
+
+# internal documentation — notes, specs, plans, presentation material.
+# These stay on disk but never reach GitHub: docs/internal/ in particular
+# holds backend addresses, deploy state, and open security risks.
+/docs/
+
+# stray markdown at the repo root (scratch notes, status files, TODOs).
+# Only these three are meant to be public.
+/*.md
+!/README.md
+!/AGENTS.md
+!/CLAUDE.md
+
+# agent / editor workspace state
+.superpowers/
+.claude/settings.local.json
+.idea/
+.vscode/
+*.log

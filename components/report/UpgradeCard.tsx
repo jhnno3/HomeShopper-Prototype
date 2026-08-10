@@ -78,7 +78,7 @@ export function UpgradeCard({
     setIsSubmitting(true);
     // encodeURIComponent guards against reportId containing path separators
     // that would collapse this into a request to a different endpoint —
-    // see SECURITY_NOTES.md.
+    // see docs/internal/security-notes.md.
     apiFetch<PremiumRequestApiResponse>(`/reports/${encodeURIComponent(reportId)}/premium-requests`, {
       method: 'POST',
       body: JSON.stringify({ dong: pending.dong, ho: pending.ho }),
