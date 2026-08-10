@@ -59,46 +59,37 @@ export function SegmentedToggle<T extends string>({
         transition={transition}
       />
 
-      {options.map((option, i) => {
+      {options.map((option) => {
         const selected = option === value;
         const shown = expanded || selected;
         return (
-          <React.Fragment key={option}>
-            {i > 0 && (
-              <motion.span
-                aria-hidden
-                className="h-3.5 shrink-0 bg-[rgba(14,27,51,0.14)]"
-                animate={{ width: expanded ? 1 : 0, opacity: expanded ? 1 : 0 }}
-                transition={transition}
-              />
+          <motion.button
+            key={option}
+            type="button"
+            role="radio"
+            aria-checked={selected}
+            tabIndex={selected || expanded ? 0 : -1}
+            onClick={() => {
+              // A tap on the collapsed chip is a request to see the other
+              // options, not to re-pick the one already selected.
+              if (!expanded) {
+                setExpanded(true);
+                return;
+              }
+              onChange(option);
+              setExpanded(false);
+            }}
+            className={cn(
+              "relative z-10 overflow-hidden whitespace-nowrap rounded-full py-1.5 text-center text-[14px] transition-colors",
+              selected
+                ? "font-medium text-(--royal)"
+                : "font-normal text-(--faint) hover:text-(--muted)"
             )}
-            <motion.button
-              type="button"
-              role="radio"
-              aria-checked={selected}
-              tabIndex={selected || expanded ? 0 : -1}
-              onClick={() => {
-                // A tap on the collapsed chip is a request to see the other
-                // options, not to re-pick the one already selected.
-                if (!expanded) {
-                  setExpanded(true);
-                  return;
-                }
-                onChange(option);
-                setExpanded(false);
-              }}
-              className={cn(
-                "relative z-10 overflow-hidden whitespace-nowrap rounded-full py-1.5 text-center text-[14px] transition-colors",
-                selected
-                  ? "font-medium text-(--royal)"
-                  : "font-normal text-(--muted) hover:text-(--ink)"
-              )}
-              animate={{ width: shown ? optionWidth : 0, opacity: shown ? 1 : 0 }}
-              transition={transition}
-            >
-              {option}
-            </motion.button>
-          </React.Fragment>
+            animate={{ width: shown ? optionWidth : 0, opacity: shown ? 1 : 0 }}
+            transition={transition}
+          >
+            {option}
+          </motion.button>
         );
       })}
 
@@ -112,7 +103,7 @@ export function SegmentedToggle<T extends string>({
           free-floating chip that happens to be next to them. */}
       <motion.span
         aria-hidden
-        className="absolute inset-y-0 bg-[rgba(10,92,255,0.1)]"
+        className="absolute inset-y-0 bg-white shadow-[0_1px_4px_rgba(14,27,51,0.12)]"
         style={{ width: optionWidth }}
         animate={{
           left: expanded ? options.indexOf(value) * (optionWidth + 1) : 0,
