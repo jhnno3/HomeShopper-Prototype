@@ -2,6 +2,8 @@
 // backend run on different origins in dev, so every request needs
 // `credentials: "include"` to carry the `homeshopper_session` cookie.
 
+import type { ReverseGeocodeResponse } from './types';
+
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8080';
 
 export class ApiError extends Error {
@@ -27,4 +29,10 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
 
   if (res.status === 204) return undefined as T;
   return res.json();
+}
+
+// GET /api/v1/locations/reverse-geocode (FRONTEND_INTEGRATION_2026-08-07.md §2).
+export function reverseGeocode(latitude: number, longitude: number) {
+  const query = new URLSearchParams({ latitude: String(latitude), longitude: String(longitude) });
+  return apiFetch<ReverseGeocodeResponse>(`/locations/reverse-geocode?${query}`);
 }

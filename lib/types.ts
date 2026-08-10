@@ -89,6 +89,18 @@ export interface Reservation {
   src: ReservationSource;
 }
 
+// Response of `GET /api/v1/locations/reverse-geocode`
+// (FRONTEND_INTEGRATION_2026-08-07.md §2).
+export interface ReverseGeocodeResponse {
+  latitude: number;
+  longitude: number;
+  selectedAddress: string;
+  roadAddress: string | null;
+  jibunAddress: string | null;
+  buildingName: string | null;
+  zoneNumber: string | null;
+}
+
 // Response of `POST /api/v1/analyses` (PROTOTYPE_API.md §3). `completed` means
 // every section resolved; `partial` means some did — both are 201, and both
 // yield a viewable report at `reportId`. Analysis failure comes back as an

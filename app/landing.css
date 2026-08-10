@@ -302,9 +302,9 @@ body:has(.v3) .ink-bg {
 
 /* Focus state is a flat swap, not a transition — the bar deliberately has
    no hover/focus animation of its own, so the only motion around the
-   search field is the submit button emerging and the 전세/월세 toggle.
-   The border still firms up on focus (instantly) because the input's own
-   outline is suppressed below and this is what replaces it. */
+   search field is the submit button and the 전세/월세 toggle. The border
+   still firms up on focus (instantly) because the input's own outline is
+   suppressed below and this is what replaces it. */
 .g-bar:focus-within {
   border-color: rgba(255, 255, 255, 0.8);
 }
