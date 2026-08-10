@@ -128,4 +128,24 @@ describe('AnalyzePage', () => {
     expect(await screen.findByText('도로명 주소를 찾지 못했습니다.')).toBeInTheDocument();
     expect(screen.queryByLabelText('도로명주소')).not.toBeInTheDocument();
   });
+
+  it('retries in link mode with link copy and link validation', async () => {
+    const { ApiError } = await import('@/lib/api');
+    apiFetchMock.mockRejectedValue(new ApiError('분석 서버에 연결하지 못했습니다.', 502));
+    searchParamsValue = 'source=https://dabangapp.com/room/1&mode=link';
+    render(<AnalyzePage />);
+
+    const field = await screen.findByLabelText('다방 매물 링크');
+    expect(field).toHaveAttribute('placeholder', '다방 링크를 붙여넣으세요');
+    expect(
+      screen.getByText('다방 앱에서 매물 상세 페이지 링크를 복사해 붙여넣어 주세요.')
+    ).toBeInTheDocument();
+
+    fireEvent.change(field, { target: { value: 'https://zigbang.com/items/1' } });
+    fireEvent.click(screen.getByText('분석 시작'));
+
+    expect(
+      screen.getByText('지금은 다방(dabangapp.com) 매물 링크만 분석할 수 있어요.')
+    ).toBeInTheDocument();
+  });
 });

@@ -143,7 +143,13 @@ function AnalyzeFlow() {
 
   function handleStep1Submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!sourceValue.trim()) {
+    if (isLink) {
+      const input = classifyListingInput(sourceValue);
+      if (input.kind === 'invalid') {
+        setError(input.message);
+        return;
+      }
+    } else if (!sourceValue.trim()) {
       setError('주소를 입력해주세요.');
       return;
     }
@@ -184,9 +190,9 @@ function AnalyzeFlow() {
                     setSourceValue(e.target.value);
                     if (error) setError(null);
                   }}
-                  placeholder="매물 주소를 입력하세요"
+                  placeholder={isLink ? '다방 링크를 붙여넣으세요' : '매물 주소를 입력하세요'}
                   className="w-full rounded-full border border-[rgba(0,131,255,0.22)] bg-[rgba(0,131,255,0.05)] px-5 py-2.5 text-[var(--color-ink)] placeholder:text-[var(--color-slate)] transition-colors focus:border-[var(--color-blue)] focus:bg-[rgba(0,131,255,0.09)] focus:outline-none"
-                  aria-label="매물 주소"
+                  aria-label={isLink ? '다방 매물 링크' : '매물 주소'}
                   aria-invalid={Boolean(error)}
                   aria-describedby={error ? 'analyze-source-error' : undefined}
                 />
@@ -236,7 +242,9 @@ function AnalyzeFlow() {
               card never feels like it's just a single bare error line. */}
           <p className="mt-6 flex items-start justify-start gap-1.5 text-left text-[13px] text-[var(--color-slate)]">
             <Info size={14} className="mt-[3px] shrink-0" aria-hidden />
-            도로명 또는 지번 주소를 입력해주세요. 예: 서울특별시 서초구 서초대로 301
+            {isLink
+              ? '다방 앱에서 매물 상세 페이지 링크를 복사해 붙여넣어 주세요.'
+              : '도로명 또는 지번 주소를 입력해주세요. 예: 서울특별시 서초구 서초대로 301'}
           </p>
         </ErrorCard>
       )}
