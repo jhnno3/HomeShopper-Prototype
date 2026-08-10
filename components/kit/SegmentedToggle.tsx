@@ -15,11 +15,12 @@ type Props<T extends string> = {
 };
 
 /** Collapsed it shows only the selected option as a highlighted chip; hover,
- * focus, or a tap expands it in place to reveal the rest (전세 | 월세) as
- * separately clickable segments, then it shrinks back around whatever was
- * picked. Same idea as the width-transition icon menus — the container grows
- * and the hidden content scales in behind it — but driven by Motion so the
- * expand and the surrounding reflow are one motion. */
+ * focus, or a tap expands it in place to reveal the rest as separately
+ * clickable segments, then it shrinks back around whatever was picked. The
+ * selected option always renders in the leftmost slot — picking the other
+ * one reorders the row (via `layout`, so it slides rather than snaps)
+ * instead of leaving labels pinned to fixed positions and only the
+ * highlight moving between them. */
 export function SegmentedToggle<T extends string>({
   options,
   value,
@@ -34,6 +35,13 @@ export function SegmentedToggle<T extends string>({
   const transition = reduce
     ? { duration: 0.12 }
     : { duration: 0.34, ease: [0.22, 1, 0.36, 1] as const };
+
+  // Selected option first, so it always occupies the left (highlighted)
+  // slot and the rest trail off to the right in their original order.
+  const orderedOptions = React.useMemo(
+    () => [value, ...options.filter((o) => o !== value)],
+    [options, value]
+  );
 
   return (
     <div
@@ -59,7 +67,7 @@ export function SegmentedToggle<T extends string>({
         transition={transition}
       />
 
-      {options.map((option) => {
+      {orderedOptions.map((option) => {
         const selected = option === value;
         const shown = expanded || selected;
         return (
@@ -93,25 +101,14 @@ export function SegmentedToggle<T extends string>({
         );
       })}
 
-      {/* Highlight pill tracking the selected segment. Separate from the
-          button's own background so it slides between segments when the
-          choice changes instead of cross-fading. Collapsed it always sits at
-          0 — the unselected segments have zero width, so the selected one is
-          flush against the left edge whichever one it is. Expanded, the edge
-          facing the other segments squares off instead of staying rounded,
-          so the pill reads as "this one, out of the group" rather than a
-          free-floating chip that happens to be next to them. */}
+      {/* Highlight pill for the selected segment. Always docked at the left
+          edge and fully round — the selected option is always ordered
+          first, so there's no "which slot is it in" calculation left to
+          do, and no need to square off an inner edge against a neighbor. */}
       <motion.span
         aria-hidden
-        className="absolute inset-y-0 bg-white shadow-[0_1px_4px_rgba(14,27,51,0.12)]"
+        className="absolute inset-y-0 left-0 rounded-full bg-white shadow-[0_1px_4px_rgba(14,27,51,0.12)]"
         style={{ width: optionWidth }}
-        animate={{
-          left: expanded ? options.indexOf(value) * (optionWidth + 1) : 0,
-          borderTopLeftRadius: !expanded || options.indexOf(value) === 0 ? 999 : 0,
-          borderBottomLeftRadius: !expanded || options.indexOf(value) === 0 ? 999 : 0,
-          borderTopRightRadius: !expanded || options.indexOf(value) === options.length - 1 ? 999 : 0,
-          borderBottomRightRadius: !expanded || options.indexOf(value) === options.length - 1 ? 999 : 0,
-        }}
         transition={transition}
       />
     </div>
