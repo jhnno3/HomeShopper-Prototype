@@ -294,22 +294,19 @@ body:has(.v3) .ink-bg {
      pill's outline is the same weight all the way around. */
   border: 1px solid rgba(255, 255, 255, 0.6);
   box-shadow: 0 12px 40px -12px rgba(11, 59, 167, 0.2);
-  transition:
-    box-shadow 0.25s ease,
-    border-color 0.25s ease,
-    transform 0.25s ease;
 }
 
 .g-bar::before {
   content: none;
 }
 
+/* Focus state is a flat swap, not a transition — the bar deliberately has
+   no hover/focus animation of its own, so the only motion around the
+   search field is the submit button emerging and the 전세/월세 toggle.
+   The border still firms up on focus (instantly) because the input's own
+   outline is suppressed below and this is what replaces it. */
 .g-bar:focus-within {
-  /* No blue glow ring on focus — just a slightly firmer edge and a touch
-     more lift, so typing doesn't flash a colored highlight around the bar. */
   border-color: rgba(255, 255, 255, 0.8);
-  box-shadow: 0 18px 50px -12px rgba(11, 59, 167, 0.28);
-  transform: translateY(-1px);
 }
 
 .g-bar input {

@@ -195,6 +195,17 @@ function focusHeroSearch() {
 const DEAL_TYPES = ["전세", "월세"] as const;
 type DealType = (typeof DEAL_TYPES)[number];
 
+/* The reference for this animation wraps the bar and the button in an SVG
+   goo filter (feGaussianBlur + an feColorMatrix that slams alpha back to
+   hard edges) so the two shapes merge and pinch apart like liquid. That
+   filter can't be used here: the matrix maps any alpha below ~0.83 to
+   zero, which erases this bar's translucent glass fill, its border, its
+   shadow, the search icon, and the input text — everything but the fully
+   opaque white chips. (A `filter` on the ancestor also disables the
+   descendant's `backdrop-filter`.) The reference's bar is solid black, so
+   it has nothing to lose. The emergence motion below is kept; the merge is
+   faked by layering instead — see the z-index note there. */
+
 function CommandBar() {
   const router = useRouter();
   const reduce = useReducedMotion();
@@ -206,13 +217,15 @@ function CommandBar() {
   return (
     <>
     {/* No gap-2 here — the arrow button below owns its own marginLeft so
-        the same animated property both reveals it and creates its spacing
+        the same animated property both moves it and creates its spacing
         from the pill, instead of a flex gap reserving that space the
-        instant the button mounts, ahead of the width/marginLeft tween. */}
+        instant the button mounts, ahead of the tween. */}
     <div className="flex w-full items-center">
     <form
       id="hero-search-form"
-      className="g-panel g-bar flex h-[46px] min-w-0 flex-1 items-center gap-2 py-1 pl-4 pr-3"
+      // z-10 keeps the pill above the submit button, which starts tucked
+      // underneath it — see the emergence note below.
+      className="g-panel g-bar relative z-10 flex h-[46px] min-w-0 flex-1 items-center gap-2 py-1 pl-4 pr-3"
       onSubmit={(e) => {
         e.preventDefault();
         const source = value.trim();
@@ -273,7 +286,7 @@ function CommandBar() {
       <button
         type="button"
         aria-label="지도에서 위치 선택"
-        className="grid size-9 shrink-0 place-items-center rounded-full border border-[rgba(14,27,51,0.06)] bg-white text-(--royal) shadow-[0_2px_8px_rgba(14,27,51,0.14)] transition-transform active:scale-95"
+        className="grid size-9 shrink-0 place-items-center rounded-full border border-[rgba(14,27,51,0.06)] bg-white text-(--royal) shadow-[0_2px_8px_rgba(14,27,51,0.14)]"
       >
         {/* Provided map-pin.svg asset — recolored from its hardcoded
             #0a5cff to currentColor so it picks up the button's
@@ -290,30 +303,30 @@ function CommandBar() {
       </button>
     </form>
 
-    {/* Submit arrow — pops in as its own circle outside the pill. `form`
-        associates it with the pill's <form> by id despite not being a DOM
-        descendant, so it still submits and Enter-to-submit inside the input
-        keeps working. One motion.button, one animate call — but `width` and
-        `height` tween together (not just `width` against a fixed height),
-        so the shape stays a true circle shrinking to/from a point instead
-        of a short capsule that only becomes circular right at the end. That
-        shape pop was reading as a second, separate-feeling motion even
-        though it's driven by a single transition. `marginLeft` rides along
-        the same tween to create its spacing from the pill as it grows,
-        instead of a flex gap snapping open the instant it mounts. */}
+    {/* Submit arrow — starts tucked completely under the pill's right end
+        (z-0 against the pill's z-10) and slides out from behind it, so it
+        reads as a separate button emerging from the bar rather than fading
+        in beside it. `marginLeft` is the whole animation: -46 (fully
+        hidden, contributing no width) to +8 (clear of the pill, with its
+        gap), so the same property both moves it and opens the space for
+        it — no flex gap snapping ahead of the tween. `form` associates it
+        with the pill's <form> by id despite not being a DOM descendant, so
+        clicking it and Enter-to-submit inside the input both still work. */}
     <AnimatePresence>
       {hasText && (
         <motion.button
           type="submit"
           form="hero-search-form"
           aria-label="분석하기"
-          className="grid shrink-0 place-items-center overflow-hidden rounded-full border border-[rgba(14,27,51,0.06)] bg-white text-(--royal) shadow-[0_12px_40px_-12px_rgba(11,59,167,0.2)] transition-transform active:scale-95"
-          initial={reduce ? false : { width: 0, height: 0, marginLeft: 0, opacity: 0 }}
-          animate={{ width: 46, height: 46, marginLeft: 8, opacity: 1 }}
-          exit={
-            reduce ? { opacity: 0 } : { width: 0, height: 0, marginLeft: 0, opacity: 0 }
+          className="relative z-0 grid size-[46px] shrink-0 place-items-center rounded-full bg-white text-(--royal) shadow-[0_12px_40px_-12px_rgba(11,59,167,0.2)]"
+          initial={reduce ? false : { marginLeft: -46, opacity: 0, scale: 0.7 }}
+          animate={{ marginLeft: 8, opacity: 1, scale: 1 }}
+          exit={reduce ? { opacity: 0 } : { marginLeft: -46, opacity: 0, scale: 0.7 }}
+          transition={
+            reduce
+              ? { duration: 0.12 }
+              : { delay: 0.1, duration: 0.85, type: "spring", bounce: 0.15 }
           }
-          transition={reduce ? { duration: 0.12 } : { duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
         >
           <svg
             className="size-[21px] shrink-0"
