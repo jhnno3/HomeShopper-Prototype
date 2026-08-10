@@ -205,8 +205,9 @@ function CommandBar() {
 
   return (
     <>
+    <div className="flex w-full items-center gap-2">
     <form
-      className="g-panel g-bar flex w-full items-center py-1.5 pl-4 pr-4"
+      className="g-panel g-bar flex h-[54px] min-w-0 flex-1 items-center py-1.5 pl-4 pr-4"
       onSubmit={(e) => {
         e.preventDefault();
         const source = value.trim();
@@ -263,28 +264,6 @@ function CommandBar() {
           value={dealType}
           onChange={setDealType}
         />
-
-        {/* Map-ping entry point — opens a map picker to drop a pin instead of
-            typing an address (reverse-geocode wiring lands separately). No
-            button chrome — just the glyph. The arrow button's own
-            marginLeft (below) keeps it clear of this one, so this button
-            can use balanced padding instead of trimming its right side. */}
-        <button
-          type="button"
-          aria-label="지도에서 위치 선택"
-          className="grid shrink-0 place-items-center p-1 text-(--royal) transition-transform active:scale-95"
-        >
-          {/* Provided map-pin.svg asset — recolored from its hardcoded
-              #0a5cff to currentColor so it picks up the button's
-              text-(--royal) like the rest of the icon set. */}
-          <svg className="h-[24px] w-auto" viewBox="0 0 256 256" fill="none" aria-hidden>
-            <path
-              d="M127.99414,15.9971a88.1046,88.1046,0,0,0-88,88c0,75.29688,80,132.17188,83.40625,134.55469a8.023,8.023,0,0,0,9.1875,0c3.40625-2.38281,83.40625-59.25781,83.40625-134.55469A88.10459,88.10459,0,0,0,127.99414,15.9971Z"
-              fill="currentColor"
-            />
-            <path d="M128,72a32,32,0,1,1-32,32A31.99909,31.99909,0,0,1,128,72Z" fill="#ffffff" />
-          </svg>
-        </button>
       </div>
 
       {/* The button used to pop in via opacity/scale alone while its 40px
@@ -317,13 +296,39 @@ function CommandBar() {
               strokeLinejoin="round"
               aria-hidden
             >
-              <path d="M5 12h14" />
-              <path d="m13 6 6 6-6 6" />
+              <path d="M12 19V5" />
+              <path d="m5 12 7-7 7 7" />
             </svg>
           </motion.button>
         )}
       </AnimatePresence>
     </form>
+
+    {/* Map-ping entry point — opens a map picker to drop a pin instead of
+        typing an address (reverse-geocode wiring lands separately). Its own
+        circular pill outside the search bar, sized to the same 54px as the
+        bar itself (an explicit match, not `self-stretch` — in a row flex
+        container the width resolves before a stretched cross-size is known,
+        so `aspect-square` can't derive a width from it). */}
+    <button
+      type="button"
+      aria-label="지도에서 위치 선택"
+      className="g-panel grid size-[54px] shrink-0 place-items-center rounded-full text-(--royal) transition-transform active:scale-95"
+    >
+      {/* Provided map-pin.svg asset — recolored from its hardcoded
+          #0a5cff to currentColor so it picks up the button's
+          text-(--royal) like the rest of the icon set. Sized down from the
+          asset's own bulk (22px) to ~18px so it reads at the same visual
+          weight as the 월세/전세 toggle's text instead of outsizing it. */}
+      <svg className="h-[18px] w-auto" viewBox="0 0 256 256" fill="none" aria-hidden>
+        <path
+          d="M127.99414,15.9971a88.1046,88.1046,0,0,0-88,88c0,75.29688,80,132.17188,83.40625,134.55469a8.023,8.023,0,0,0,9.1875,0c3.40625-2.38281,83.40625-59.25781,83.40625-134.55469A88.10459,88.10459,0,0,0,127.99414,15.9971Z"
+          fill="currentColor"
+        />
+        <path d="M128,72a32,32,0,1,1-32,32A31.99909,31.99909,0,0,1,128,72Z" fill="#ffffff" />
+      </svg>
+    </button>
+    </div>
     {error && (
       <p
         id="hero-search-error"
