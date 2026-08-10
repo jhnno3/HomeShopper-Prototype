@@ -1,6 +1,5 @@
 "use client";
 import * as React from "react";
-import { motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/cn";
 
 type Props<T extends string> = {
@@ -9,7 +8,7 @@ type Props<T extends string> = {
   onChange: (value: T) => void;
   ariaLabel: string;
   /** Width of a single option in px. Fixed rather than measured because the
-   * collapse animates width to 0 — `auto` has nothing to tween toward. */
+   * options are absolutely positioned into slots at multiples of it. */
   optionWidth?: number;
   className?: string;
 };
@@ -17,10 +16,15 @@ type Props<T extends string> = {
 /** Collapsed it shows only the selected option as a highlighted chip; hover,
  * focus, or a tap expands it in place to reveal the rest as separately
  * clickable segments, then it shrinks back around whatever was picked. The
- * selected option always renders in the leftmost slot — picking the other
- * one reorders the row (via `layout`, so it slides rather than snaps)
- * instead of leaving labels pinned to fixed positions and only the
- * highlight moving between them. */
+ * selected option always occupies the leftmost slot, so picking the other
+ * one slides the labels past each other into their new slots.
+ *
+ * Animation is plain CSS transitions (`transition-all duration-[335ms]` plus a
+ * `scale`/`opacity` reveal delayed behind the container's own widening),
+ * not a JS animation library — the container grows first and the newly
+ * revealed label pops in behind it. Options are absolutely positioned and
+ * moved with `translateX` rather than reordered in the DOM, because CSS
+ * can't transition a DOM reorder but can transition a transform. */
 export function SegmentedToggle<T extends string>({
   options,
   value,
@@ -29,19 +33,13 @@ export function SegmentedToggle<T extends string>({
   optionWidth = 48,
   className,
 }: Props<T>) {
-  const reduce = useReducedMotion();
   const [expanded, setExpanded] = React.useState(false);
 
-  const transition = reduce
-    ? { duration: 0.12 }
-    : { duration: 0.34, ease: [0.22, 1, 0.36, 1] as const };
-
-  // Selected option first, so it always occupies the left (highlighted)
-  // slot and the rest trail off to the right in their original order.
-  const orderedOptions = React.useMemo(
-    () => [value, ...options.filter((o) => o !== value)],
-    [options, value]
-  );
+  // Selected option owns slot 0; the rest trail off to the right in their
+  // original order. Slot index drives translateX, so a change here reads as
+  // a slide rather than a swap.
+  const slotOf = (option: T) =>
+    option === value ? 0 : options.filter((o) => o !== value).indexOf(option) + 1;
 
   return (
     <div
@@ -56,34 +54,47 @@ export function SegmentedToggle<T extends string>({
       onBlurCapture={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setExpanded(false);
       }}
-      className={cn("relative flex shrink-0 items-center", className)}
+      className={cn(
+        "relative shrink-0 transition-all duration-[335ms] motion-reduce:transition-none",
+        className
+      )}
+      style={{ width: expanded ? options.length * optionWidth : optionWidth }}
     >
+      {/* Sets the row's height from the real label metrics, since every
+          option below is absolutely positioned and contributes none. */}
+      <span aria-hidden className="invisible block py-1.5 text-center text-[14px]">
+        {value}
+      </span>
+
       {/* Track behind the segments — only earns its keep once there is more
           than one segment to group, so it fades in with the expansion. */}
-      <motion.span
+      <span
         aria-hidden
-        className="absolute inset-0 rounded-full bg-[rgba(14,27,51,0.04)]"
-        animate={{ opacity: expanded ? 1 : 0 }}
-        transition={transition}
+        className={cn(
+          "absolute inset-0 rounded-full bg-[rgba(14,27,51,0.04)] transition-all duration-[335ms] motion-reduce:transition-none",
+          expanded ? "opacity-100" : "opacity-0"
+        )}
       />
 
-      {orderedOptions.map((option) => {
+      {/* Highlight pill for the selected segment — always docked at the left
+          edge and fully round, since the selected option always holds slot 0
+          and so never needs an edge squared off against a neighbor. */}
+      <span
+        aria-hidden
+        className="absolute inset-y-0 left-0 rounded-full bg-white shadow-[0_1px_4px_rgba(14,27,51,0.12)]"
+        style={{ width: optionWidth }}
+      />
+
+      {options.map((option) => {
         const selected = option === value;
         const shown = expanded || selected;
         return (
-          <motion.button
+          <button
             key={option}
-            // Only the position is layout-animated, not the size — width is
-            // already driven by the `animate` prop below, and a full
-            // `layout` would try to own that too and fight it. With this,
-            // reordering (selected moving to the left slot) slides the
-            // labels across on the same curve as everything else instead of
-            // swapping them between slots in a single frame.
-            layout="position"
             type="button"
             role="radio"
             aria-checked={selected}
-            tabIndex={selected || expanded ? 0 : -1}
+            tabIndex={shown ? 0 : -1}
             onClick={() => {
               // A tap on the collapsed chip is a request to see the other
               // options, not to re-pick the one already selected.
@@ -95,29 +106,27 @@ export function SegmentedToggle<T extends string>({
               setExpanded(false);
             }}
             className={cn(
-              "relative z-10 overflow-hidden whitespace-nowrap rounded-full py-1.5 text-center text-[14px] transition-colors",
+              "absolute inset-y-0 left-0 z-10 whitespace-nowrap rounded-full text-center text-[14px] transition-all duration-[335ms] motion-reduce:transition-none",
               selected
                 ? "font-medium text-(--royal)"
                 : "font-normal text-(--faint) hover:text-(--muted)"
             )}
-            animate={{ width: shown ? optionWidth : 0, opacity: shown ? 1 : 0 }}
-            transition={transition}
+            style={{
+              width: optionWidth,
+              // translateX places the option in its slot; scale is the
+              // reveal itself, so a hidden option collapses to a point at
+              // its own slot instead of leaving a clickable dead zone.
+              transform: `translateX(${slotOf(option) * optionWidth}px) scale(${shown ? 1 : 0})`,
+              opacity: shown ? 1 : 0,
+              // Revealing waits for the container to widen; hiding leads, so
+              // the label is gone before the container closes over it.
+              transitionDelay: shown && expanded ? "70ms" : "0ms",
+            }}
           >
             {option}
-          </motion.button>
+          </button>
         );
       })}
-
-      {/* Highlight pill for the selected segment. Always docked at the left
-          edge and fully round — the selected option is always ordered
-          first, so there's no "which slot is it in" calculation left to
-          do, and no need to square off an inner edge against a neighbor. */}
-      <motion.span
-        aria-hidden
-        className="absolute inset-y-0 left-0 rounded-full bg-white shadow-[0_1px_4px_rgba(14,27,51,0.12)]"
-        style={{ width: optionWidth }}
-        transition={transition}
-      />
     </div>
   );
 }
