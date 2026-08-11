@@ -293,15 +293,15 @@ body:has(.v3) .ink-bg {
 
 /* ---------- command bar ---------- */
 .g-bar {
-  /* the search pill keeps its outer focus glow instead of the card sheen,
-     which needs overflow:hidden and would clip that glow. */
+  /* Plain white, not glass — the bar opts out of the .g-panel translucency
+     and blur entirely (unlike other glass surfaces), and keeps overflow
+     visible since it has no sheen to clip. */
   overflow: visible;
   border-radius: 999px;
-  /* .g-panel's inset top highlight (box-shadow: 0 1px 0 ... inset) stacks
-     on top of its own border, so the top edge reads brighter/thicker than
-     the bottom. Dropped here in favor of a single uniform border so the
-     pill's outline is the same weight all the way around. */
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: #fff;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border: none;
   box-shadow: 0 12px 40px -12px rgba(11, 59, 167, 0.2);
 }
 
@@ -309,26 +309,18 @@ body:has(.v3) .ink-bg {
   content: none;
 }
 
-/* Focus state is a flat swap, not a transition — the bar deliberately has
-   no hover/focus animation of its own, so the only motion around the
-   search field is the submit button and the 전세/월세 toggle. The border
-   still firms up on focus (instantly) because the input's own outline is
-   suppressed below and this is what replaces it. */
-.g-bar:focus-within {
-  border-color: rgba(255, 255, 255, 0.8);
-}
-
 .g-bar input {
   background: transparent;
   border: none;
   outline: none;
   width: 100%;
-  font-size: 15px;
+  font-size: 16px;
   color: var(--ink);
 }
 
-/* The pill's :focus-within ring is the focus indicator; suppress the
-   input's own outline so no blue rectangle shows on click/focus. */
+/* No separate focus ring — the input's own blinking caret already signals
+   focus for a single-field pill like this, so its outline is suppressed
+   rather than replaced with anything. */
 .g-bar input:focus-visible {
   outline: none;
 }

@@ -9,8 +9,9 @@ type Props<T extends string> = {
   ariaLabel: string;
   /** Whether this toggle is the currently active entry method in a larger
    * mutually-exclusive selector (e.g. alongside a link button and a map-pin
-   * button). Active shows the selected option as a filled blue pill; inactive
-   * shows it as a plain white pill — still fully legible, never dimmed. The
+   * button). Active shows the selected option as a filled blue pill;
+   * inactive drops the pill entirely and shows it as plain grey text, same
+   * as the link/map-pin buttons look when they aren't the active mode. The
    * control stays fully interactive either way; clicking still selects an
    * option and fires onChange, which the caller uses to reclaim the active
    * slot. */
@@ -64,14 +65,14 @@ export function SegmentedToggle<T extends string>({
         if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setExpanded(false);
       }}
       className={cn(
-        "relative shrink-0 transition-all duration-[335ms] motion-reduce:transition-none",
+        "relative shrink-0 transition-all duration-[315ms] motion-reduce:transition-none",
         className
       )}
       style={{ width: expanded ? options.length * optionWidth : optionWidth }}
     >
       {/* Sets the row's height from the real label metrics, since every
           option below is absolutely positioned and contributes none. */}
-      <span aria-hidden className="invisible block py-1.5 text-center text-[14px]">
+      <span aria-hidden className="invisible block py-2 text-center text-[15px]">
         {value}
       </span>
 
@@ -80,25 +81,24 @@ export function SegmentedToggle<T extends string>({
       <span
         aria-hidden
         className={cn(
-          "absolute inset-0 rounded-full bg-[rgba(14,27,51,0.04)] transition-all duration-[335ms] motion-reduce:transition-none",
+          "absolute inset-0 rounded-full bg-[rgba(14,27,51,0.07)] transition-all duration-[335ms] motion-reduce:transition-none",
           expanded ? "opacity-100" : "opacity-0"
         )}
       />
 
-      {/* Highlight pill for the selected segment — always docked at the left
-          edge and fully round, since the selected option always holds slot 0
-          and so never needs an edge squared off against a neighbor. Filled
-          blue when this toggle is the active entry method, plain white
-          otherwise — mirrors the link/map-pin buttons in the same row so the
-          whole selector reads as one mutually-exclusive group. */}
-      <span
-        aria-hidden
-        className={cn(
-          "absolute inset-y-0 left-0 rounded-full shadow-[0_1px_4px_rgba(14,27,51,0.12)] transition-colors duration-[335ms] motion-reduce:transition-none",
-          active ? "bg-(--royal)" : "bg-white"
-        )}
-        style={{ width: optionWidth }}
-      />
+      {/* Highlight pill for the selected segment — only rendered when this
+          toggle is the active entry method (filled blue, fully round, always
+          docked at slot 0). Inactive has no pill at all: the selected option
+          just sits as plain grey text like the link/map-pin buttons do when
+          they're not the active mode, so the whole selector reads as one
+          mutually-exclusive group. */}
+      {active && (
+        <span
+          aria-hidden
+          className="absolute inset-y-0 left-0 rounded-full bg-(--royal) shadow-[0_1px_4px_rgba(14,27,51,0.12)]"
+          style={{ width: optionWidth }}
+        />
+      )}
 
       {options.map((option) => {
         const selected = option === value;
@@ -121,12 +121,33 @@ export function SegmentedToggle<T extends string>({
               setExpanded(false);
             }}
             className={cn(
-              "absolute inset-y-0 left-0 z-10 whitespace-nowrap rounded-full text-center text-[14px] transition-all duration-[335ms] motion-reduce:transition-none",
-              selected
-                ? active
-                  ? "font-medium text-white"
-                  : "font-medium text-(--ink)"
-                : "font-normal text-(--faint) hover:text-(--muted)"
+              "absolute inset-y-0 left-0 z-10 whitespace-nowrap rounded-full text-center text-[15px] transition-all duration-[335ms] focus-visible:outline-none motion-reduce:transition-none",
+              selected ? "font-medium" : "font-normal",
+              active
+                ? // Active: the blue pill is the only highlight in play, so
+                  // no option takes a grey hover — one on the unselected
+                  // label would read as a competing selection next to it.
+                  // Keyboard focus still needs somewhere to show, so the
+                  // unselected label keeps a focus-visible-only grey pill;
+                  // the selected one is already the blue pill.
+                  selected
+                  ? "text-white"
+                  : "text-(--faint) focus-visible:bg-[rgba(14,27,51,0.12)] focus-visible:text-(--muted)"
+                : // Inactive: no blue pill exists, so hover is what marks
+                  // the pointer's position and every option gets it,
+                  // selected included. Two greys — the row's shared track
+                  // is the lighter rgba(...,0.07), the hovered option gets
+                  // this darker pill in the same rounded-full shape, so it
+                  // reads as "this one" rather than a text-color shift.
+                  // focus-visible mirrors hover so keyboard users get the
+                  // same cue without the default outline's square corners.
+                  // The selected label still sits a shade darker than the
+                  // unselected one, so which is picked stays readable even
+                  // with the blue pill gone.
+                  cn(
+                    "hover:bg-[rgba(14,27,51,0.12)] hover:text-(--muted) focus-visible:bg-[rgba(14,27,51,0.12)] focus-visible:text-(--muted)",
+                    selected ? "text-(--muted)" : "text-(--faint)"
+                  )
             )}
             style={{
               width: optionWidth,
