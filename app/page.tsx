@@ -235,7 +235,7 @@ function CommandBar() {
     <div className="flex w-full items-center">
     <form
       id="hero-search-form"
-      className="g-panel g-bar flex h-[46px] min-w-0 flex-1 items-center gap-2 py-1 pl-4 pr-3"
+      className="g-panel g-bar flex h-[52px] min-w-0 flex-1 items-center gap-2 py-1 pl-5 pr-3.5"
       onSubmit={(e) => {
         e.preventDefault();
         if (isLink) {
@@ -258,7 +258,7 @@ function CommandBar() {
       }}
     >
       <svg
-        className="size-[18px] shrink-0 text-(--faint)"
+        className="size-5 shrink-0 text-(--faint)"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -289,13 +289,14 @@ function CommandBar() {
       {/* Divider between the address field and the action cluster — inset
           from the pill's top/bottom edges (not full-height) so it reads as
           a soft separator rather than a hard column border. */}
-      <div aria-hidden className="mx-0.5 h-6 w-px shrink-0 self-center bg-[rgba(14,27,51,0.1)]" />
+      <div aria-hidden className="mx-0.5 h-7 w-px shrink-0 self-center bg-[rgba(14,27,51,0.1)]" />
 
       <SegmentedToggle
         ariaLabel="거래 유형"
         options={DEAL_TYPES}
         value={dealType}
         active={activeControl === "dealType"}
+        optionWidth={54}
         onChange={(next) => {
           setDealType(next);
           selectMode("address", "dealType");
@@ -304,22 +305,23 @@ function CommandBar() {
 
       {/* Link-mode entry point. Together with the 전세/월세 toggle and the
           map pin, this forms one mutually-exclusive entry-method selector —
-          exactly one of the three is ever highlighted blue, the other two
-          stay plain white (never dimmed). Icon is the provided link.svg with
-          its hardcoded #000 stroke swapped for currentColor. */}
+          exactly one of the three is ever highlighted blue; the other two
+          are bare icons with no circle, and only pick up a grey circle on
+          hover. Icon is the provided link.svg with its hardcoded #000 stroke
+          swapped for currentColor. */}
       <button
         type="button"
         aria-label="다방 링크로 분석"
         aria-pressed={activeControl === "link"}
         onClick={() => selectMode("link", "link")}
-        className={`grid size-9 shrink-0 place-items-center rounded-full border transition-colors duration-200 ${
+        className={`grid size-10 shrink-0 place-items-center rounded-full transition-colors duration-[335ms] ${
           activeControl === "link"
-            ? "border-transparent bg-(--royal) text-white shadow-[0_2px_8px_rgba(14,27,51,0.14)]"
-            : "border-[rgba(14,27,51,0.06)] bg-white text-(--royal) shadow-[0_2px_8px_rgba(14,27,51,0.14)]"
+            ? "bg-(--royal) text-white shadow-[0_2px_8px_rgba(14,27,51,0.14)]"
+            : "text-(--faint) hover:bg-[rgba(14,27,51,0.12)] hover:text-(--muted)"
         }`}
       >
         <svg
-          className="h-[18px] w-auto"
+          className="h-5 w-auto"
           viewBox="0 0 256 256"
           fill="none"
           stroke="currentColor"
@@ -346,26 +348,42 @@ function CommandBar() {
           selectMode("address", "pin");
           setShowMapPicker(true);
         }}
-        className={`grid size-9 shrink-0 place-items-center rounded-full border transition-colors duration-200 ${
+        className={`group grid size-10 shrink-0 place-items-center rounded-full transition-colors duration-[335ms] ${
           activeControl === "pin"
-            ? "border-transparent bg-(--royal) text-white shadow-[0_2px_8px_rgba(14,27,51,0.14)]"
-            : "border-[rgba(14,27,51,0.06)] bg-white text-(--royal) shadow-[0_2px_8px_rgba(14,27,51,0.14)]"
+            ? "bg-(--royal) text-white shadow-[0_2px_8px_rgba(14,27,51,0.14)]"
+            : "text-(--faint) hover:bg-[rgba(14,27,51,0.12)] hover:text-(--muted)"
         }`}
       >
         {/* Provided map-pin.svg asset — recolored from its hardcoded
             #0a5cff to currentColor so it picks up the button's text color.
             The inner circle is punched out in whatever color sits behind
-            it — white on the white button, blue (matching the fill) on the
-            blue button — so it always reads as a hole rather than a dot. */}
-        <svg className="h-[18px] w-auto" viewBox="0 0 256 256" fill="none" aria-hidden>
+            it — white at rest (the bar itself), the same grey as the hover
+            circle on hover, blue on the selected button — so it always
+            reads as a hole rather than a dot in every state. */}
+        <svg className="h-5 w-auto" viewBox="0 0 256 256" fill="none" aria-hidden>
           <path
             d="M127.99414,15.9971a88.1046,88.1046,0,0,0-88,88c0,75.29688,80,132.17188,83.40625,134.55469a8.023,8.023,0,0,0,9.1875,0c3.40625-2.38281,83.40625-59.25781,83.40625-134.55469A88.10459,88.10459,0,0,0,127.99414,15.9971Z"
             fill="currentColor"
           />
-          <path
-            d="M128,72a32,32,0,1,1-32,32A31.99909,31.99909,0,0,1,128,72Z"
-            fill={activeControl === "pin" ? "var(--royal)" : "#ffffff"}
-          />
+          {activeControl === "pin" ? (
+            <path
+              d="M128,72a32,32,0,1,1-32,32A31.99909,31.99909,0,0,1,128,72Z"
+              fill="var(--royal)"
+            />
+          ) : (
+            // group-hover targets a flat hex, not the hover circle's own
+            // translucent rgba(14,27,51,0.12) — stacking that same
+            // translucent value again on top of the circle it's meant to
+            // match would double-composite and come out visibly darker
+            // than the circle itself, breaking the punched-hole illusion.
+            // #e2e4e7 is that rgba flattened against the white bar behind
+            // it, and the duration matches the circle's own so they land
+            // together instead of one trailing the other.
+            <path
+              d="M128,72a32,32,0,1,1-32,32A31.99909,31.99909,0,0,1,128,72Z"
+              className="fill-white transition-[fill] duration-[335ms] group-hover:fill-[#e2e4e7]"
+            />
+          )}
         </svg>
       </button>
     </form>
@@ -383,15 +401,15 @@ function CommandBar() {
         a circle keeps it a circle at every step, so this also drops the
         `height` tween the old version needed just to avoid a capsule shape. */}
     <div
-      className="h-[46px] shrink-0 transition-all duration-[335ms] motion-reduce:transition-none"
-      style={{ width: hasText ? 46 : 0, marginLeft: hasText ? 8 : 0 }}
+      className="h-[52px] shrink-0 transition-all duration-[335ms] motion-reduce:transition-none"
+      style={{ width: hasText ? 52 : 0, marginLeft: hasText ? 9 : 0 }}
     >
       <button
         type="submit"
         form="hero-search-form"
         aria-label="분석하기"
         tabIndex={hasText ? 0 : -1}
-        className="grid size-[46px] shrink-0 place-items-center rounded-full border border-[rgba(14,27,51,0.06)] bg-white text-(--royal) shadow-[0_12px_40px_-12px_rgba(11,59,167,0.2)] transition-all duration-[335ms] motion-reduce:transition-none"
+        className="grid size-[52px] shrink-0 place-items-center rounded-full border border-[rgba(14,27,51,0.06)] bg-white text-(--royal) shadow-[0_12px_40px_-12px_rgba(11,59,167,0.2)] transition-all duration-[335ms] motion-reduce:transition-none"
         style={{
           transform: `scale(${hasText ? 1 : 0})`,
           opacity: hasText ? 1 : 0,
@@ -401,7 +419,7 @@ function CommandBar() {
         }}
       >
         <svg
-          className="size-[21px] shrink-0"
+          className="size-6 shrink-0"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -629,7 +647,7 @@ export default function LandingPage() {
                 <h1 key="h1" className="text-[34px] leading-[1.25] font-extrabold tracking-[-0.035em] text-balance break-keep sm:text-[60px]">
                   주소만 입력하세요
                   <br />
-                  <span className="text-grad">반값 수수료</span>로,
+                  <span className="text-grad">홈쇼퍼</span>에서,
                   <br />
                   계약까지 다 해드립니다
                 </h1>,
