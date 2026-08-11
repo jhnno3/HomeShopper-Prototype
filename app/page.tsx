@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AnimatePresence, cubicBezier, motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { cubicBezier, motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { FaqAccordion } from "@/components/landing/FaqAccordion";
 import { HeroGradient } from "@/components/landing/HeroGradient";
 import { SheetGradient } from "@/components/landing/SheetGradient";
@@ -199,7 +199,6 @@ type DealType = (typeof DEAL_TYPES)[number];
 
 function CommandBar() {
   const router = useRouter();
-  const reduce = useReducedMotion();
   const [value, setValue] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [dealType, setDealType] = useState<DealType>("전세");
@@ -374,44 +373,48 @@ function CommandBar() {
     {/* Submit arrow — pops in as its own circle outside the pill. `form`
         associates it with the pill's <form> by id despite not being a DOM
         descendant, so it still submits and Enter-to-submit inside the input
-        keeps working. One motion.button, one animate call — but `width` and
-        `height` tween together (not just `width` against a fixed height),
-        so the shape stays a true circle shrinking to/from a point instead
-        of a short capsule that only becomes circular right at the end. That
-        shape pop was reading as a second, separate-feeling motion even
-        though it's driven by a single transition. `marginLeft` rides along
-        the same tween to create its spacing from the pill as it grows,
-        instead of a flex gap snapping open the instant it mounts. */}
-    <AnimatePresence>
-      {hasText && (
-        <motion.button
-          type="submit"
-          form="hero-search-form"
-          aria-label="분석하기"
-          className="grid shrink-0 place-items-center overflow-hidden rounded-full border border-[rgba(14,27,51,0.06)] bg-white text-(--royal) shadow-[0_12px_40px_-12px_rgba(11,59,167,0.2)]"
-          initial={reduce ? false : { width: 0, height: 0, marginLeft: 0, opacity: 0 }}
-          animate={{ width: 46, height: 46, marginLeft: 8, opacity: 1 }}
-          exit={
-            reduce ? { opacity: 0 } : { width: 0, height: 0, marginLeft: 0, opacity: 0 }
-          }
-          transition={reduce ? { duration: 0.12 } : { duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        keeps working. Same plain-CSS technique as SegmentedToggle: a wrapper
+        (no border) tweens `width`/`marginLeft` to make room, while the
+        bordered circle inside tweens `scale`/`opacity` to appear — kept on
+        separate elements because animating `width` to 0 on a bordered,
+        border-box element stalls a couple pixels short (the border itself
+        has a floor Chromium won't shrink below) and finishes as a visible
+        jolt once opacity catches up. `scale` has no such floor, and scaling
+        a circle keeps it a circle at every step, so this also drops the
+        `height` tween the old version needed just to avoid a capsule shape. */}
+    <div
+      className="h-[46px] shrink-0 transition-all duration-[335ms] motion-reduce:transition-none"
+      style={{ width: hasText ? 46 : 0, marginLeft: hasText ? 8 : 0 }}
+    >
+      <button
+        type="submit"
+        form="hero-search-form"
+        aria-label="분석하기"
+        tabIndex={hasText ? 0 : -1}
+        className="grid size-[46px] shrink-0 place-items-center rounded-full border border-[rgba(14,27,51,0.06)] bg-white text-(--royal) shadow-[0_12px_40px_-12px_rgba(11,59,167,0.2)] transition-all duration-[335ms] motion-reduce:transition-none"
+        style={{
+          transform: `scale(${hasText ? 1 : 0})`,
+          opacity: hasText ? 1 : 0,
+          // Revealing waits for the wrapper to widen; hiding leads, so the
+          // circle is gone before the wrapper closes back over it.
+          transitionDelay: hasText ? "70ms" : "0ms",
+        }}
+      >
+        <svg
+          className="size-[21px] shrink-0"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
         >
-          <svg
-            className="size-[21px] shrink-0"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden
-          >
-            <path d="M12 19V5" />
-            <path d="m5 12 7-7 7 7" />
-          </svg>
-        </motion.button>
-      )}
-    </AnimatePresence>
+          <path d="M12 19V5" />
+          <path d="m5 12 7-7 7 7" />
+        </svg>
+      </button>
+    </div>
     </div>
     {error && (
       <p
