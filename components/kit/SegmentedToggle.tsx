@@ -7,11 +7,14 @@ type Props<T extends string> = {
   value: T;
   onChange: (value: T) => void;
   ariaLabel: string;
-  /** Visual de-emphasis only — used when link mode owns the search bar. The
-   * control stays fully interactive: clicking still selects an option and
-   * fires onChange (the caller uses that as an exit path back out of
-   * whatever mode dimmed it). */
-  dimmed?: boolean;
+  /** Whether this toggle is the currently active entry method in a larger
+   * mutually-exclusive selector (e.g. alongside a link button and a map-pin
+   * button). Active shows the selected option as a filled blue pill; inactive
+   * shows it as a plain white pill — still fully legible, never dimmed. The
+   * control stays fully interactive either way; clicking still selects an
+   * option and fires onChange, which the caller uses to reclaim the active
+   * slot. */
+  active?: boolean;
   /** Width of a single option in px. Fixed rather than measured because the
    * options are absolutely positioned into slots at multiples of it. */
   optionWidth?: number;
@@ -35,7 +38,7 @@ export function SegmentedToggle<T extends string>({
   value,
   onChange,
   ariaLabel,
-  dimmed = false,
+  active = true,
   optionWidth = 48,
   className,
 }: Props<T>) {
@@ -62,7 +65,6 @@ export function SegmentedToggle<T extends string>({
       }}
       className={cn(
         "relative shrink-0 transition-all duration-[335ms] motion-reduce:transition-none",
-        dimmed && "opacity-40",
         className
       )}
       style={{ width: expanded ? options.length * optionWidth : optionWidth }}
@@ -85,10 +87,16 @@ export function SegmentedToggle<T extends string>({
 
       {/* Highlight pill for the selected segment — always docked at the left
           edge and fully round, since the selected option always holds slot 0
-          and so never needs an edge squared off against a neighbor. */}
+          and so never needs an edge squared off against a neighbor. Filled
+          blue when this toggle is the active entry method, plain white
+          otherwise — mirrors the link/map-pin buttons in the same row so the
+          whole selector reads as one mutually-exclusive group. */}
       <span
         aria-hidden
-        className="absolute inset-y-0 left-0 rounded-full bg-white shadow-[0_1px_4px_rgba(14,27,51,0.12)]"
+        className={cn(
+          "absolute inset-y-0 left-0 rounded-full shadow-[0_1px_4px_rgba(14,27,51,0.12)] transition-colors duration-[335ms] motion-reduce:transition-none",
+          active ? "bg-(--royal)" : "bg-white"
+        )}
         style={{ width: optionWidth }}
       />
 
@@ -115,7 +123,9 @@ export function SegmentedToggle<T extends string>({
             className={cn(
               "absolute inset-y-0 left-0 z-10 whitespace-nowrap rounded-full text-center text-[14px] transition-all duration-[335ms] motion-reduce:transition-none",
               selected
-                ? "font-medium text-(--royal)"
+                ? active
+                  ? "font-medium text-white"
+                  : "font-medium text-(--ink)"
                 : "font-normal text-(--faint) hover:text-(--muted)"
             )}
             style={{

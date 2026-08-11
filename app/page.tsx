@@ -208,10 +208,19 @@ function CommandBar() {
   const [mode, setMode] = useState<"address" | "link">("address");
   const isLink = mode === "link";
 
+  /* Which of the three entry methods is visually "on" — the 전세/월세
+     toggle, the link button, or the map pin. Separate from `mode` because
+     the map pin is functionally address mode (same as typing), but still
+     needs its own highlighted state distinct from the deal-type toggle. */
+  const [activeControl, setActiveControl] = useState<"dealType" | "link" | "pin">("dealType");
+
   /* Address and link are mutually exclusive inputs, so switching drops the
      text: an address is never a valid 다방 link and vice versa, and carrying
-     it across would only produce a confusing validation failure. */
-  function selectMode(next: "address" | "link") {
+     it across would only produce a confusing validation failure. Switching
+     between two address-mode controls (dealType <-> pin) keeps the text,
+     since both stay in address mode. */
+  function selectMode(next: "address" | "link", control: "dealType" | "link" | "pin") {
+    setActiveControl(control);
     if (next === mode) return;
     setMode(next);
     setValue("");
@@ -287,60 +296,27 @@ function CommandBar() {
         ariaLabel="거래 유형"
         options={DEAL_TYPES}
         value={dealType}
-        dimmed={isLink}
+        active={activeControl === "dealType"}
         onChange={(next) => {
           setDealType(next);
-          selectMode("address");
+          selectMode("address", "dealType");
         }}
       />
 
-      {/* Map-ping entry point — opens a map picker to drop a pin instead of
-          typing an address. Back inside the pill (moved out and in again
-          across iterations), still its own solid-white circular button
-          rather than a glyph blending into the pill's glass background. */}
-      <button
-        type="button"
-        aria-label="지도에서 위치 선택"
-        onClick={() => {
-          selectMode("address");
-          setShowMapPicker(true);
-        }}
-        className={`grid size-9 shrink-0 place-items-center rounded-full border transition-opacity duration-200 ${
-          isLink
-            ? "border-transparent bg-transparent text-(--faint) opacity-40"
-            : "border-[rgba(14,27,51,0.06)] bg-white text-(--royal) shadow-[0_2px_8px_rgba(14,27,51,0.14)]"
-        }`}
-      >
-        {/* Provided map-pin.svg asset — recolored from its hardcoded
-            #0a5cff to currentColor so it picks up the button's
-            text-(--royal) like the rest of the icon set. Sized to read at
-            the same visual weight as the 월세/전세 toggle's text now that
-            it's back inside the pill next to it. */}
-        <svg className="h-[18px] w-auto" viewBox="0 0 256 256" fill="none" aria-hidden>
-          <path
-            d="M127.99414,15.9971a88.1046,88.1046,0,0,0-88,88c0,75.29688,80,132.17188,83.40625,134.55469a8.023,8.023,0,0,0,9.1875,0c3.40625-2.38281,83.40625-59.25781,83.40625-134.55469A88.10459,88.10459,0,0,0,127.99414,15.9971Z"
-            fill="currentColor"
-          />
-          <path d="M128,72a32,32,0,1,1-32,32A31.99909,31.99909,0,0,1,128,72Z" fill="#ffffff" />
-        </svg>
-      </button>
-
-      {/* Link-mode entry point. Together with the 전세/월세 toggle this forms
-          one mutually-exclusive mode selector: picking a deal type means
-          address input, picking this means 다방 link input. Paired with the
-          map pin as a matching circular button; only the active mode is
-          highlighted, so at rest in address mode both sit neutral. Icon is
-          the provided link.svg with its hardcoded #000 stroke swapped for
-          currentColor, same treatment as the map pin. */}
+      {/* Link-mode entry point. Together with the 전세/월세 toggle and the
+          map pin, this forms one mutually-exclusive entry-method selector —
+          exactly one of the three is ever highlighted blue, the other two
+          stay plain white (never dimmed). Icon is the provided link.svg with
+          its hardcoded #000 stroke swapped for currentColor. */}
       <button
         type="button"
         aria-label="다방 링크로 분석"
-        aria-pressed={isLink}
-        onClick={() => selectMode("link")}
-        className={`grid size-9 shrink-0 place-items-center rounded-full border transition-opacity duration-200 ${
-          isLink
-            ? "border-[rgba(14,27,51,0.06)] bg-(--royal) text-white shadow-[0_2px_8px_rgba(14,27,51,0.14)]"
-            : "border-transparent bg-transparent text-(--faint) opacity-40"
+        aria-pressed={activeControl === "link"}
+        onClick={() => selectMode("link", "link")}
+        className={`grid size-9 shrink-0 place-items-center rounded-full border transition-colors duration-200 ${
+          activeControl === "link"
+            ? "border-transparent bg-(--royal) text-white shadow-[0_2px_8px_rgba(14,27,51,0.14)]"
+            : "border-[rgba(14,27,51,0.06)] bg-white text-(--royal) shadow-[0_2px_8px_rgba(14,27,51,0.14)]"
         }`}
       >
         <svg
@@ -355,6 +331,42 @@ function CommandBar() {
         >
           <path d="M130.49413,63.28047l11.648-11.648a44,44,0,1,1,62.22539,62.22539l-28.28427,28.28428a44,44,0,0,1-62.2254,0" />
           <path d="M125.50407,192.72133l-11.64621,11.6462a44,44,0,1,1-62.22539-62.22539l28.28427-28.28428a44,44,0,0,1,62.2254,0" />
+        </svg>
+      </button>
+
+      {/* Map-pin entry point — opens a map picker to drop a pin instead of
+          typing an address. Rightmost in the cluster. Functionally always
+          address mode (same as typing), but carries its own highlighted
+          state within the entry-method trio, distinct from the deal-type
+          toggle. */}
+      <button
+        type="button"
+        aria-label="지도에서 위치 선택"
+        aria-pressed={activeControl === "pin"}
+        onClick={() => {
+          selectMode("address", "pin");
+          setShowMapPicker(true);
+        }}
+        className={`grid size-9 shrink-0 place-items-center rounded-full border transition-colors duration-200 ${
+          activeControl === "pin"
+            ? "border-transparent bg-(--royal) text-white shadow-[0_2px_8px_rgba(14,27,51,0.14)]"
+            : "border-[rgba(14,27,51,0.06)] bg-white text-(--royal) shadow-[0_2px_8px_rgba(14,27,51,0.14)]"
+        }`}
+      >
+        {/* Provided map-pin.svg asset — recolored from its hardcoded
+            #0a5cff to currentColor so it picks up the button's text color.
+            The inner circle is punched out in whatever color sits behind
+            it — white on the white button, blue (matching the fill) on the
+            blue button — so it always reads as a hole rather than a dot. */}
+        <svg className="h-[18px] w-auto" viewBox="0 0 256 256" fill="none" aria-hidden>
+          <path
+            d="M127.99414,15.9971a88.1046,88.1046,0,0,0-88,88c0,75.29688,80,132.17188,83.40625,134.55469a8.023,8.023,0,0,0,9.1875,0c3.40625-2.38281,83.40625-59.25781,83.40625-134.55469A88.10459,88.10459,0,0,0,127.99414,15.9971Z"
+            fill="currentColor"
+          />
+          <path
+            d="M128,72a32,32,0,1,1-32,32A31.99909,31.99909,0,0,1,128,72Z"
+            fill={activeControl === "pin" ? "var(--royal)" : "#ffffff"}
+          />
         </svg>
       </button>
     </form>
