@@ -772,7 +772,12 @@ export default function LandingPage() {
                 becomes a real box at lg, where it's the single 'left' cell,
                 so heading+search size and gap independently of the report
                 card next to them instead of sharing its row. */}
-            <div className="contents lg:flex lg:flex-col lg:gap-6 lg:[grid-area:left]">
+            {/* gap tuned so the bar's vertical center lines up with the
+                report card's 중개업소 row across from it, rather than to a
+                round spacing value — the two columns read as one composed
+                layout at lg, so that cross-column alignment is what the
+                spacing is actually for. */}
+            <div className="contents lg:flex lg:flex-col lg:gap-[58px] lg:[grid-area:left]">
               <motion.div
                 className="mx-auto flex w-full max-w-2xl flex-col items-center gap-6 text-center [grid-area:heading] lg:mx-0 lg:items-start lg:text-left"
                 initial={reduce ? false : "hide"}
