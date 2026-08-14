@@ -295,23 +295,26 @@ function CommandBar() {
 
   return (
     <>
-    {/* Above the bar, not below it: the suggestion dropdown occupies the
-        space directly under the pill, so an error there would collide with
-        the list it is usually telling the user to pick from. */}
-    {error && (
-      <p
-        id="hero-search-error"
-        role="alert"
-        className="mb-2 pl-1 text-left text-[13px] font-semibold text-[var(--color-danger)]"
-      >
-        {error}
-      </p>
-    )}
     {/* No gap-2 here — the arrow button below owns its own marginLeft so
         the same animated property both reveals it and creates its spacing
         from the pill, instead of a flex gap reserving that space the
         instant the button mounts, ahead of the width/marginLeft tween. */}
-    <div className="flex w-full items-center">
+    <div className="relative flex w-full items-center">
+    {/* Absolutely positioned above the bar, not laid out in normal flow —
+        this sits in the same [grid-area:search] box as the bar itself, so
+        an in-flow error would grow that box and visibly push the bar down
+        the moment it appeared. Anchored to this wrapper rather than the
+        <form> so it doesn't fight the suggestion dropdown, which anchors
+        to the form on the opposite edge (below it). */}
+    {error && (
+      <p
+        id="hero-search-error"
+        role="alert"
+        className="absolute inset-x-0 bottom-[calc(100%+10px)] pl-1 text-left text-[13px] font-semibold text-[var(--color-danger)]"
+      >
+        {error}
+      </p>
+    )}
     <form
       id="hero-search-form"
       className="g-panel g-bar flex h-[52px] min-w-0 flex-1 items-center gap-2 py-1 pl-5 pr-3.5"
