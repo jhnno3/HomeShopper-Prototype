@@ -731,10 +731,11 @@ export default function LandingPage() {
       <section
         ref={heroRef}
         /* Asymmetric vertical padding rather than plain `py`: the block is
-           vertically centered, so the heavier bottom padding pulls the whole
-           hero upward and opens room under the search bar for its address
-           suggestions, which would otherwise run past the fold. */
-        className={`hero-pull ${pullEnabled ? "is-pinned" : ""} relative flex min-h-[calc(100svh-var(--nav-h))] items-center px-4 pb-36 pt-8 sm:px-6 sm:pb-44 sm:pt-10 lg:px-10 xl:px-16`}
+           vertically centered, so heavier bottom padding pulls the whole
+           hero upward, opening room under the search bar for its address
+           suggestions (which would otherwise run past the fold) while still
+           sitting a bit above dead-center rather than exactly centered. */
+        className={`hero-pull ${pullEnabled ? "is-pinned" : ""} relative flex min-h-[calc(100svh-var(--nav-h))] items-center px-4 pt-[56px] pb-[120px] sm:px-6 sm:pt-[64px] sm:pb-[152px] lg:px-10 xl:px-16`}
       >
         <motion.div
           className="ambient-canvas"
@@ -777,7 +778,7 @@ export default function LandingPage() {
                 round spacing value — the two columns read as one composed
                 layout at lg, so that cross-column alignment is what the
                 spacing is actually for. */}
-            <div className="contents lg:flex lg:flex-col lg:gap-[58px] lg:[grid-area:left]">
+            <div className="contents lg:flex lg:flex-col lg:gap-[80px] lg:[grid-area:left]">
               <motion.div
                 className="mx-auto flex w-full max-w-2xl flex-col items-center gap-6 text-center [grid-area:heading] lg:mx-0 lg:items-start lg:text-left"
                 initial={reduce ? false : "hide"}
