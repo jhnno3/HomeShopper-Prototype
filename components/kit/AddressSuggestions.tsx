@@ -1,4 +1,5 @@
 "use client";
+import * as React from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { MapPin } from "lucide-react";
 import type { AddressSuggestion } from "@/lib/kakaoAddressSearch";
@@ -23,6 +24,37 @@ export function AddressSuggestions({
   onHighlight: (index: number | null) => void;
   onSelect: (suggestion: AddressSuggestion) => void;
 }) {
+  const listRef = React.useRef<HTMLUListElement>(null);
+  const [maxHeight, setMaxHeight] = React.useState<number>();
+
+  /* The hero is sized so all five rows normally fit under the bar, but a
+     short window (or a zoomed-in one) can still leave less room than the
+     list needs. Rather than let it run past the fold where the last rows
+     are unreachable, cap it to whatever space is actually below the bar and
+     let it scroll. Re-measured on resize and on scroll, since the hero
+     shifts under its own scroll animation while the list is open. */
+  React.useLayoutEffect(() => {
+    if (!open) return;
+    const measure = () => {
+      const el = listRef.current;
+      if (!el) return;
+      const top = el.getBoundingClientRect().top;
+      setMaxHeight(Math.max(140, window.innerHeight - top - 16));
+    };
+    measure();
+    // Again next frame: the first pass can land before the entrance
+    // transform settles, which reads as a lower top edge and would clamp
+    // the list shorter than the space actually allows.
+    const raf = requestAnimationFrame(measure);
+    window.addEventListener("resize", measure);
+    window.addEventListener("scroll", measure, true);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", measure);
+      window.removeEventListener("scroll", measure, true);
+    };
+  }, [open, suggestions]);
+
   return (
     <AnimatePresence>
       {open && suggestions.length > 0 && (
@@ -34,8 +66,10 @@ export function AddressSuggestions({
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           exit={{ opacity: 0, y: -6, filter: "blur(4px)" }}
           transition={{ duration: 0.18, ease: "easeOut" }}
+          ref={listRef}
           onMouseLeave={() => onHighlight(null)}
-          className="absolute inset-x-0 top-[calc(100%+8px)] z-30 overflow-hidden rounded-2xl border border-[rgba(14,27,51,0.06)] bg-white py-1.5 shadow-[0_20px_48px_-16px_rgba(11,59,167,0.24)]"
+          style={{ maxHeight }}
+          className="absolute inset-x-0 top-[calc(100%+8px)] z-30 overflow-y-auto overscroll-contain rounded-2xl border border-[rgba(14,27,51,0.06)] bg-white py-1.5 shadow-[0_20px_48px_-16px_rgba(11,59,167,0.24)]"
         >
           {suggestions.map((suggestion, index) => (
             <motion.li

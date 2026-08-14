@@ -295,6 +295,18 @@ function CommandBar() {
 
   return (
     <>
+    {/* Above the bar, not below it: the suggestion dropdown occupies the
+        space directly under the pill, so an error there would collide with
+        the list it is usually telling the user to pick from. */}
+    {error && (
+      <p
+        id="hero-search-error"
+        role="alert"
+        className="mb-2 pl-1 text-left text-[13px] font-semibold text-[var(--color-danger)]"
+      >
+        {error}
+      </p>
+    )}
     {/* No gap-2 here — the arrow button below owns its own marginLeft so
         the same animated property both reveals it and creates its spacing
         from the pill, instead of a flex gap reserving that space the
@@ -544,15 +556,6 @@ function CommandBar() {
       </button>
     </div>
     </div>
-    {error && (
-      <p
-        id="hero-search-error"
-        role="alert"
-        className="mt-2 pl-1 text-left text-[13px] font-semibold text-[var(--color-danger)]"
-      >
-        {error}
-      </p>
-    )}
     {showMapPicker && (
       <MapPicker
         onClose={() => setShowMapPicker(false)}
@@ -724,7 +727,11 @@ export default function LandingPage() {
           as the white .main-sheet below rose to cover it during scroll. */}
       <section
         ref={heroRef}
-        className={`hero-pull ${pullEnabled ? "is-pinned" : ""} relative flex min-h-[calc(100svh-var(--nav-h))] items-center px-4 py-12 sm:px-6 sm:py-16 lg:px-10 xl:px-16`}
+        /* Asymmetric vertical padding rather than plain `py`: the block is
+           vertically centered, so the heavier bottom padding pulls the whole
+           hero upward and opens room under the search bar for its address
+           suggestions, which would otherwise run past the fold. */
+        className={`hero-pull ${pullEnabled ? "is-pinned" : ""} relative flex min-h-[calc(100svh-var(--nav-h))] items-center px-4 pb-36 pt-8 sm:px-6 sm:pb-44 sm:pt-10 lg:px-10 xl:px-16`}
       >
         <motion.div
           className="ambient-canvas"
