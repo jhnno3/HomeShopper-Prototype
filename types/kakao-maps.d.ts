@@ -55,4 +55,28 @@ declare global {
 
     function load(callback: () => void): void;
   }
+
+  // `libraries=services` (see lib/kakaoMaps.ts) — keyword search for the
+  // hero search bar's address-suggestion dropdown.
+  namespace kakao.maps.services {
+    type Status = 'OK' | 'ZERO_RESULT' | 'ERROR';
+    const Status: { OK: 'OK'; ZERO_RESULT: 'ZERO_RESULT'; ERROR: 'ERROR' };
+
+    interface PlacesSearchResultItem {
+      id: string;
+      place_name: string;
+      address_name: string;
+      road_address_name: string;
+    }
+
+    class Places {
+      // Kakao's own callback order is (status, data, pagination) — status
+      // first, confirmed against the live SDK response, not (data, status)
+      // as most paraphrased docs describe it.
+      keywordSearch(
+        keyword: string,
+        callback: (status: Status, data: PlacesSearchResultItem[]) => void
+      ): void;
+    }
+  }
 }

@@ -9,10 +9,13 @@ import { HeroGradient } from "@/components/landing/HeroGradient";
 import { SheetGradient } from "@/components/landing/SheetGradient";
 import { MapPicker } from "@/components/kit/MapPicker";
 import { SegmentedToggle } from "@/components/kit/SegmentedToggle";
+import { AddressSuggestions } from "@/components/kit/AddressSuggestions";
 import { Logo } from "@/components/kit/Logo";
 import { ReportSummary } from "@/components/report/ReportSummary";
 import { demoReport } from "@/lib/report-data";
 import { classifyListingInput } from "@/lib/listing-input";
+import { loadKakaoMaps } from "@/lib/kakaoMaps";
+import { searchAddress, type AddressSuggestion } from "@/lib/kakaoAddressSearch";
 import "./landing.css";
 
 const DOCS = ["허위매물 검증", "전문가 동행 임장", "협상·특약 대행", "수수료 반값"];
@@ -213,6 +216,75 @@ function CommandBar() {
      needs its own highlighted state distinct from the deal-type toggle. */
   const [activeControl, setActiveControl] = useState<"dealType" | "link" | "pin">("dealType");
 
+  /* Address suggestions (Kakao keyword search) — see lib/kakaoAddressSearch.
+     `addressConfirmed` tracks whether the current `value` came from picking
+     a suggestion or the map picker (both resolve to one specific place) as
+     opposed to free-typed text; submit is gated on it so a vague query like
+     "강남" can't reach the analyze API — it just never becomes confirmed. */
+  const [kakaoReady, setKakaoReady] = useState<"loading" | "ready" | "error">("loading");
+  const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
+  const [addressConfirmed, setAddressConfirmed] = useState(false);
+  const skipNextSearchRef = useRef(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    loadKakaoMaps()
+      .then(() => {
+        if (!cancelled) setKakaoReady("ready");
+      })
+      .catch(() => {
+        if (!cancelled) setKakaoReady("error");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isLink || kakaoReady !== "ready") return;
+    if (skipNextSearchRef.current) {
+      skipNextSearchRef.current = false;
+      return;
+    }
+    const query = value.trim();
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      if (query.length < 2) {
+        setSuggestions([]);
+        setSuggestionsOpen(false);
+        return;
+      }
+      searchAddress(query)
+        .then((results) => {
+          if (cancelled) return;
+          setSuggestions(results);
+          setSuggestionsOpen(results.length > 0);
+          setHighlightedIndex(null);
+        })
+        .catch(() => {
+          if (cancelled) return;
+          setSuggestions([]);
+          setSuggestionsOpen(false);
+        });
+    }, 250);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [value, isLink, kakaoReady]);
+
+  function selectSuggestion(suggestion: AddressSuggestion) {
+    skipNextSearchRef.current = true;
+    setValue(suggestion.addressName);
+    setAddressConfirmed(true);
+    setSuggestions([]);
+    setSuggestionsOpen(false);
+    setHighlightedIndex(null);
+    if (error) setError(null);
+  }
+
   /* Address and link are mutually exclusive inputs, so switching drops the
      text: an address is never a valid 다방 link and vice versa, and carrying
      it across would only produce a confusing validation failure. Switching
@@ -224,6 +296,9 @@ function CommandBar() {
     setMode(next);
     setValue("");
     setError(null);
+    setAddressConfirmed(false);
+    setSuggestions([]);
+    setSuggestionsOpen(false);
   }
 
   return (
@@ -253,6 +328,11 @@ function CommandBar() {
           setError("주소를 입력해주세요.");
           return;
         }
+        if (kakaoReady === "ready" && !addressConfirmed) {
+          setError("목록에서 주소를 선택해주세요.");
+          if (suggestions.length > 0) setSuggestionsOpen(true);
+          return;
+        }
         const params = new URLSearchParams({ source, dealType });
         router.push(`/analyze?${params.toString()}`);
       }}
@@ -274,15 +354,45 @@ function CommandBar() {
         id="hero-search"
         type="text"
         inputMode="text"
+        role={isLink ? undefined : "combobox"}
         aria-label={isLink ? "다방 매물 링크" : "매물 주소"}
         placeholder={isLink ? "다방 매물 링크를 붙여넣으세요" : "매물 주소를 입력하세요"}
         value={value}
         onChange={(e) => {
           setValue(e.target.value);
+          setAddressConfirmed(false);
           if (error) setError(null);
         }}
+        onKeyDown={(e) => {
+          if (isLink || !suggestionsOpen || suggestions.length === 0) return;
+          if (e.key === "ArrowDown") {
+            e.preventDefault();
+            setHighlightedIndex((prev) =>
+              prev === null ? 0 : Math.min(prev + 1, suggestions.length - 1)
+            );
+          } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            setHighlightedIndex((prev) =>
+              prev === null ? suggestions.length - 1 : Math.max(prev - 1, 0)
+            );
+          } else if (e.key === "Enter" && highlightedIndex !== null) {
+            e.preventDefault();
+            selectSuggestion(suggestions[highlightedIndex]);
+          } else if (e.key === "Escape") {
+            setSuggestionsOpen(false);
+          }
+        }}
+        onBlur={() => setSuggestionsOpen(false)}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? "hero-search-error" : undefined}
+        aria-expanded={!isLink ? suggestionsOpen : undefined}
+        aria-controls={!isLink ? "hero-address-suggestions" : undefined}
+        aria-autocomplete={!isLink ? "list" : undefined}
+        aria-activedescendant={
+          !isLink && highlightedIndex !== null
+            ? `hero-address-suggestion-${highlightedIndex}`
+            : undefined
+        }
         className="h-full flex-1 px-0"
       />
 
@@ -386,6 +496,14 @@ function CommandBar() {
           )}
         </svg>
       </button>
+
+      <AddressSuggestions
+        open={!isLink && suggestionsOpen}
+        suggestions={suggestions}
+        highlightedIndex={highlightedIndex}
+        onHighlight={setHighlightedIndex}
+        onSelect={selectSuggestion}
+      />
     </form>
 
     {/* Submit arrow — pops in as its own circle outside the pill. `form`
@@ -447,7 +565,9 @@ function CommandBar() {
       <MapPicker
         onClose={() => setShowMapPicker(false)}
         onConfirm={(address) => {
+          skipNextSearchRef.current = true;
           setValue(address);
+          setAddressConfirmed(true);
           setError(null);
           setShowMapPicker(false);
         }}

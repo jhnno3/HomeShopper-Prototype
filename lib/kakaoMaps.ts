@@ -23,7 +23,7 @@ export function loadKakaoMaps(): Promise<void> {
 
     const script = document.createElement('script');
     script.id = 'kakao-maps-sdk';
-    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${appKey}&autoload=false`;
+    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${appKey}&autoload=false&libraries=services`;
     script.async = true;
     script.onload = onLoaded;
     script.onerror = () => {
