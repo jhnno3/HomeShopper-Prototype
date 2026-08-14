@@ -23,7 +23,16 @@ export async function searchAddress(query: string): Promise<AddressSuggestion[]>
   if (!placesService) placesService = new window.kakao.maps.services.Places();
 
   return new Promise((resolve, reject) => {
-    placesService!.keywordSearch(query, (status, data) => {
+    placesService!.keywordSearch(query, (dataOrStatus, maybeStatus) => {
+      // Normalize by shape, not position: on success/zero-result Kakao
+      // passes (data, status), but on a rejected request it passes the
+      // status string alone in the first slot. Reading position 1 blindly
+      // would see `undefined` there and treat a hard failure as an
+      // ordinary empty result, so the dropdown would just never open with
+      // nothing logged to explain why.
+      const data = Array.isArray(dataOrStatus) ? dataOrStatus : [];
+      const status = Array.isArray(dataOrStatus) ? maybeStatus : dataOrStatus;
+
       if (status === window.kakao.maps.services.Status.ZERO_RESULT) {
         resolve([]);
         return;

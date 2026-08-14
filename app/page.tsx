@@ -14,7 +14,6 @@ import { Logo } from "@/components/kit/Logo";
 import { ReportSummary } from "@/components/report/ReportSummary";
 import { demoReport } from "@/lib/report-data";
 import { classifyListingInput } from "@/lib/listing-input";
-import { loadKakaoMaps } from "@/lib/kakaoMaps";
 import { searchAddress, type AddressSuggestion } from "@/lib/kakaoAddressSearch";
 import "./landing.css";
 
@@ -221,29 +220,20 @@ function CommandBar() {
      a suggestion or the map picker (both resolve to one specific place) as
      opposed to free-typed text; submit is gated on it so a vague query like
      "강남" can't reach the analyze API — it just never becomes confirmed. */
-  const [kakaoReady, setKakaoReady] = useState<"loading" | "ready" | "error">("loading");
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
   const [addressConfirmed, setAddressConfirmed] = useState(false);
+  /* Whether the last search actually reached Kakao. The submit gate below
+     only holds when suggestions are genuinely available — if the search
+     itself is failing (SDK down, this domain not registered on the JS key,
+     network), there is no list to pick from, and gating on it anyway would
+     lock the user out of submitting entirely. Fail open instead. */
+  const [searchFailed, setSearchFailed] = useState(false);
   const skipNextSearchRef = useRef(false);
 
   useEffect(() => {
-    let cancelled = false;
-    loadKakaoMaps()
-      .then(() => {
-        if (!cancelled) setKakaoReady("ready");
-      })
-      .catch(() => {
-        if (!cancelled) setKakaoReady("error");
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (isLink || kakaoReady !== "ready") return;
+    if (isLink) return;
     if (skipNextSearchRef.current) {
       skipNextSearchRef.current = false;
       return;
@@ -259,12 +249,14 @@ function CommandBar() {
       searchAddress(query)
         .then((results) => {
           if (cancelled) return;
+          setSearchFailed(false);
           setSuggestions(results);
           setSuggestionsOpen(results.length > 0);
           setHighlightedIndex(null);
         })
         .catch(() => {
           if (cancelled) return;
+          setSearchFailed(true);
           setSuggestions([]);
           setSuggestionsOpen(false);
         });
@@ -273,7 +265,7 @@ function CommandBar() {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [value, isLink, kakaoReady]);
+  }, [value, isLink]);
 
   function selectSuggestion(suggestion: AddressSuggestion) {
     skipNextSearchRef.current = true;
@@ -328,7 +320,7 @@ function CommandBar() {
           setError("주소를 입력해주세요.");
           return;
         }
-        if (kakaoReady === "ready" && !addressConfirmed) {
+        if (!searchFailed && !addressConfirmed) {
           setError("목록에서 주소를 선택해주세요.");
           if (suggestions.length > 0) setSuggestionsOpen(true);
           return;

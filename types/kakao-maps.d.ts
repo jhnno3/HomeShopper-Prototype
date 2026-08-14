@@ -69,14 +69,19 @@ declare global {
       road_address_name: string;
     }
 
+    /** Kakao's callback arity isn't consistent, verified against the live
+     * SDK: OK and ZERO_RESULT both arrive as `(data, status, pagination)`,
+     * but a rejected request (e.g. the page's domain isn't registered on
+     * the JS key) arrives as the status string alone in the first
+     * position, with the rest null. Callers must normalize by shape — see
+     * lib/kakaoAddressSearch.ts. */
+    type PlacesSearchCallback = (
+      dataOrStatus: PlacesSearchResultItem[] | Status,
+      status?: Status | null
+    ) => void;
+
     class Places {
-      // Kakao's own callback order is (status, data, pagination) — status
-      // first, confirmed against the live SDK response, not (data, status)
-      // as most paraphrased docs describe it.
-      keywordSearch(
-        keyword: string,
-        callback: (status: Status, data: PlacesSearchResultItem[]) => void
-      ): void;
+      keywordSearch(keyword: string, callback: PlacesSearchCallback): void;
     }
   }
 }
