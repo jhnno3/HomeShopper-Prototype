@@ -754,65 +754,85 @@ export default function LandingPage() {
             rows.
           */}
           <div
-            className="grid grid-cols-1 gap-y-9 [grid-template-areas:'heading'_'search'_'report'] sm:gap-y-10 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-x-16 lg:gap-y-9 xl:gap-x-24 lg:[grid-template-areas:'heading_report'_'search_report']"
+            /* lg uses a single row ('left'/'report'), not two — a report
+               card spanning two independently auto-sized rows makes CSS
+               Grid distribute its height demand across both, inflating the
+               heading's row past what the heading content needs (~130px in
+               practice) and pushing everything below it down with it. A
+               single row sizes to the report's real height without
+               touching heading/search's own layout, so lifting either one
+               doesn't come at the cost of squeezing the report card. */
+            className="grid grid-cols-1 gap-y-9 [grid-template-areas:'heading'_'search'_'report'] sm:gap-y-10 lg:grid-cols-[1fr_auto] lg:items-start lg:gap-x-16 xl:gap-x-24 lg:[grid-template-areas:'left_report']"
           >
-            <motion.div
-              className="mx-auto flex w-full max-w-xl flex-col items-center gap-6 text-center [grid-area:heading] lg:mx-0 lg:items-start lg:text-left"
-              initial={reduce ? false : "hide"}
-              animate="show"
-              variants={{ show: { transition: { staggerChildren: 0.09 } } }}
-            >
-              {[
-                <h1 key="h1" className="text-[34px] leading-[1.25] font-extrabold tracking-[-0.035em] text-balance break-keep sm:text-[60px]">
-                  주소만 입력하세요
-                  <br />
-                  <span className="text-grad">홈쇼퍼</span>에서,
-                  <br />
-                  계약까지 다 해드립니다
-                </h1>,
-                <p key="sub" className="max-w-lg break-keep text-[16.5px] leading-relaxed text-(--muted) sm:text-[19px]">
-                  부동산 거래 전 과정을 홈쇼퍼가 안내하는 대로 따라오시면
-                  끝납니다.
-                </p>,
-                <ul key="docs" className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[14.5px] font-medium text-(--muted) lg:justify-start">
-                  {DOCS.map((d) => (
-                    <li key={d} className="flex items-center gap-1.5">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--royal)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                        <path d="M20 6L9 17l-5-5" />
-                      </svg>
-                      {d}
-                    </li>
-                  ))}
-                </ul>,
-              ].map((node, i) => (
-                <motion.div
-                  key={i}
-                  variants={{
-                    hide: { opacity: 0, y: 18 },
-                    show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] } },
-                  }}
-                >
-                  {node}
-                </motion.div>
-              ))}
-            </motion.div>
+            {/* `contents` on mobile keeps heading/search as independent grid
+                items (own [grid-area], own row, own gap) — this wrapper only
+                becomes a real box at lg, where it's the single 'left' cell,
+                so heading+search size and gap independently of the report
+                card next to them instead of sharing its row. */}
+            <div className="contents lg:flex lg:flex-col lg:gap-6 lg:[grid-area:left]">
+              <motion.div
+                className="mx-auto flex w-full max-w-2xl flex-col items-center gap-6 text-center [grid-area:heading] lg:mx-0 lg:items-start lg:text-left"
+                initial={reduce ? false : "hide"}
+                animate="show"
+                variants={{ show: { transition: { staggerChildren: 0.09 } } }}
+              >
+                {[
+                  <h1 key="h1" className="text-[34px] leading-[1.35] font-extrabold tracking-[-0.035em] text-balance break-keep sm:text-[68px]">
+                    주소만 입력하세요
+                    <br />
+                    <span className="text-grad">홈쇼퍼</span>에서,
+                    <br />
+                    계약까지 다 해드립니다
+                  </h1>,
+                  <p key="sub" className="max-w-lg break-keep text-[16.5px] leading-relaxed text-(--muted) sm:text-[19px]">
+                    부동산 거래 전 과정을 홈쇼퍼가 안내하는 대로 따라오시면
+                    끝납니다.
+                  </p>,
+                  <ul key="docs" className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[14.5px] font-medium text-(--muted) lg:justify-start">
+                    {DOCS.map((d) => (
+                      <li key={d} className="flex items-center gap-1.5">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--royal)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                          <path d="M20 6L9 17l-5-5" />
+                        </svg>
+                        {d}
+                      </li>
+                    ))}
+                  </ul>,
+                ].map((node, i) => (
+                  <motion.div
+                    key={i}
+                    variants={{
+                      hide: { opacity: 0, y: 18 },
+                      show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] } },
+                    }}
+                  >
+                    {node}
+                  </motion.div>
+                ))}
+              </motion.div>
+
+              <motion.div
+                // Lifts the bar toward the heading below lg via its own
+                // margin — mobile's single-column stack has no row-inflation
+                // issue to fight, so a plain margin is enough there. Reset
+                // to 0 at lg, where the wrapper's own lg:gap-6 above sets
+                // the heading-to-search spacing instead.
+                className="mx-auto -mt-4 w-full max-w-xl [grid-area:search] sm:-mt-5 lg:mx-0 lg:mt-0 lg:max-w-none"
+                initial={reduce ? false : { opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.55, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <CommandBar />
+              </motion.div>
+            </div>
 
             <motion.div
-              className="mx-auto w-full max-w-sm shrink-0 [grid-area:report] lg:mx-0 lg:w-[340px] lg:max-w-none lg:justify-self-end lg:self-center xl:w-[380px]"
+              className="mx-auto w-full max-w-sm shrink-0 [grid-area:report] lg:mx-0 lg:w-[340px] lg:max-w-none lg:justify-self-end lg:self-start xl:w-[380px]"
               initial={reduce ? false : { opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.65, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
             >
               <SampleReport />
-            </motion.div>
-
-            <motion.div
-              className="mx-auto w-full max-w-xl [grid-area:search] lg:mx-0 lg:max-w-none"
-              initial={reduce ? false : { opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.55, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <CommandBar />
             </motion.div>
           </div>
         </motion.div>
