@@ -562,14 +562,15 @@ function CommandBar() {
         associates it with the pill's <form> by id despite not being a DOM
         descendant, so it still submits and Enter-to-submit inside the input
         keeps working. Same plain-CSS technique as SegmentedToggle: a wrapper
-        (no border) tweens `width`/`marginLeft` to make room, while the
-        bordered circle inside tweens `scale`/`opacity` to appear — kept on
-        separate elements because animating `width` to 0 on a bordered,
-        border-box element stalls a couple pixels short (the border itself
-        has a floor Chromium won't shrink below) and finishes as a visible
-        jolt once opacity catches up. `scale` has no such floor, and scaling
-        a circle keeps it a circle at every step, so this also drops the
-        `height` tween the old version needed just to avoid a capsule shape.
+        tweens `width`/`marginLeft` to make room, while the circle inside
+        tweens `scale`/`opacity` to appear — kept on separate elements so
+        the circle stays round and centered at every step of the reveal
+        rather than being squashed as its own box shrinks to 0 width.
+        `scale`/`opacity` on the inner circle also drops the `height` tween
+        the old version needed just to avoid a capsule shape.
+        No border on the circle itself — the shadow alone reads as
+        separation from the white pill behind it, and a border on top just
+        doubled the edge.
         Hidden below `sm` — the hero pill itself never takes text entry on
         those screens (focusing it opens MobileSearchOverlay instead, which
         carries its own submit button), so this circle would only ever
@@ -584,7 +585,7 @@ function CommandBar() {
         form="hero-search-form"
         aria-label="분석하기"
         tabIndex={hasText ? 0 : -1}
-        className="grid size-[52px] shrink-0 place-items-center rounded-full border border-[rgba(14,27,51,0.06)] bg-white text-(--royal) shadow-[0_12px_40px_-12px_rgba(11,59,167,0.2)] transition-all duration-[335ms] motion-reduce:transition-none"
+        className="grid size-[52px] shrink-0 place-items-center rounded-full bg-white text-(--royal) shadow-[0_12px_40px_-12px_rgba(11,59,167,0.2)] transition-all duration-[335ms] motion-reduce:transition-none"
         style={{
           transform: `scale(${hasText ? 1 : 0})`,
           opacity: hasText ? 1 : 0,
@@ -594,7 +595,7 @@ function CommandBar() {
         }}
       >
         <svg
-          className="size-6 shrink-0"
+          className="size-7 shrink-0"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
