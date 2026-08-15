@@ -595,7 +595,7 @@ function CommandBar() {
         }}
       >
         <svg
-          className="size-7 shrink-0"
+          className="size-6 shrink-0"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
