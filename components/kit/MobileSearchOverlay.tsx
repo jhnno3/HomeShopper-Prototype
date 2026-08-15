@@ -200,7 +200,7 @@ export function MobileSearchOverlay({
                  instead of the usual guidance copy. */
               <p
                 role="alert"
-                className="px-8 pt-24 text-center text-[13.5px] font-semibold leading-relaxed text-[var(--color-danger)]"
+                className="px-8 pt-8 text-center text-[13.5px] font-semibold leading-relaxed text-[var(--color-danger)]"
               >
                 {error}
               </p>
@@ -210,7 +210,7 @@ export function MobileSearchOverlay({
                  nothing persists between visits, so this just points at
                  what to do next rather than claiming a history that
                  doesn't exist. */
-              <p className="px-8 pt-24 text-center text-[13.5px] leading-relaxed text-(--faint)">
+              <p className="px-8 pt-8 text-center text-[13.5px] leading-relaxed text-(--faint)">
                 분석할 매물의 주소나 건물 이름을 입력하면
                 <br />
                 추천 목록이 나타납니다.
