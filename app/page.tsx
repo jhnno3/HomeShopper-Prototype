@@ -853,7 +853,7 @@ export default function LandingPage() {
                 variants={{ show: { transition: { staggerChildren: 0.09 } } }}
               >
                 {[
-                  <h1 key="h1" className="text-[48px] leading-[1.35] font-extrabold tracking-[-0.035em] text-balance break-keep sm:text-[68px]">
+                  <h1 key="h1" className="text-[50px] leading-[1.35] font-extrabold tracking-[-0.035em] text-balance break-keep sm:text-[68px]">
                     주소만 입력하세요
                     <br />
                     <span className="text-grad">홈쇼퍼</span>에서,

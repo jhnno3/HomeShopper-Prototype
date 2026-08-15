@@ -153,7 +153,11 @@ export function MobileSearchOverlay({
             </form>
           </div>
 
-          {error && (
+          {/* Only surfaced up here when there's a list below it to explain
+              ("pick one of these") — with no rows on screen the error moves
+              into that empty space instead, see below, so it isn't stated
+              twice. */}
+          {error && suggestions.length > 0 && (
             <p
               role="alert"
               className="px-5 pb-1 text-[13px] font-semibold text-[var(--color-danger)]"
@@ -187,19 +191,30 @@ export function MobileSearchOverlay({
                   </motion.li>
                 ))}
               </ul>
+            ) : error ? (
+              /* A query too vague to place — "강남" alone, say — comes back
+                 with nothing to pick from, so the generic "목록에서 주소를
+                 선택해주세요" gate below fires with an empty list under it.
+                 Telling the user to pick from a list that isn't there reads
+                 as broken, so the actual error takes over this space
+                 instead of the usual guidance copy. */
+              <p
+                role="alert"
+                className="px-8 pt-24 text-center text-[13.5px] font-semibold leading-relaxed text-[var(--color-danger)]"
+              >
+                {error}
+              </p>
             ) : (
-              /* Stands in for the recent-searches list this pattern
-                 normally opens onto. Nothing is stored between visits, so
-                 rather than leave the page blank it says so plainly and
-                 points at what to do next. */
-              <div className="flex flex-col items-center gap-2 px-8 pt-24 text-center">
-                <p className="text-[15px] font-bold">최근 검색어 내역이 없습니다.</p>
-                <p className="text-[13.5px] leading-relaxed text-(--faint)">
-                  분석할 매물의 주소나 건물 이름을 입력하면
-                  <br />
-                  추천 목록이 나타납니다.
-                </p>
-              </div>
+              /* Nothing typed yet, or nothing wrong with what's typed —
+                 there's no recent-searches history to fall back on since
+                 nothing persists between visits, so this just points at
+                 what to do next rather than claiming a history that
+                 doesn't exist. */
+              <p className="px-8 pt-24 text-center text-[13.5px] leading-relaxed text-(--faint)">
+                분석할 매물의 주소나 건물 이름을 입력하면
+                <br />
+                추천 목록이 나타납니다.
+              </p>
             )}
           </div>
         </motion.div>
