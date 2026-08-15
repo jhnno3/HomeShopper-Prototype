@@ -12,9 +12,13 @@ export type AddressSuggestion = {
   id: string;
   placeName: string;
   addressName: string;
+  /** Most specific segment of Kakao's category path, shown as a small
+   * right-aligned label on the row (e.g. 병원,의원 / 안과). Empty when the
+   * result carries no category, which is common for plain address hits. */
+  category: string;
 };
 
-const MAX_RESULTS = 5;
+const MAX_RESULTS = 4;
 
 let placesService: kakao.maps.services.Places | null = null;
 
@@ -47,6 +51,10 @@ export async function searchAddress(query: string): Promise<AddressSuggestion[]>
           placeName: result.place_name,
           // 도로명주소가 있으면 우선 — 지번보다 매물 분석 요청에 더 적합한 형식.
           addressName: result.road_address_name || result.address_name,
+          // Last segment only: the full path ("여행 > 숙박 > 호텔 > 롯데호텔")
+          // is far too long for a row label, and its leading segments are
+          // the generic ones. The tail is the useful, specific part.
+          category: (result.category_name || '').split('>').pop()?.trim() ?? '',
         }))
       );
     });

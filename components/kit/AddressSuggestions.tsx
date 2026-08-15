@@ -7,7 +7,7 @@ import type { AddressSuggestion } from "@/lib/kakaoAddressSearch";
 /* Suggestion dropdown for the hero address field. The bar itself never
    moves or resizes for this — the list is absolutely positioned against the
    <form> (which stays `position: relative`, `overflow: visible`) and just
-   overlays the page below it, capped at 5 rows by the caller. Row reveal is
+   overlays the page below it, capped at 4 rows by the caller. Row reveal is
    adapted from the staggered fade-in pattern in the Apple Spotlight
    reference, trimmed to this app's flat design language (no glass, no
    per-row shadow) and its existing hover/timing tokens. */
@@ -94,10 +94,20 @@ export function AddressSuggestions({
                   highlightedIndex === index ? "bg-[rgba(14,27,51,0.07)]" : ""
                 }`}
               >
-                <MapPin aria-hidden className="size-4 shrink-0 text-(--faint)" />
-                <span className="min-w-0">
-                  <span className="block truncate text-[14.5px] font-medium">
-                    {suggestion.placeName}
+                <MapPin aria-hidden className="size-4 shrink-0 text-(--royal)" />
+                <span className="min-w-0 flex-1">
+                  {/* Name and category share a line, category pushed right
+                      by ml-auto. min-w-0 on the name lets it truncate first
+                      so a long name never squeezes the category out. */}
+                  <span className="flex items-baseline gap-3">
+                    <span className="min-w-0 truncate text-[14.5px] font-medium">
+                      {suggestion.placeName}
+                    </span>
+                    {suggestion.category && (
+                      <span className="ml-auto shrink-0 text-[11.5px] text-(--faint)">
+                        {suggestion.category}
+                      </span>
+                    )}
                   </span>
                   <span className="block truncate text-[12.5px] text-(--faint)">
                     {suggestion.addressName}

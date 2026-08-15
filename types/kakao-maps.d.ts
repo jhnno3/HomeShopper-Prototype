@@ -67,6 +67,9 @@ declare global {
       place_name: string;
       address_name: string;
       road_address_name: string;
+      /** Full category path, `>`-delimited coarse-to-specific, e.g.
+       * "여행 > 숙박 > 호텔 > 롯데호텔". Can be empty. */
+      category_name: string;
     }
 
     /** Kakao's callback arity isn't consistent, verified against the live
