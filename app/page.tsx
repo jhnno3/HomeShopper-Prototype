@@ -10,6 +10,7 @@ import { SheetGradient } from "@/components/landing/SheetGradient";
 import { MapPicker } from "@/components/kit/MapPicker";
 import { SegmentedToggle } from "@/components/kit/SegmentedToggle";
 import { AddressSuggestions } from "@/components/kit/AddressSuggestions";
+import { MobileSearchOverlay } from "@/components/kit/MobileSearchOverlay";
 import { Logo } from "@/components/kit/Logo";
 import { ReportSummary } from "@/components/report/ReportSummary";
 import { demoReport } from "@/lib/report-data";
@@ -221,6 +222,13 @@ function CommandBar() {
      opposed to free-typed text; submit is gated on it so a vague query like
      "강남" can't reach the analyze API — it just never becomes confirmed. */
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
+  /* The floating dropdown only has so much of the page below it before
+     running past the fold, so it stays capped — see AddressSuggestions.
+     Keyboard nav and Enter-to-select both key off this same slice, not the
+     full `suggestions` array, so the highlighted index and the rendered
+     rows never disagree about what row N is. The full-screen mobile
+     surface has no such ceiling and reads `suggestions` directly. */
+  const desktopSuggestions = suggestions.slice(0, 4);
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
   const [addressConfirmed, setAddressConfirmed] = useState(false);
@@ -231,6 +239,27 @@ function CommandBar() {
      lock the user out of submitting entirely. Fail open instead. */
   const [searchFailed, setSearchFailed] = useState(false);
   const skipNextSearchRef = useRef(false);
+
+  /* Small screens get a dedicated full-screen search surface instead of
+     typing into the hero pill — see MobileSearchOverlay. Opened by focusing
+     the pill's input, which also covers the page's CTA buttons since they
+     all route through focusHeroSearch(). */
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+
+  /* The overlay is `sm:hidden`, so widening past the breakpoint would hide
+     it while leaving its state open and the body scroll-locked. Close it on
+     the media query itself rather than trusting the CSS to be the only
+     thing that has to agree. */
+  useEffect(() => {
+    if (!mobileSearchOpen) return;
+    const mq = window.matchMedia("(min-width: 640px)");
+    const sync = () => {
+      if (mq.matches) setMobileSearchOpen(false);
+    };
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, [mobileSearchOpen]);
 
   useEffect(() => {
     if (isLink) return;
@@ -266,6 +295,34 @@ function CommandBar() {
       clearTimeout(timer);
     };
   }, [value, isLink]);
+
+  /* Shared by the hero pill's <form> and the small-screen overlay's, so
+     the same validation gating (and the same error copy) applies wherever
+     the user hits enter. */
+  function submitSearch() {
+    if (isLink) {
+      const input = classifyListingInput(value);
+      if (input.kind === "invalid") {
+        setError(input.message);
+        return;
+      }
+      const params = new URLSearchParams({ source: input.source, mode: "link" });
+      router.push(`/analyze?${params.toString()}`);
+      return;
+    }
+    const source = value.trim();
+    if (!source) {
+      setError("주소를 입력해주세요.");
+      return;
+    }
+    if (!searchFailed && !addressConfirmed) {
+      setError("목록에서 주소를 선택해주세요.");
+      if (suggestions.length > 0) setSuggestionsOpen(true);
+      return;
+    }
+    const params = new URLSearchParams({ source, dealType });
+    router.push(`/analyze?${params.toString()}`);
+  }
 
   function selectSuggestion(suggestion: AddressSuggestion) {
     skipNextSearchRef.current = true;
@@ -320,28 +377,7 @@ function CommandBar() {
       className="g-panel g-bar flex h-[52px] min-w-0 flex-1 items-center gap-2 py-1 pl-5 pr-3.5"
       onSubmit={(e) => {
         e.preventDefault();
-        if (isLink) {
-          const input = classifyListingInput(value);
-          if (input.kind === "invalid") {
-            setError(input.message);
-            return;
-          }
-          const params = new URLSearchParams({ source: input.source, mode: "link" });
-          router.push(`/analyze?${params.toString()}`);
-          return;
-        }
-        const source = value.trim();
-        if (!source) {
-          setError("주소를 입력해주세요.");
-          return;
-        }
-        if (!searchFailed && !addressConfirmed) {
-          setError("목록에서 주소를 선택해주세요.");
-          if (suggestions.length > 0) setSuggestionsOpen(true);
-          return;
-        }
-        const params = new URLSearchParams({ source, dealType });
-        router.push(`/analyze?${params.toString()}`);
+        submitSearch();
       }}
     >
       <svg
@@ -371,22 +407,31 @@ function CommandBar() {
           if (error) setError(null);
         }}
         onKeyDown={(e) => {
-          if (isLink || !suggestionsOpen || suggestions.length === 0) return;
+          if (isLink || !suggestionsOpen || desktopSuggestions.length === 0) return;
           if (e.key === "ArrowDown") {
             e.preventDefault();
             setHighlightedIndex((prev) =>
-              prev === null ? 0 : Math.min(prev + 1, suggestions.length - 1)
+              prev === null ? 0 : Math.min(prev + 1, desktopSuggestions.length - 1)
             );
           } else if (e.key === "ArrowUp") {
             e.preventDefault();
             setHighlightedIndex((prev) =>
-              prev === null ? suggestions.length - 1 : Math.max(prev - 1, 0)
+              prev === null ? desktopSuggestions.length - 1 : Math.max(prev - 1, 0)
             );
           } else if (e.key === "Enter" && highlightedIndex !== null) {
             e.preventDefault();
-            selectSuggestion(suggestions[highlightedIndex]);
+            selectSuggestion(desktopSuggestions[highlightedIndex]);
           } else if (e.key === "Escape") {
             setSuggestionsOpen(false);
+          }
+        }}
+        onFocus={() => {
+          // Address mode only — the link field is a paste target, and
+          // handing it a full-screen surface with an address placeholder
+          // and a suggestion list it never populates would just confuse.
+          if (isLink) return;
+          if (window.matchMedia("(max-width: 639px)").matches) {
+            setMobileSearchOpen(true);
           }
         }}
         onBlur={() => setSuggestionsOpen(false)}
@@ -506,7 +551,7 @@ function CommandBar() {
 
       <AddressSuggestions
         open={!isLink && suggestionsOpen}
-        suggestions={suggestions}
+        suggestions={desktopSuggestions}
         highlightedIndex={highlightedIndex}
         onHighlight={setHighlightedIndex}
         onSelect={selectSuggestion}
@@ -524,9 +569,14 @@ function CommandBar() {
         has a floor Chromium won't shrink below) and finishes as a visible
         jolt once opacity catches up. `scale` has no such floor, and scaling
         a circle keeps it a circle at every step, so this also drops the
-        `height` tween the old version needed just to avoid a capsule shape. */}
+        `height` tween the old version needed just to avoid a capsule shape.
+        Hidden below `sm` — the hero pill itself never takes text entry on
+        those screens (focusing it opens MobileSearchOverlay instead, which
+        carries its own submit button), so this circle would only ever
+        appear for the one frame between picking a suggestion there and the
+        overlay closing, popping in and out for no reason a tap could reach. */}
     <div
-      className="h-[52px] shrink-0 transition-all duration-[335ms] motion-reduce:transition-none"
+      className="hidden h-[52px] shrink-0 transition-all duration-[335ms] motion-reduce:transition-none sm:block"
       style={{ width: hasText ? 52 : 0, marginLeft: hasText ? 9 : 0 }}
     >
       <button
@@ -559,6 +609,23 @@ function CommandBar() {
       </button>
     </div>
     </div>
+    <MobileSearchOverlay
+      open={mobileSearchOpen}
+      value={value}
+      onValueChange={(next) => {
+        setValue(next);
+        setAddressConfirmed(false);
+        if (error) setError(null);
+      }}
+      suggestions={suggestions}
+      error={error}
+      onSelect={(suggestion) => {
+        selectSuggestion(suggestion);
+        setMobileSearchOpen(false);
+      }}
+      onSubmit={submitSearch}
+      onClose={() => setMobileSearchOpen(false)}
+    />
     {showMapPicker && (
       <MapPicker
         onClose={() => setShowMapPicker(false)}
@@ -786,7 +853,7 @@ export default function LandingPage() {
                 variants={{ show: { transition: { staggerChildren: 0.09 } } }}
               >
                 {[
-                  <h1 key="h1" className="text-[50px] leading-[1.35] font-extrabold tracking-[-0.035em] text-balance break-keep sm:text-[68px]">
+                  <h1 key="h1" className="text-[48px] leading-[1.35] font-extrabold tracking-[-0.035em] text-balance break-keep sm:text-[68px]">
                     주소만 입력하세요
                     <br />
                     <span className="text-grad">홈쇼퍼</span>에서,

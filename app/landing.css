@@ -460,3 +460,14 @@ body:has(.v3) .ink-bg {
 .g-banner-cta:active {
   transform: scale(0.97);
 }
+
+/* ---------- full-screen search surface (MobileSearchOverlay) ----------
+   Matches the hero pill's input treatment: no focus ring. The field is
+   autofocused the moment the surface opens and is the only control on the
+   page, so the ring marks what is already obvious — same reasoning as
+   .g-bar input above. Listed after .v3 :focus-visible so it wins on order
+   at equal specificity. */
+.v3 .search-page-input,
+.v3 .search-page-input:focus-visible {
+  outline: none;
+}

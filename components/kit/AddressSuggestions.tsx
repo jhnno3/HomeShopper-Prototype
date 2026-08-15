@@ -4,13 +4,16 @@ import { AnimatePresence, motion } from "motion/react";
 import { MapPin } from "lucide-react";
 import type { AddressSuggestion } from "@/lib/kakaoAddressSearch";
 
-/* Suggestion dropdown for the hero address field. The bar itself never
-   moves or resizes for this — the list is absolutely positioned against the
-   <form> (which stays `position: relative`, `overflow: visible`) and just
-   overlays the page below it, capped at 4 rows by the caller. Row reveal is
-   adapted from the staggered fade-in pattern in the Apple Spotlight
-   reference, trimmed to this app's flat design language (no glass, no
-   per-row shadow) and its existing hover/timing tokens. */
+/* Suggestion dropdown for the hero address field, desktop/tablet only — the
+   mobile equivalent is the full-screen MobileSearchOverlay. The bar itself
+   never moves or resizes for this — the list is absolutely positioned
+   against the <form> (which stays `position: relative`, `overflow:
+   visible`) and just overlays the page below it, capped to 4 rows by the
+   caller since a floating dropdown only has so much room below it before
+   running past the fold. Row reveal is adapted from the staggered fade-in
+   pattern in the Apple Spotlight reference, trimmed to this app's flat
+   design language (no glass, no per-row shadow) and its existing
+   hover/timing tokens. */
 export function AddressSuggestions({
   open,
   suggestions,
@@ -27,7 +30,7 @@ export function AddressSuggestions({
   const listRef = React.useRef<HTMLUListElement>(null);
   const [maxHeight, setMaxHeight] = React.useState<number>();
 
-  /* The hero is sized so all five rows normally fit under the bar, but a
+  /* The hero is sized so all four rows normally fit under the bar, but a
      short window (or a zoomed-in one) can still leave less room than the
      list needs. Rather than let it run past the fold where the last rows
      are unreachable, cap it to whatever space is actually below the bar and
@@ -79,45 +82,93 @@ export function AddressSuggestions({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.03, duration: 0.16, ease: "easeOut" }}
             >
-              <button
+              <SuggestionRow
                 id={`hero-address-suggestion-${index}`}
-                type="button"
-                role="option"
-                aria-selected={highlightedIndex === index}
+                suggestion={suggestion}
+                selected={highlightedIndex === index}
                 onMouseEnter={() => onHighlight(index)}
-                // Keeps focus on the <input> so a click doesn't blur it —
-                // blur is what closes the dropdown, and closing before the
-                // click handler runs would drop the selection.
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => onSelect(suggestion)}
-                className={`flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors duration-150 ${
-                  highlightedIndex === index ? "bg-[rgba(14,27,51,0.07)]" : ""
-                }`}
-              >
-                <MapPin aria-hidden className="size-4 shrink-0 text-(--royal)" />
-                <span className="min-w-0 flex-1">
-                  {/* Name and category share a line, category pushed right
-                      by ml-auto. min-w-0 on the name lets it truncate first
-                      so a long name never squeezes the category out. */}
-                  <span className="flex items-baseline gap-3">
-                    <span className="min-w-0 truncate text-[14.5px] font-medium">
-                      {suggestion.placeName}
-                    </span>
-                    {suggestion.category && (
-                      <span className="ml-auto shrink-0 text-[11.5px] text-(--faint)">
-                        {suggestion.category}
-                      </span>
-                    )}
-                  </span>
-                  <span className="block truncate text-[12.5px] text-(--faint)">
-                    {suggestion.addressName}
-                  </span>
-                </span>
-              </button>
+                onSelect={() => onSelect(suggestion)}
+              />
             </motion.li>
           ))}
         </motion.ul>
       )}
     </AnimatePresence>
+  );
+}
+
+/* One suggestion row, shared by the desktop dropdown above and the
+   small-screen full-screen search page (MobileSearchOverlay) — the two
+   containers differ (floating card vs. flat full-bleed list) but a row
+   reads identically in both, and the padding is generous enough to stay a
+   comfortable touch target. `size` bumps the type and spacing for the
+   full-screen list, where rows are the whole page rather than a dropdown. */
+export function SuggestionRow({
+  id,
+  suggestion,
+  selected,
+  size = "compact",
+  onMouseEnter,
+  onSelect,
+}: {
+  id?: string;
+  suggestion: AddressSuggestion;
+  selected: boolean;
+  size?: "compact" | "roomy";
+  onMouseEnter?: () => void;
+  onSelect: () => void;
+}) {
+  const roomy = size === "roomy";
+  return (
+    <button
+      id={id}
+      type="button"
+      role="option"
+      aria-selected={selected}
+      onMouseEnter={onMouseEnter}
+      // Keeps focus on the <input> so a click doesn't blur it — blur is
+      // what closes the dropdown, and closing before the click handler
+      // runs would drop the selection.
+      onMouseDown={(e) => e.preventDefault()}
+      onClick={onSelect}
+      className={`flex w-full items-center gap-3 text-left transition-colors duration-150 ${
+        roomy ? "px-5 py-3.5" : "px-4 py-2.5"
+      } ${selected ? "bg-[rgba(14,27,51,0.07)]" : ""}`}
+    >
+      <MapPin
+        aria-hidden
+        className={`shrink-0 text-(--royal) ${roomy ? "size-[18px]" : "size-4"}`}
+      />
+      <span className="min-w-0 flex-1">
+        {/* Name and category share a line, category pushed right by
+            ml-auto. min-w-0 on the name lets it truncate first so a long
+            name never squeezes the category out. */}
+        <span className="flex items-baseline gap-3">
+          <span
+            className={`min-w-0 truncate font-medium ${
+              roomy ? "text-[16px]" : "text-[14.5px]"
+            }`}
+          >
+            {suggestion.placeName}
+          </span>
+          {suggestion.category && (
+            <span
+              className={`ml-auto shrink-0 text-(--faint) ${
+                roomy ? "text-[12.5px]" : "text-[11.5px]"
+              }`}
+            >
+              {suggestion.category}
+            </span>
+          )}
+        </span>
+        <span
+          className={`block truncate text-(--faint) ${
+            roomy ? "mt-0.5 text-[13.5px]" : "text-[12.5px]"
+          }`}
+        >
+          {suggestion.addressName}
+        </span>
+      </span>
+    </button>
   );
 }

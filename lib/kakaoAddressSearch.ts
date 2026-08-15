@@ -18,8 +18,6 @@ export type AddressSuggestion = {
   category: string;
 };
 
-const MAX_RESULTS = 4;
-
 let placesService: kakao.maps.services.Places | null = null;
 
 export async function searchAddress(query: string): Promise<AddressSuggestion[]> {
@@ -46,7 +44,12 @@ export async function searchAddress(query: string): Promise<AddressSuggestion[]>
         return;
       }
       resolve(
-        data.slice(0, MAX_RESULTS).map((result) => ({
+        // Kakao's own page size (15 by default) is the only cap here — how
+        // many of those rows actually render is a per-surface layout
+        // decision, not this fetch's. The desktop dropdown trims to 4
+        // itself (see AddressSuggestions); the full-screen mobile search
+        // page has the room to show them all.
+        data.map((result) => ({
           id: result.id,
           placeName: result.place_name,
           // 도로명주소가 있으면 우선 — 지번보다 매물 분석 요청에 더 적합한 형식.
